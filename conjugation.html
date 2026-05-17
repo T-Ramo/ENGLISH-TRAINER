@@ -5,36 +5,1012 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>English Trainer — Conjugaison</title>
   <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/vocab.css" />
+  <link rel="stylesheet" href="styles/conjugation.css" />
 </head>
 <body>
   <div class="app">
     <div id="topbar-slot"></div>
+
     <main>
       <div class="container">
-        <div class="eyebrow">Module 03 — Verbes</div>
-        <h1 style="margin-top: 8px">Conjugaison</h1>
-        <p style="max-width: 540px; margin-top: 16px; color: var(--ink-soft); font-size: 1.05rem">
-          Module en préparation. Il proposera&nbsp;:
-        </p>
-        <ul style="margin-top: 16px; padding-left: 20px; color: var(--ink-soft); line-height: 2">
-          <li>Liste complète des verbes irréguliers anglais</li>
-          <li>Trainer chronométré : Verbe + temps → forme correcte</li>
-          <li>Drill par familles (verbes en -ought, -ung, etc.)</li>
-          <li>Conjugaison de tous les temps : Present, Past, Future, Perfect, Continuous</li>
-          <li>Tableaux de référence imprimables</li>
-        </ul>
-        <p style="margin-top: 32px"><a href="index.html" class="btn btn-ghost">← Retour à l'accueil</a></p>
+
+        <!-- HERO -->
+        <section class="conj-hero anim-fade-up">
+          <div>
+            <div class="eyebrow">Module 03 — Verbes</div>
+            <h1 style="margin-top: 4px">Conjugaison</h1>
+            <p class="muted" style="margin-top: 12px; max-width: 540px">
+              Maîtrise les verbes irréguliers, tous les temps anglais et les structures conditionnelles.
+              Cinq modes d'exercice, SRS intégré.
+            </p>
+          </div>
+          <div style="display:flex;gap:var(--s-3);align-items:center;flex-wrap:wrap">
+            <div class="mono muted" style="font-size: 0.85rem" id="pool-info">— exercices disponibles</div>
+            <button id="lessons-toggle-btn" class="btn btn-ghost btn-sm">Fiches de leçons ↓</button>
+          </div>
+        </section>
+
+        <!-- SECTION LEÇONS (accordéon, masquée par défaut) -->
+        <section id="lessons-section" style="display:none; margin-bottom: var(--s-7)">
+          <div class="lessons-panel">
+            <div class="lessons-tabs" id="lessons-tabs"></div>
+            <div id="lessons-list"></div>
+          </div>
+        </section>
+
+        <!-- STAGE PRINCIPAL -->
+        <div id="stage-root"></div>
+
       </div>
     </main>
+
     <div id="footer-slot"></div>
   </div>
+
+  <!-- Scripts -->
   <script src="data/vocab.js"></script>
+  <script src="data/conjugation.js"></script>
   <script src="scripts/storage.js"></script>
   <script src="scripts/shared.js"></script>
+  <script src="scripts/conj-engine.js"></script>
+
   <script>
     Storage.load();
     Shared.renderTopbar('conj');
     Shared.renderFooter();
+
+    // ================================================================
+    // UTILITAIRES
+    // ================================================================
+
+    const TENSE_CATEGORY_LABELS = {
+      simple:           'Temps simples',
+      continuous:       'Continus',
+      perfect:          'Parfaits',
+      'perfect-continuous': 'Parfaits continus',
+      passive:          'Voix passive',
+      special:          'Cas particuliers',
+    };
+
+    function tensePillClass(category) {
+      return 'tense-pill tense-pill-' + (category || 'simple');
+    }
+
+    function tensePillHtml(tense) {
+      const t = TENSES[tense];
+      if (!t) return '';
+      return `<span class="${tensePillClass(t.category)}">${TENSE_CATEGORY_LABELS[t.category] || t.category}</span>`;
+    }
+
+    const stageRoot = document.getElementById('stage-root');
+
+    let selectedMode = 'forms';
+    let sessionOptions = {
+      tier: null,
+      tenses: [],
+      subtype: 'affirmative-to-negative',
+      condType: 'mix',
+    };
+
+    // ================================================================
+    // SECTION LEÇONS
+    // ================================================================
+
+    const LESSON_CATEGORIES = ['simple','continuous','perfect','perfect-continuous','passive','special'];
+
+    function renderLessons(activeCategory) {
+      activeCategory = activeCategory || 'simple';
+      const tabs = document.getElementById('lessons-tabs');
+      tabs.innerHTML = LESSON_CATEGORIES.map(cat => `
+        <button class="lessons-tab ${cat === activeCategory ? 'active' : ''}" data-cat="${cat}">
+          ${TENSE_CATEGORY_LABELS[cat]}
+        </button>
+      `).join('');
+      tabs.querySelectorAll('.lessons-tab').forEach(btn => {
+        btn.addEventListener('click', () => renderLessons(btn.dataset.cat));
+      });
+
+      const tensesInCat = Object.values(TENSES).filter(t => t.category === activeCategory);
+      const list = document.getElementById('lessons-list');
+      list.innerHTML = tensesInCat.map(t => renderLessonCard(t)).join('');
+      list.querySelectorAll('.lesson-header').forEach(header => {
+        header.addEventListener('click', () => {
+          header.closest('.tense-lesson-card').classList.toggle('open');
+          header.querySelector('.lesson-chevron').textContent =
+            header.closest('.tense-lesson-card').classList.contains('open') ? '▼' : '▶';
+        });
+      });
+      list.querySelectorAll('.lesson-practice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tenseId = btn.dataset.tense;
+          document.getElementById('lessons-section').style.display = 'none';
+          document.getElementById('lessons-toggle-btn').textContent = 'Fiches de leçons ↓';
+          selectedMode = 'conjugate';
+          sessionOptions.tenses = [tenseId];
+          renderSetup();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    }
+
+    function renderLessonCard(t) {
+      const formationRows = Object.entries(t.formation).map(([k, v]) => `
+        <div class="formation-label">${k.charAt(0).toUpperCase() + k.slice(1)}</div>
+        <div class="formation-value">${v}</div>
+      `).join('');
+
+      const usageItems = (t.usage || []).map(u => `<li>${u}</li>`).join('');
+      const examples = (t.examples || []).map(ex => `
+        <div class="lesson-example">
+          <div class="lesson-example-en">"${ex.en}"</div>
+          <div class="lesson-example-fr">${ex.fr}</div>
+        </div>
+      `).join('');
+      const markers = (t.markers || []).map(m => `<span class="lesson-marker">${m}</span>`).join('');
+      const pitfalls = (t.pitfalls || []).map(p => `<div class="lesson-pitfall">${p}</div>`).join('');
+
+      return `
+        <div class="tense-lesson-card">
+          <div class="lesson-header">
+            <span class="${tensePillClass(t.category)}">${TENSE_CATEGORY_LABELS[t.category] || t.category}</span>
+            <span class="lesson-header-title">${t.label} <span style="color:var(--ink-soft);font-weight:400;font-size:0.88rem">— ${t.labelFr}</span></span>
+            <span class="lesson-chevron">▶</span>
+          </div>
+          <div class="lesson-body">
+            <div class="lesson-section-title">Formation</div>
+            <div class="lesson-formation-grid">${formationRows}</div>
+
+            <div class="lesson-section-title">Usage</div>
+            <ul class="lesson-usage-list">${usageItems}</ul>
+
+            ${markers ? `<div class="lesson-section-title">Marqueurs temporels</div><div class="lesson-markers">${markers}</div>` : ''}
+
+            ${examples ? `<div class="lesson-section-title">Exemples</div><div class="lesson-examples">${examples}</div>` : ''}
+
+            ${pitfalls ? `<div class="lesson-section-title">Pièges fréquents</div><div class="lesson-pitfalls">${pitfalls}</div>` : ''}
+
+            <button class="lesson-practice-btn" data-tense="${t.id}">Pratiquer ce temps →</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Toggle leçons
+    document.getElementById('lessons-toggle-btn').addEventListener('click', () => {
+      const sec = document.getElementById('lessons-section');
+      const btn = document.getElementById('lessons-toggle-btn');
+      if (sec.style.display === 'none') {
+        sec.style.display = 'block';
+        btn.textContent = 'Masquer les leçons ↑';
+        renderLessons('simple');
+        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        sec.style.display = 'none';
+        btn.textContent = 'Fiches de leçons ↓';
+      }
+    });
+
+    // ================================================================
+    // VUE SETUP
+    // ================================================================
+
+    function renderSetup() {
+      updatePoolInfo();
+
+      const tenseOptions = Object.values(TENSES).map(t => {
+        const checked = sessionOptions.tenses.includes(t.id);
+        return `
+          <label class="tense-checkbox-label ${checked ? 'checked' : ''}" data-tense="${t.id}">
+            <input type="checkbox" ${checked ? 'checked' : ''} />
+            <span class="${tensePillClass(t.category)}" style="font-size:0.62rem">${t.category}</span>
+            ${t.label}
+          </label>
+        `;
+      }).join('');
+
+      stageRoot.innerHTML = `
+        <!-- MODES -->
+        <div class="vocab-modes" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr))">
+          ${Object.values(ConjEngine.MODES).map(m => `
+            <button class="mode-card ${m.key === selectedMode ? 'active' : ''}" data-mode="${m.key}">
+              <div class="mode-icon">${m.icon}</div>
+              <div class="eyebrow">${m.eyebrow}</div>
+              <div class="mode-title">${m.label}</div>
+              <div class="mode-desc">${m.desc}</div>
+            </button>
+          `).join('')}
+        </div>
+
+        <!-- FILTRES -->
+        <div class="filters-row" id="filters-area">
+          ${renderFilters()}
+          <div style="flex:1"></div>
+          <button id="start-btn" class="btn btn-amber">Démarrer la session →</button>
+        </div>
+
+        <div class="start-prompt">
+          <h2>Prêt à commencer ?</h2>
+          <p id="start-desc">Choisis un mode, ajuste les filtres, puis lance la session.</p>
+        </div>
+      `;
+
+      updateStartDesc();
+
+      // Wire mode cards
+      stageRoot.querySelectorAll('.mode-card').forEach(card => {
+        card.addEventListener('click', () => {
+          selectedMode = card.dataset.mode;
+          renderSetup();
+        });
+      });
+
+      wireFilters();
+
+      document.getElementById('start-btn').addEventListener('click', () => {
+        try {
+          ConjEngine.startSession({ mode: selectedMode, options: sessionOptions });
+          renderQuestion();
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+    }
+
+    function renderFilters() {
+      switch (selectedMode) {
+        case 'forms':
+          return `
+            <div class="filter-group">
+              <span class="filter-label">Niveau</span>
+              <select id="f-tier" class="filter-select">
+                <option value="">Tous les niveaux</option>
+                <option value="1" ${sessionOptions.tier == 1 ? 'selected' : ''}>Tier 1 — Essentiels</option>
+                <option value="2" ${sessionOptions.tier == 2 ? 'selected' : ''}>Tier 2 — Courants</option>
+                <option value="3" ${sessionOptions.tier == 3 ? 'selected' : ''}>Tier 3 — Enrichissement</option>
+              </select>
+            </div>
+          `;
+        case 'conjugate':
+        case 'recognition':
+          return `
+            <div class="filter-group" style="flex-direction:column;align-items:flex-start;gap:var(--s-2)">
+              <span class="filter-label">Temps à inclure (tous si vide)</span>
+              <div class="tense-checkboxes" id="tense-checks">
+                ${Object.values(TENSES).map(t => {
+                  const checked = sessionOptions.tenses.includes(t.id);
+                  return `
+                    <label class="tense-checkbox-label ${checked ? 'checked' : ''}" data-tense="${t.id}">
+                      <input type="checkbox" ${checked ? 'checked' : ''} />
+                      <span class="${tensePillClass(t.category)}" style="font-size:0.62rem">${t.category.slice(0,3)}</span>
+                      ${t.label}
+                    </label>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        case 'transformation':
+          return `
+            <div class="filter-group">
+              <span class="filter-label">Type</span>
+              <select id="f-subtype" class="filter-select">
+                <option value="affirmative-to-negative" ${sessionOptions.subtype === 'affirmative-to-negative' ? 'selected' : ''}>Affirmatif → Négatif</option>
+                <option value="active-to-passive" ${sessionOptions.subtype === 'active-to-passive' ? 'selected' : ''}>Actif → Passif</option>
+              </select>
+            </div>
+          `;
+        case 'conditional':
+          return `
+            <div class="filter-group">
+              <span class="filter-label">Type de conditionnel</span>
+              <select id="f-condtype" class="filter-select">
+                <option value="mix" ${sessionOptions.condType === 'mix' ? 'selected' : ''}>Mix (tous)</option>
+                <option value="cond-0" ${sessionOptions.condType === 'cond-0' ? 'selected' : ''}>Zero Conditional</option>
+                <option value="cond-1" ${sessionOptions.condType === 'cond-1' ? 'selected' : ''}>First Conditional</option>
+                <option value="cond-2" ${sessionOptions.condType === 'cond-2' ? 'selected' : ''}>Second Conditional</option>
+                <option value="cond-3" ${sessionOptions.condType === 'cond-3' ? 'selected' : ''}>Third Conditional</option>
+              </select>
+            </div>
+          `;
+        default:
+          return '';
+      }
+    }
+
+    function wireFilters() {
+      const tier = document.getElementById('f-tier');
+      if (tier) tier.addEventListener('change', () => { sessionOptions.tier = tier.value || null; updatePoolInfo(); });
+
+      const subtype = document.getElementById('f-subtype');
+      if (subtype) subtype.addEventListener('change', () => { sessionOptions.subtype = subtype.value; updatePoolInfo(); });
+
+      const condtype = document.getElementById('f-condtype');
+      if (condtype) condtype.addEventListener('change', () => { sessionOptions.condType = condtype.value; updatePoolInfo(); });
+
+      document.querySelectorAll('.tense-checkbox-label').forEach(lbl => {
+        lbl.addEventListener('click', () => {
+          const tid = lbl.dataset.tense;
+          const cb = lbl.querySelector('input');
+          if (!cb) return;
+          cb.checked = !cb.checked;
+          lbl.classList.toggle('checked', cb.checked);
+          if (cb.checked) {
+            if (!sessionOptions.tenses.includes(tid)) sessionOptions.tenses.push(tid);
+          } else {
+            sessionOptions.tenses = sessionOptions.tenses.filter(t => t !== tid);
+          }
+          updatePoolInfo();
+        });
+      });
+    }
+
+    function updatePoolInfo() {
+      const el = document.getElementById('pool-info');
+      if (!el) return;
+      let count = 0;
+      switch (selectedMode) {
+        case 'forms': {
+          let pool = IRREGULAR_VERBS.slice();
+          if (sessionOptions.tier) pool = pool.filter(v => v.tier === parseInt(sessionOptions.tier, 10));
+          count = pool.length;
+          break;
+        }
+        case 'conjugate':
+          count = (sessionOptions.tenses.length ? sessionOptions.tenses : Object.keys(TENSES)).length * 3;
+          break;
+        case 'recognition': {
+          let pool = RECOGNITION_SENTENCES.slice();
+          if (sessionOptions.tenses.length) pool = pool.filter(s => sessionOptions.tenses.includes(s.tense));
+          count = pool.length;
+          break;
+        }
+        case 'transformation': {
+          const src = TRANSFORMATION_EXERCISES[sessionOptions.subtype] || TRANSFORMATION_EXERCISES['affirmative-to-negative'];
+          count = src.length;
+          break;
+        }
+        case 'conditional': {
+          let pool = CONDITIONAL_EXERCISES.slice();
+          if (sessionOptions.condType && sessionOptions.condType !== 'mix')
+            pool = pool.filter(e => e.type === sessionOptions.condType);
+          count = pool.length;
+          break;
+        }
+      }
+      el.textContent = count + ' exercices disponibles';
+    }
+
+    function updateStartDesc() {
+      const el = document.getElementById('start-desc');
+      if (!el) return;
+      const m = ConjEngine.MODES[selectedMode];
+      el.textContent = m.desc + ' Une session contient ' + m.sessionSize + ' exercices.';
+    }
+
+    // ================================================================
+    // VUE QUESTION
+    // ================================================================
+
+    function renderQuestion() {
+      const s = ConjEngine.session;
+      if (!s) return renderSetup();
+      s.currentStart = Date.now();
+
+      const idx   = s.index;
+      const total = s.queue.length;
+      const pct   = Math.round((idx / total) * 100);
+
+      switch (s.mode.key) {
+        case 'forms':         return renderFormsQuestion(s, idx, total, pct);
+        case 'conjugate':     return renderConjugateQuestion(s, idx, total, pct);
+        case 'recognition':   return renderRecognitionQuestion(s, idx, total, pct);
+        case 'transformation':return renderTransformationQuestion(s, idx, total, pct);
+        case 'conditional':   return renderConditionalQuestion(s, idx, total, pct);
+      }
+    }
+
+    function quizHeader(idx, total, pct, points, streak) {
+      return `
+        <div class="quiz-progress">
+          <span class="progress-label mono">${idx + 1} / ${total}</span>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <span class="progress-label mono">+${points} pts</span>
+        </div>
+        <div class="quiz-streak ${streak >= 5 ? 'big' : ''}">
+          ${streak >= 1 ? '🔥 ' + streak + ' d\'affilée' : '&nbsp;'}
+        </div>
+      `;
+    }
+
+    // --- Mode 1 : Forms ---
+    function renderFormsQuestion(s, idx, total, pct) {
+      const verb = ConjEngine.current();
+      stageRoot.innerHTML = `
+        <div class="quiz-stage">
+          ${quizHeader(idx, total, pct, s.points, s.streak)}
+
+          <div class="quiz-prompt">
+            <div class="prompt-type">Verbe irrégulier — Tier ${verb.tier}</div>
+            <div class="prompt-word">${verb.fr}</div>
+            <div class="prompt-pos">${verb.base}</div>
+          </div>
+
+          <div class="forms-input-trio">
+            <div class="forms-field">
+              <span class="forms-field-label">Base form</span>
+              <input type="text" class="forms-field-input" id="f-base" value="${verb.base}" disabled />
+            </div>
+            <div class="forms-field">
+              <span class="forms-field-label">Simple Past</span>
+              <input type="text" class="forms-field-input" id="f-past"
+                placeholder="ex: went" autocomplete="off" autocapitalize="off"
+                autocorrect="off" spellcheck="false" />
+            </div>
+            <div class="forms-field">
+              <span class="forms-field-label">Past Participle</span>
+              <input type="text" class="forms-field-input" id="f-pp"
+                placeholder="ex: gone" autocomplete="off" autocapitalize="off"
+                autocorrect="off" spellcheck="false" />
+            </div>
+          </div>
+
+          <div class="quiz-actions">
+            <button id="submit-btn" class="btn btn-primary btn-lg">Valider</button>
+            <button id="hint-btn" class="btn btn-ghost btn-sm">Indice (−2 pts)</button>
+            <button id="speak-btn" class="quiz-speaker" title="Écouter">🔊</button>
+            <button id="skip-btn" class="btn btn-ghost btn-sm">Passer</button>
+          </div>
+
+          <div class="quiz-hint" id="hint-zone"></div>
+          <div class="quiz-feedback" id="feedback"></div>
+        </div>
+      `;
+
+      const pastInput = document.getElementById('f-past');
+      const ppInput   = document.getElementById('f-pp');
+      pastInput.focus();
+      const submit = () => handleFormsSubmit(verb);
+      [pastInput, ppInput].forEach(inp => inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); submit(); }
+      }));
+      document.getElementById('submit-btn').addEventListener('click', submit);
+      document.getElementById('hint-btn').addEventListener('click', () => {
+        const zone = document.getElementById('hint-zone');
+        const hintPast = ConjEngine.getHint('past');
+        const hintPP   = ConjEngine.getHint('pp');
+        zone.textContent = 'Prétérit : ' + hintPast + ' · Participe : ' + hintPP;
+      });
+      document.getElementById('speak-btn').addEventListener('click', () => Shared.speak(verb.base));
+      document.getElementById('skip-btn').addEventListener('click', () => {
+        ConjEngine.session.results.push({ verb, userPast:'(passé)', userPP:'(passé)', pastOk:false, ppOk:false, allOk:false, pointsEarned:0 });
+        ConjEngine.session.streak = 0;
+        showFormsFeedback({ verb, pastOk:false, ppOk:false, allOk:false, pointsEarned:0 }, true);
+      });
+    }
+
+    function handleFormsSubmit(verb) {
+      const pastVal = document.getElementById('f-past').value.trim();
+      const ppVal   = document.getElementById('f-pp').value.trim();
+      if (!pastVal && !ppVal) return;
+      const result = ConjEngine.submitForms(pastVal, ppVal);
+      document.getElementById('f-past').classList.add(result.pastOk ? 'correct' : 'wrong');
+      document.getElementById('f-pp').classList.add(result.ppOk ? 'correct' : 'wrong');
+      document.getElementById('f-past').disabled = true;
+      document.getElementById('f-pp').disabled   = true;
+      document.getElementById('submit-btn').disabled = true;
+      showFormsFeedback(result, false);
+    }
+
+    function showFormsFeedback(result, skipped) {
+      const fb   = document.getElementById('feedback');
+      const verb = result.verb;
+      const ok   = result.allOk;
+      fb.innerHTML = `
+        <div class="answer-reveal ${ok ? '' : 'wrong'}">
+          ${ok ? '✓ Parfait !' : (skipped ? 'Passé' : '✗ Incorrect')}
+          <button class="quiz-speaker" id="speak-btn2" title="Écouter">🔊</button>
+          ${ok && result.pointsEarned > 0 ? `<span class="points-earned">+${result.pointsEarned} pts</span>` : ''}
+        </div>
+        <div class="answer-detail">
+          <strong>${verb.base}</strong> — <strong>${verb.past}</strong> — <strong>${verb.pp}</strong>
+          ${!result.pastOk ? `<br>Prétérit attendu : <strong style="color:var(--success)">${verb.past}</strong>` : ''}
+          ${!result.ppOk   ? `<br>Participe attendu : <strong style="color:var(--success)">${verb.pp}</strong>` : ''}
+        </div>
+        <div style="margin-top:16px">
+          <button id="next-btn" class="btn btn-amber">
+            ${ConjEngine.session && ConjEngine.session.index < ConjEngine.session.queue.length - 1 ? 'Suivant' : 'Voir le résumé'} →
+          </button>
+        </div>
+      `;
+      if (Storage.state.settings.autoPlayAudio) setTimeout(() => Shared.speak(verb.base), 250);
+      document.getElementById('speak-btn2').addEventListener('click', () => Shared.speak(verb.base));
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.focus();
+      nextBtn.addEventListener('click', advanceOrSummary);
+      nextBtn.addEventListener('keydown', e => { if (e.key === 'Enter') nextBtn.click(); });
+    }
+
+    // --- Mode 2 : Conjugate ---
+    function renderConjugateQuestion(s, idx, total, pct) {
+      const item   = ConjEngine.current();
+      const info   = ConjEngine.buildConjugateSentence(item);
+      const tense  = TENSES[item.tense];
+
+      stageRoot.innerHTML = `
+        <div class="quiz-stage">
+          ${quizHeader(idx, total, pct, s.points, s.streak)}
+
+          <div class="quiz-prompt">
+            <div class="prompt-type conj-prompt-tense">
+              ${tense ? `<span class="${tensePillClass(tense.category)}">${tense.label}</span>` : item.tense}
+            </div>
+            <div class="conj-prompt-sentence">${info.withBlank.replace('_____', '<strong>_____</strong>')}</div>
+            <div class="conj-prompt-verb-fr">→ "${item.verb.fr}"</div>
+          </div>
+
+          <div class="quiz-input-row">
+            <input type="text" id="answer-input" class="quiz-input"
+              placeholder="Ta réponse…"
+              autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+            <button id="submit-btn" class="btn btn-primary btn-lg">Valider</button>
+          </div>
+
+          <div class="quiz-actions">
+            <button id="hint-btn" class="btn btn-ghost btn-sm">Indice (−2 pts)</button>
+            <button id="speak-btn" class="quiz-speaker" title="Écouter la phrase">🔊</button>
+            <button id="skip-btn" class="btn btn-ghost btn-sm">Passer</button>
+          </div>
+
+          <div class="quiz-hint" id="hint-zone"></div>
+          <div class="quiz-feedback" id="feedback"></div>
+        </div>
+      `;
+
+      const input  = document.getElementById('answer-input');
+      const submit = document.getElementById('submit-btn');
+      input.focus();
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit.click(); } });
+      submit.addEventListener('click', () => {
+        const val = input.value.trim();
+        if (!val) return;
+        const result = ConjEngine.submitConjugate(val);
+        input.classList.add(result.ok ? 'correct' : 'wrong');
+        input.disabled = true;
+        submit.disabled = true;
+        showConjugateFeedback(result, info, item, false);
+      });
+      document.getElementById('hint-btn').addEventListener('click', () => {
+        const expected = info.conjugated;
+        ConjEngine.session.hintsUsed += 1;
+        const chars = expected.split('');
+        const hint  = chars.map((ch, i) => {
+          if (ch === ' ') return ' ';
+          if (i === 0) return ch;
+          return i <= ConjEngine.session.hintsUsed ? ch : '·';
+        }).join('');
+        document.getElementById('hint-zone').textContent = hint;
+      });
+      document.getElementById('speak-btn').addEventListener('click', () => Shared.speak(info.withAnswer));
+      document.getElementById('skip-btn').addEventListener('click', () => {
+        ConjEngine.session.results.push({ item, userInput:'(passé)', expected:info.conjugated, ok:false, near:false, pointsEarned:0 });
+        ConjEngine.session.streak = 0;
+        showConjugateFeedback({ ok:false, near:false, pointsEarned:0, expected:info.conjugated }, info, item, true);
+      });
+    }
+
+    function showConjugateFeedback(result, info, item, skipped) {
+      const fb   = document.getElementById('feedback');
+      const tenseData = TENSES[item.tense];
+      fb.innerHTML = `
+        <div class="answer-reveal ${result.ok ? '' : 'wrong'}">
+          ${result.ok ? (result.near ? '✓ Presque parfait' : '✓ Excellent !') : (skipped ? 'Passé' : '✗ Incorrect')}
+          <button class="quiz-speaker" id="speak-btn2">🔊</button>
+          ${result.ok && result.pointsEarned > 0 ? `<span class="points-earned">+${result.pointsEarned} pts</span>` : ''}
+        </div>
+        <div class="answer-detail">
+          Réponse attendue : <strong>${result.expected}</strong>
+          ${!result.ok && tenseData ? `
+            <br><button class="btn btn-ghost btn-sm" style="margin-top:8px" id="see-lesson-btn">
+              Voir la leçon ${tenseData.label} →
+            </button>
+          ` : ''}
+        </div>
+        <div style="margin-top:16px">
+          <button id="next-btn" class="btn btn-amber">
+            ${ConjEngine.session && ConjEngine.session.index < ConjEngine.session.queue.length - 1 ? 'Suivant' : 'Voir le résumé'} →
+          </button>
+        </div>
+      `;
+      if (Storage.state.settings.autoPlayAudio) setTimeout(() => Shared.speak(info.withAnswer), 300);
+      document.getElementById('speak-btn2').addEventListener('click', () => Shared.speak(info.withAnswer));
+      const seeLessonBtn = document.getElementById('see-lesson-btn');
+      if (seeLessonBtn && tenseData) seeLessonBtn.addEventListener('click', () => showLessonModal(tenseData));
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.focus();
+      nextBtn.addEventListener('click', advanceOrSummary);
+      nextBtn.addEventListener('keydown', e => { if (e.key === 'Enter') nextBtn.click(); });
+    }
+
+    // --- Mode 3 : Recognition ---
+    function renderRecognitionQuestion(s, idx, total, pct) {
+      const item    = ConjEngine.current();
+      const options = ConjEngine.buildRecognitionOptions(item.tense);
+
+      stageRoot.innerHTML = `
+        <div class="quiz-stage">
+          ${quizHeader(idx, total, pct, s.points, s.streak)}
+
+          <div class="quiz-prompt">
+            <div class="prompt-type">Identifie le temps verbal</div>
+            <div class="conj-prompt-sentence" style="font-size:clamp(1rem,2.5vw,1.35rem)">"${item.en}"</div>
+          </div>
+
+          <div class="qcm-options" id="qcm-opts">
+            ${options.map(tk => {
+              const t = TENSES[tk];
+              return `
+                <button class="qcm-option" data-tense="${tk}">
+                  <span class="${tensePillClass(t ? t.category : '')}" style="font-size:0.62rem;margin-bottom:4px;display:block">${t ? (TENSE_CATEGORY_LABELS[t.category] || t.category) : ''}</span>
+                  ${t ? t.label : tk}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="quiz-feedback" id="feedback"></div>
+        </div>
+      `;
+
+      document.getElementById('qcm-opts').querySelectorAll('.qcm-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const selected = btn.dataset.tense;
+          const result   = ConjEngine.submitRecognition(selected);
+          document.querySelectorAll('.qcm-option').forEach(b => {
+            b.disabled = true;
+            if (b.dataset.tense === result.correctTense) b.classList.add(result.ok ? 'selected-correct' : 'reveal-correct');
+            if (b.dataset.tense === selected && !result.ok) b.classList.add('selected-wrong');
+          });
+          showRecognitionFeedback(result, item);
+        });
+      });
+    }
+
+    function showRecognitionFeedback(result, item) {
+      const fb     = document.getElementById('feedback');
+      const correct = TENSES[result.correctTense];
+      const markers = correct && correct.markers ? correct.markers.slice(0, 3).join(', ') : '';
+      fb.innerHTML = `
+        <div class="answer-reveal ${result.ok ? '' : 'wrong'}">
+          ${result.ok ? '✓ Correct !' : '✗ Incorrect'}
+          ${result.ok && result.pointsEarned > 0 ? `<span class="points-earned">+${result.pointsEarned} pts</span>` : ''}
+        </div>
+        <div class="answer-detail">
+          ${!result.ok ? `Temps correct : <strong>${correct ? correct.label : result.correctTense}</strong><br>` : ''}
+          ${markers ? `Marqueurs typiques : <em>${markers}</em>` : ''}
+        </div>
+        <div style="margin-top:16px">
+          <button id="next-btn" class="btn btn-amber">
+            ${ConjEngine.session && ConjEngine.session.index < ConjEngine.session.queue.length - 1 ? 'Suivant' : 'Voir le résumé'} →
+          </button>
+        </div>
+      `;
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.focus();
+      nextBtn.addEventListener('click', advanceOrSummary);
+      nextBtn.addEventListener('keydown', e => { if (e.key === 'Enter') nextBtn.click(); });
+    }
+
+    // --- Mode 4 : Transformation ---
+    function renderTransformationQuestion(s, idx, total, pct) {
+      const item = ConjEngine.current();
+
+      stageRoot.innerHTML = `
+        <div class="quiz-stage">
+          ${quizHeader(idx, total, pct, s.points, s.streak)}
+
+          <div class="quiz-prompt">
+            <div class="prompt-type">
+              ${sessionOptions.subtype === 'active-to-passive' ? 'Actif → Passif' : 'Affirmatif → Négatif'}
+            </div>
+            <div class="conj-prompt-sentence">"${item.en}"</div>
+          </div>
+
+          <div class="quiz-input-row">
+            <input type="text" id="answer-input" class="quiz-input"
+              placeholder="Reformule la phrase…"
+              autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+            <button id="submit-btn" class="btn btn-primary btn-lg">Valider</button>
+          </div>
+
+          <div class="quiz-actions">
+            <button id="speak-btn" class="quiz-speaker" title="Écouter">🔊</button>
+            <button id="skip-btn" class="btn btn-ghost btn-sm">Passer</button>
+          </div>
+
+          <div class="quiz-feedback" id="feedback"></div>
+        </div>
+      `;
+
+      const input  = document.getElementById('answer-input');
+      const submit = document.getElementById('submit-btn');
+      input.focus();
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit.click(); } });
+      submit.addEventListener('click', () => {
+        const val = input.value.trim();
+        if (!val) return;
+        const result = ConjEngine.submitTransformation(val);
+        input.classList.add(result.ok ? 'correct' : 'wrong');
+        input.disabled = true;
+        submit.disabled = true;
+        showTransformFeedback(result, item);
+      });
+      document.getElementById('speak-btn').addEventListener('click', () => Shared.speak(item.en));
+      document.getElementById('skip-btn').addEventListener('click', () => {
+        ConjEngine.session.results.push({ item, userInput:'(passé)', ok:false, near:false, pointsEarned:0 });
+        ConjEngine.session.streak = 0;
+        showTransformFeedback({ ok:false, near:false, pointsEarned:0, expected:item.answer }, item, true);
+      });
+    }
+
+    function showTransformFeedback(result, item, skipped) {
+      const fb = document.getElementById('feedback');
+      fb.innerHTML = `
+        <div class="answer-reveal ${result.ok ? '' : 'wrong'}">
+          ${result.ok ? (result.near ? '✓ Presque' : '✓ Exact !') : (skipped ? 'Passé' : '✗ Incorrect')}
+          <button class="quiz-speaker" id="speak-btn2">🔊</button>
+          ${result.ok && result.pointsEarned > 0 ? `<span class="points-earned">+${result.pointsEarned} pts</span>` : ''}
+        </div>
+        <div class="answer-detail">Réponse attendue : <strong>${result.expected}</strong></div>
+        <div style="margin-top:16px">
+          <button id="next-btn" class="btn btn-amber">
+            ${ConjEngine.session && ConjEngine.session.index < ConjEngine.session.queue.length - 1 ? 'Suivant' : 'Voir le résumé'} →
+          </button>
+        </div>
+      `;
+      if (Storage.state.settings.autoPlayAudio) setTimeout(() => Shared.speak(result.expected), 300);
+      document.getElementById('speak-btn2').addEventListener('click', () => Shared.speak(result.expected));
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.focus();
+      nextBtn.addEventListener('click', advanceOrSummary);
+      nextBtn.addEventListener('keydown', e => { if (e.key === 'Enter') nextBtn.click(); });
+    }
+
+    // --- Mode 5 : Conditional ---
+    function renderConditionalQuestion(s, idx, total, pct) {
+      const item = ConjEngine.current();
+      const condData = CONDITIONALS.find(c => c.id === item.type);
+
+      stageRoot.innerHTML = `
+        <div class="quiz-stage">
+          ${quizHeader(idx, total, pct, s.points, s.streak)}
+
+          <div class="quiz-prompt">
+            <div class="prompt-type">
+              ${condData ? condData.label : item.type}
+              ${condData ? `<span class="tense-pill tense-pill-conditional" style="margin-left:8px">${condData.formula}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="conditional-sentence" id="cond-sentence">
+            <span class="cond-fragment">${item.ifClause.replace('_____', '<input type="text" id="cond-if" class="sentence-blank" placeholder="…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />')}</span>
+            <span class="cond-fragment">${item.mainClause.replace('_____', '<input type="text" id="cond-main" class="sentence-blank" placeholder="…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />')}</span>
+          </div>
+
+          <div class="conj-prompt-verb-fr">→ ${item.fr}</div>
+
+          <div class="quiz-actions" style="margin-top:var(--s-4)">
+            <button id="submit-btn" class="btn btn-primary btn-lg">Valider</button>
+            <button id="skip-btn" class="btn btn-ghost btn-sm">Passer</button>
+          </div>
+
+          <div class="quiz-feedback" id="feedback"></div>
+        </div>
+      `;
+
+      const ifInp   = document.getElementById('cond-if');
+      const mainInp = document.getElementById('cond-main');
+      if (ifInp) ifInp.focus();
+
+      const submit = () => {
+        const ifVal   = ifInp ? ifInp.value.trim() : '';
+        const mainVal = mainInp ? mainInp.value.trim() : '';
+        if (!ifVal && !mainVal) return;
+        const result = ConjEngine.submitConditional(ifVal, mainVal);
+        if (ifInp)   { ifInp.classList.add(result.ifOk ? 'correct' : 'wrong');   ifInp.disabled   = true; }
+        if (mainInp) { mainInp.classList.add(result.mainOk ? 'correct' : 'wrong'); mainInp.disabled = true; }
+        document.getElementById('submit-btn').disabled = true;
+        showConditionalFeedback(result, item);
+      };
+      [ifInp, mainInp].forEach(inp => {
+        if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+      });
+      document.getElementById('submit-btn').addEventListener('click', submit);
+      document.getElementById('skip-btn').addEventListener('click', () => {
+        ConjEngine.session.results.push({ item, userIf:'(passé)', userMain:'(passé)', ifOk:false, mainOk:false, allOk:false, pointsEarned:0 });
+        ConjEngine.session.streak = 0;
+        showConditionalFeedback({ ifOk:false, mainOk:false, allOk:false, pointsEarned:0, item }, item, true);
+      });
+    }
+
+    function showConditionalFeedback(result, item, skipped) {
+      const fb = document.getElementById('feedback');
+      const ok = result.allOk;
+      fb.innerHTML = `
+        <div class="answer-reveal ${ok ? '' : 'wrong'}">
+          ${ok ? '✓ Les deux membres sont corrects !' : (skipped ? 'Passé' : (result.ifOk || result.mainOk ? '✓ Partiellement correct' : '✗ Incorrect'))}
+          ${ok && result.pointsEarned > 0 ? `<span class="points-earned">+${result.pointsEarned} pts</span>` : ''}
+        </div>
+        <div class="answer-detail">
+          If-clause attendue : <strong>${item.ifAnswer}</strong>
+          <br>Main-clause attendue : <strong>${item.mainAnswer}</strong>
+        </div>
+        <div style="margin-top:16px">
+          <button id="next-btn" class="btn btn-amber">
+            ${ConjEngine.session && ConjEngine.session.index < ConjEngine.session.queue.length - 1 ? 'Suivant' : 'Voir le résumé'} →
+          </button>
+        </div>
+      `;
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.focus();
+      nextBtn.addEventListener('click', advanceOrSummary);
+      nextBtn.addEventListener('keydown', e => { if (e.key === 'Enter') nextBtn.click(); });
+    }
+
+    // ================================================================
+    // AVANCER / RÉSUMÉ
+    // ================================================================
+
+    function advanceOrSummary() {
+      ConjEngine.next();
+      if (ConjEngine.isFinished()) renderSummary();
+      else renderQuestion();
+    }
+
+    // ================================================================
+    // VUE RÉSUMÉ
+    // ================================================================
+
+    function renderSummary() {
+      const summary = ConjEngine.finishSession();
+      const acc   = summary.total ? Math.round((summary.correct / summary.total) * 100) : 0;
+      const grade = acc >= 90 ? 'Excellent' : acc >= 75 ? 'Très bien' : acc >= 60 ? 'Bien' : acc >= 40 ? 'À retravailler' : 'Difficile';
+      Shared.renderTopbar('conj'); // rafraîchit les points
+
+      const missedHtml = summary.missed.length
+        ? `<div style="margin-top:32px">
+            <div class="eyebrow" style="margin-bottom:12px">Exercices à revoir</div>
+            <div style="max-width:640px;margin:0 auto">
+              ${summary.missed.map(r => buildMissedItem(r)).join('')}
+            </div>
+           </div>`
+        : `<div style="margin-top:32px;padding:16px;background:rgba(74,124,78,0.1);border-radius:8px;color:var(--success);font-weight:600">
+             ✨ Aucun exercice raté — session parfaite !
+           </div>`;
+
+      stageRoot.innerHTML = `
+        <div class="session-summary">
+          <div class="eyebrow">Session terminée — ${summary.mode}</div>
+          <div class="summary-score">
+            ${summary.correct}<span style="font-size:2rem;color:var(--ink-soft)">/${summary.total}</span>
+          </div>
+          <div class="serif" style="font-size:1.4rem;font-style:italic;color:var(--ink-soft)">
+            ${grade} — ${acc}% de précision
+          </div>
+
+          <div class="summary-metrics">
+            <div class="summary-metric">
+              <div class="summary-metric-val">+${summary.points}</div>
+              <div class="summary-metric-lbl">Points gagnés</div>
+            </div>
+            <div class="summary-metric">
+              <div class="summary-metric-val">${summary.streakAchieved}</div>
+              <div class="summary-metric-lbl">Meilleure série</div>
+            </div>
+            <div class="summary-metric">
+              <div class="summary-metric-val">${summary.durationS}s</div>
+              <div class="summary-metric-lbl">Durée</div>
+            </div>
+            <div class="summary-metric">
+              <div class="summary-metric-val">${Shared.formatNum(Storage.state.points)}</div>
+              <div class="summary-metric-lbl">Points totaux</div>
+            </div>
+          </div>
+
+          ${missedHtml}
+
+          <div style="margin-top:40px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <button id="again-btn" class="btn btn-amber">Refaire une session</button>
+            <a href="index.html" class="btn btn-ghost">Retour à l'accueil</a>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('again-btn').addEventListener('click', () => {
+        Shared.renderTopbar('conj');
+        renderSetup();
+      });
+    }
+
+    function buildMissedItem(r) {
+      // Construire un rendu selon le type de résultat
+      let context = '', user = '', correct = '';
+      if (r.verb && r.userPast !== undefined) {
+        // mode forms
+        context = 'Forms — ' + r.verb.fr;
+        user    = r.userPast + ' / ' + r.userPP;
+        correct = r.verb.past + ' / ' + r.verb.pp;
+      } else if (r.item && r.item.tense) {
+        if (r.item.en) {
+          // recognition
+          context = 'Recognition';
+          user    = 'Sélectionné : ' + (TENSES[r.selectedTense] ? TENSES[r.selectedTense].label : r.selectedTense || '—');
+          correct = TENSES[r.item.tense] ? TENSES[r.item.tense].label : r.item.tense;
+        } else {
+          // conjugate
+          context = 'Conjugate — ' + (TENSES[r.item.tense] ? TENSES[r.item.tense].label : r.item.tense);
+          user    = r.userInput;
+          correct = r.expected;
+        }
+      } else if (r.item && r.item.type) {
+        // conditional
+        context = 'Conditional — ' + r.item.type;
+        user    = r.userIf + ' / ' + r.userMain;
+        correct = r.item.ifAnswer + ' / ' + r.item.mainAnswer;
+      } else if (r.item && r.item.answer) {
+        // transformation
+        context = 'Transformation';
+        user    = r.userInput;
+        correct = r.item.answer;
+      }
+      return `
+        <div class="missed-item-conj">
+          <div class="miss-context">${context}</div>
+          <div class="miss-user">✗ ${user || '(vide)'}</div>
+          <div class="miss-correct">✓ ${correct}</div>
+        </div>
+      `;
+    }
+
+    // ================================================================
+    // MODALE LEÇON (depuis feedback)
+    // ================================================================
+
+    function showLessonModal(tenseData) {
+      const existing = document.getElementById('lesson-modal-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'lesson-modal-overlay';
+      overlay.className = 'lesson-modal-overlay';
+      overlay.innerHTML = `
+        <div class="lesson-modal">
+          <button class="lesson-modal-close" id="modal-close">✕</button>
+          <div class="eyebrow">${tenseData.category}</div>
+          <h3 style="margin-top:4px">${tenseData.label}</h3>
+          <p style="color:var(--ink-soft);font-style:italic;margin-top:4px">${tenseData.labelFr}</p>
+          ${renderLessonCard(tenseData)}
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+      document.getElementById('modal-close').addEventListener('click', () => overlay.remove());
+      // Ouvrir directement la carte
+      setTimeout(() => {
+        const card = overlay.querySelector('.tense-lesson-card');
+        if (card) {
+          card.classList.add('open');
+          const chevron = card.querySelector('.lesson-chevron');
+          if (chevron) chevron.textContent = '▼';
+        }
+      }, 50);
+    }
+
+    // ================================================================
+    // BOOTSTRAP
+    // ================================================================
+
+    renderSetup();
   </script>
 </body>
 </html>

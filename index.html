@@ -96,12 +96,12 @@
               </div>
             </a>
 
-            <a href="#" class="module-card disabled" onclick="return false">
+            <a href="conjugation.html" class="module-card">
               <div class="module-num">03 — Verbes</div>
               <h3 class="module-title">Conjugaison</h3>
-              <p class="module-desc">Verbes irréguliers et réguliers, tous les temps. Mode drill chronométré pour réflexes.</p>
+              <p class="module-desc">160 verbes irréguliers, 14 temps, modaux et conditionnels. 5 modes d'exercice avec SRS.</p>
               <div class="module-foot">
-                <span><span class="pill">Bientôt</span></span>
+                <span><span class="pill pill-amber">Disponible</span></span>
                 <span class="module-arrow">→</span>
               </div>
             </a>
@@ -165,6 +165,11 @@
                 <span class="pbar-num" id="pbar-3-num">0 / 0</span>
                 <div class="pbar-track"><div class="pbar-fill" id="pbar-3"></div></div>
               </div>
+              <div class="pbar-item">
+                <span class="pbar-label">Verbes irréguliers maîtrisés</span>
+                <span class="pbar-num" id="pbar-irreg-num">0 / 0</span>
+                <div class="pbar-track"><div class="pbar-fill" id="pbar-irreg" style="background:var(--burgundy)"></div></div>
+              </div>
             </div>
 
             <div class="badges-row" id="badges-row"></div>
@@ -179,8 +184,10 @@
 
   <!-- Scripts -->
   <script src="data/vocab.js"></script>
+  <script src="data/conjugation.js"></script>
   <script src="scripts/storage.js"></script>
   <script src="scripts/shared.js"></script>
+  <script src="scripts/conj-engine.js"></script>
   <script>
     // Init
     Storage.load();
@@ -208,6 +215,14 @@
     }
     bar(1); bar(2); bar(3);
 
+    // Barre verbes irréguliers
+    if (typeof IRREGULAR_VERBS !== 'undefined' && typeof ConjEngine !== 'undefined') {
+      const irregStats = ConjEngine.getIrregularStats();
+      const pct = irregStats.total ? Math.round((irregStats.mastered / irregStats.total) * 100) : 0;
+      document.getElementById('pbar-irreg').style.width = pct + '%';
+      document.getElementById('pbar-irreg-num').textContent = irregStats.mastered + ' / ' + irregStats.total + ' maîtrisés';
+    }
+
     // Badges
     const ALL_BADGES = [
       { id: 'vocab-100', label: '◆ 100 mots vus' },
@@ -216,6 +231,11 @@
       { id: 'perfect-session', label: '✦ Session parfaite' },
       { id: 'streak-7', label: '🔥 7 jours' },
       { id: 'streak-30', label: '🔥 30 jours' },
+      { id: 'conj-irreg-50', label: '◆ 50 irréguliers' },
+      { id: 'conj-irreg-all', label: '◆ Tous les irréguliers' },
+      { id: 'conj-tense-master', label: '✦ Maître d\'un temps' },
+      { id: 'conditional-pro', label: '⊛ Conditional Pro' },
+      { id: 'modal-pro', label: '⊛ Modal Pro' },
     ];
     const badgesRow = document.getElementById('badges-row');
     badgesRow.innerHTML = ALL_BADGES.map(b => {

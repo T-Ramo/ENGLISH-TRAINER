@@ -30,6 +30,11 @@ const DEFAULT_STATE = {
   toeic: {
     history: [], // { date, score, listening, reading }
   },
+  conj: {
+    // key: 'verb_id::tense' -> { seen, correct, wrong, ease, intervalDays, nextDueAt }
+    cards: {},
+    history: [], // { date, mode, correct, total, points }
+  },
 };
 
 const Storage = {
@@ -47,6 +52,7 @@ const Storage = {
         this.state.vocab = { ...DEFAULT_STATE.vocab, ...this.state.vocab };
         this.state.settings = { ...DEFAULT_STATE.settings, ...this.state.settings };
         this.state.toeic = { ...DEFAULT_STATE.toeic, ...this.state.toeic };
+        this.state.conj  = { ...DEFAULT_STATE.conj,  ...this.state.conj  };
       } else {
         this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         this.state.user.createdAt = Date.now();
@@ -139,6 +145,32 @@ const Storage = {
       else learning++;
     }
     return { mastered, learning, untouched, total: wordIds.length };
+  },
+
+  // ----- Conjugation card data -----
+  getConjCard(key) {
+    return this.state.conj.cards[key] || null;
+  },
+
+  upsertConjCard(key, partial) {
+    const cur = this.state.conj.cards[key] || {
+      seen: 0, correct: 0, wrong: 0,
+      lastSeenAt: null, nextDueAt: null,
+      ease: 2.5, intervalDays: 0,
+    };
+    this.state.conj.cards[key] = { ...cur, ...partial };
+    this.save();
+  },
+
+  getConjMasteryStats(keys) {
+    let mastered = 0, learning = 0, untouched = 0;
+    for (const k of keys) {
+      const c = this.state.conj.cards[k];
+      if (!c) { untouched++; continue; }
+      if (c.correct >= 3 && c.intervalDays >= 7) mastered++;
+      else learning++;
+    }
+    return { mastered, learning, untouched, total: keys.length };
   },
 
   // ----- Badges -----
