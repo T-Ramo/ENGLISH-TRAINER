@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Trainer — Conjugaison</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <div class="app">
+    <div id="topbar-slot"></div>
+    <main>
+      <div class="container">
+        <div class="eyebrow">Module 03 — Verbes</div>
+        <h1 style="margin-top: 8px">Conjugaison</h1>
+        <p style="max-width: 540px; margin-top: 16px; color: var(--ink-soft); font-size: 1.05rem">
+          Module en préparation. Il proposera&nbsp;:
+        </p>
+        <ul style="margin-top: 16px; padding-left: 20px; color: var(--ink-soft); line-height: 2">
+          <li>Liste complète des verbes irréguliers anglais</li>
+          <li>Trainer chronométré : Verbe + temps → forme correcte</li>
+          <li>Drill par familles (verbes en -ought, -ung, etc.)</li>
+          <li>Conjugaison de tous les temps : Present, Past, Future, Perfect, Continuous</li>
+          <li>Tableaux de référence imprimables</li>
+        </ul>
+        <p style="margin-top: 32px"><a href="index.html" class="btn btn-ghost">← Retour à l'accueil</a></p>
+      </div>
+    </main>
+    <div id="footer-slot"></div>
+  </div>
+  <script src="data/vocab.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/shared.js"></script>
+  <script>
+    Storage.load();
+    Shared.renderTopbar('conj');
+    Shared.renderFooter();
+  </script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Trainer — Accueil</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/home.css" />
+</head>
+<body>
+  <div class="app">
+    <div id="topbar-slot"></div>
+
+    <main>
+      <div class="container">
+
+        <!-- HERO -->
+        <section class="hero">
+          <div class="anim-fade-up" style="animation-delay: 0.05s">
+            <div class="eyebrow">Niveau B1 · Objectif TOEIC</div>
+            <h1 class="hero-headline">
+              Apprends l'anglais<br />
+              <em>méthodiquement.</em>
+            </h1>
+            <p class="hero-sub">
+              Les 3000 mots les plus fréquents, la grammaire essentielle,
+              la conjugaison drillée et des tests TOEIC blancs notés sur 990.
+              Tout en un seul endroit, à ton rythme.
+            </p>
+            <div class="hero-cta">
+              <a href="vocabulary.html" class="btn btn-primary btn-lg">
+                Commencer le vocabulaire →
+              </a>
+              <a href="#modules" class="btn btn-ghost btn-lg">Voir les modules</a>
+            </div>
+          </div>
+
+          <div class="hero-card anim-fade-up" style="animation-delay: 0.2s">
+            <div class="eyebrow">Citation du jour</div>
+            <h3>Daily wisdom</h3>
+            <p class="daily-quote" id="daily-quote">"The limits of my language mean the limits of my world."</p>
+            <p class="daily-trans" id="daily-trans">— Ludwig Wittgenstein</p>
+          </div>
+        </section>
+
+        <!-- STATS -->
+        <section class="stats-grid anim-fade-up" style="animation-delay: 0.3s">
+          <div class="stat-card accent">
+            <div class="stat-icon">◆</div>
+            <div class="stat-value" id="stat-points">0</div>
+            <div class="stat-label">Points totaux</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-value" id="stat-streak">0</div>
+            <div class="stat-label">Jours consécutifs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-value" id="stat-vocab">0</div>
+            <div class="stat-label">Mots vus</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">◎</div>
+            <div class="stat-value" id="stat-accuracy">—</div>
+            <div class="stat-label">Précision</div>
+          </div>
+        </section>
+
+        <!-- MODULES -->
+        <section id="modules">
+          <div class="section-head">
+            <h2><strong>Modules</strong> d'apprentissage</h2>
+            <span class="muted mono" style="font-size: 0.85rem">Cliquez sur un module pour commencer</span>
+          </div>
+
+          <div class="modules-grid">
+
+            <a href="vocabulary.html" class="module-card">
+              <div class="module-num">01 — Lexique</div>
+              <h3 class="module-title">Vocabulaire</h3>
+              <p class="module-desc">3000 mots les plus fréquents, par thèmes et niveaux. Trois modes de jeu, prononciation US, répétition espacée.</p>
+              <div class="module-foot">
+                <span><span class="pill pill-amber">Disponible</span></span>
+                <span class="module-arrow">→</span>
+              </div>
+            </a>
+
+            <a href="#" class="module-card disabled" onclick="return false">
+              <div class="module-num">02 — Structures</div>
+              <h3 class="module-title">Grammaire</h3>
+              <p class="module-desc">Temps, pronoms, prépositions, conditionnels, voix passive. Leçons + exercices interactifs.</p>
+              <div class="module-foot">
+                <span><span class="pill">Bientôt</span></span>
+                <span class="module-arrow">→</span>
+              </div>
+            </a>
+
+            <a href="#" class="module-card disabled" onclick="return false">
+              <div class="module-num">03 — Verbes</div>
+              <h3 class="module-title">Conjugaison</h3>
+              <p class="module-desc">Verbes irréguliers et réguliers, tous les temps. Mode drill chronométré pour réflexes.</p>
+              <div class="module-foot">
+                <span><span class="pill">Bientôt</span></span>
+                <span class="module-arrow">→</span>
+              </div>
+            </a>
+
+            <a href="#" class="module-card disabled" onclick="return false">
+              <div class="module-num">04 — Comprehension</div>
+              <h3 class="module-title">Lecture & écoute</h3>
+              <p class="module-desc">Textes courts, dialogues, exercices style TOEIC Part 3, 4 et 7. Questions à choix multiples.</p>
+              <div class="module-foot">
+                <span><span class="pill">Bientôt</span></span>
+                <span class="module-arrow">→</span>
+              </div>
+            </a>
+
+            <a href="#" class="module-card disabled" onclick="return false">
+              <div class="module-num">05 — Examen</div>
+              <h3 class="module-title">Tests TOEIC</h3>
+              <p class="module-desc">Tests blancs complets, scoring officiel sur 990, debrief par section avec axes d'amélioration.</p>
+              <div class="module-foot">
+                <span><span class="pill">Bientôt</span></span>
+                <span class="module-arrow">→</span>
+              </div>
+            </a>
+
+            <a href="#" class="module-card disabled" onclick="return false">
+              <div class="module-num">06 — Données</div>
+              <h3 class="module-title">Statistiques</h3>
+              <p class="module-desc">Courbes de progression, mots maîtrisés, points faibles détectés automatiquement.</p>
+              <div class="module-foot">
+                <span><span class="pill">Bientôt</span></span>
+                <span class="module-arrow">→</span>
+              </div>
+            </a>
+
+          </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- PROGRESSION -->
+        <section>
+          <div class="section-head">
+            <h2><strong>Ta</strong> progression</h2>
+            <button id="reset-btn" class="btn btn-ghost btn-sm">Réinitialiser</button>
+          </div>
+
+          <div class="progress-block">
+            <div class="progress-bars">
+              <div class="pbar-item">
+                <span class="pbar-label">Tier 1 — Essentiels (500 mots)</span>
+                <span class="pbar-num" id="pbar-1-num">0 / 0</span>
+                <div class="pbar-track"><div class="pbar-fill" id="pbar-1"></div></div>
+              </div>
+              <div class="pbar-item">
+                <span class="pbar-label">Tier 2 — Courants (500 → 1500)</span>
+                <span class="pbar-num" id="pbar-2-num">0 / 0</span>
+                <div class="pbar-track"><div class="pbar-fill" id="pbar-2"></div></div>
+              </div>
+              <div class="pbar-item">
+                <span class="pbar-label">Tier 3 — Enrichissement (1500 → 3000)</span>
+                <span class="pbar-num" id="pbar-3-num">0 / 0</span>
+                <div class="pbar-track"><div class="pbar-fill" id="pbar-3"></div></div>
+              </div>
+            </div>
+
+            <div class="badges-row" id="badges-row"></div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <div id="footer-slot"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data/vocab.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/shared.js"></script>
+  <script>
+    // Init
+    Storage.load();
+    Shared.renderTopbar('home');
+    Shared.renderFooter();
+
+    // Stats
+    const st = Storage.state;
+    document.getElementById('stat-points').textContent = Shared.formatNum(st.points);
+    document.getElementById('stat-streak').textContent = st.streak.current;
+    document.getElementById('stat-vocab').textContent = Object.keys(st.vocab.cards).length;
+    const acc = st.totals.answersGiven
+      ? Math.round((st.totals.answersCorrect / st.totals.answersGiven) * 100) + '%'
+      : '—';
+    document.getElementById('stat-accuracy').textContent = acc;
+
+    // Progress bars
+    function bar(tier) {
+      const ids = VOCAB.filter(w => w.tier === tier).map(w => w.id);
+      const s = Storage.getMasteryStats(ids);
+      const pct = s.total ? Math.round((s.mastered / s.total) * 100) : 0;
+      document.getElementById('pbar-' + tier).style.width = pct + '%';
+      document.getElementById('pbar-' + tier + '-num').textContent =
+        s.mastered + ' / ' + s.total + ' maîtrisés';
+    }
+    bar(1); bar(2); bar(3);
+
+    // Badges
+    const ALL_BADGES = [
+      { id: 'vocab-100', label: '◆ 100 mots vus' },
+      { id: 'vocab-500', label: '◆ 500 mots vus' },
+      { id: 'vocab-1000', label: '◆ 1000 mots vus' },
+      { id: 'perfect-session', label: '✦ Session parfaite' },
+      { id: 'streak-7', label: '🔥 7 jours' },
+      { id: 'streak-30', label: '🔥 30 jours' },
+    ];
+    const badgesRow = document.getElementById('badges-row');
+    badgesRow.innerHTML = ALL_BADGES.map(b => {
+      const earned = Storage.hasBadge(b.id);
+      return `<span class="badge ${earned ? 'earned' : 'locked'}">${b.label}</span>`;
+    }).join('');
+
+    // Daily quote rotation
+    const QUOTES = [
+      { en: '"The limits of my language mean the limits of my world."', src: '— Ludwig Wittgenstein' },
+      { en: '"A different language is a different vision of life."', src: '— Federico Fellini' },
+      { en: '"One language sets you in a corridor for life. Two languages open every door along the way."', src: '— Frank Smith' },
+      { en: '"Learning another language is not only learning different words, but another way to think about things."', src: '— Flora Lewis' },
+      { en: '"The man who does not read has no advantage over the man who cannot read."', src: '— Mark Twain' },
+      { en: '"You can never understand one language until you understand at least two."', src: '— Geoffrey Willans' },
+      { en: '"Language is the road map of a culture."', src: '— Rita Mae Brown' },
+    ];
+    const idx = new Date().getDate() % QUOTES.length;
+    document.getElementById('daily-quote').textContent = QUOTES[idx].en;
+    document.getElementById('daily-trans').textContent = QUOTES[idx].src;
+
+    // Reset
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      if (confirm('Réinitialiser toute ta progression ? Cette action est définitive.')) {
+        Storage.reset();
+        location.reload();
+      }
+    });
+  </script>
+</body>
+</html>

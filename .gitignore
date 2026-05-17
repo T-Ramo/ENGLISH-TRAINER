@@ -1,0 +1,21 @@
+# Python virtual environment
+.venv_vocab/
+# Local data source and generated vocab artifacts
+vocab-list.md
+tmp_bad_verbs.txt
+data/vocab.wn.js
+data/vocab.wn2.js
+data/vocab.wn3.js
+data/vocab.generated.js
+data/vocab.generated.sample.js
+data/vocab.best.js
+data/vocab.final.js
+data/vocab.final2.js
+data/vocab.fixed.js
+# Python cache
+__pycache__/
+*.pyc
+# OS files
+.DS_Store
+# Logs
+*.log

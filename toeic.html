@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Trainer — Tests TOEIC</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <div class="app">
+    <div id="topbar-slot"></div>
+    <main>
+      <div class="container">
+        <div class="eyebrow">Module 05 — Examen</div>
+        <h1 style="margin-top: 8px">Tests TOEIC blancs</h1>
+        <p style="max-width: 540px; margin-top: 16px; color: var(--ink-soft); font-size: 1.05rem">
+          Module en préparation. Il inclura&nbsp;:
+        </p>
+        <ul style="margin-top: 16px; padding-left: 20px; color: var(--ink-soft); line-height: 2">
+          <li>Tests complets format TOEIC Listening &amp; Reading (200 questions, 2h)</li>
+          <li>Mini-tests par section (Part 1 à 7)</li>
+          <li>Scoring officiel converti sur 990</li>
+          <li>Debrief détaillé : score par section + erreurs récurrentes</li>
+          <li>Recommandations personnalisées (vocabulaire à revoir, grammaire à travailler)</li>
+          <li>Historique des scores et courbe de progression</li>
+        </ul>
+        <div style="margin-top: 32px; padding: 16px; background: rgba(200, 132, 44, 0.1); border-left: 3px solid var(--amber); border-radius: 4px">
+          <strong>Note :</strong> les questions seront créées <em>dans le style</em> TOEIC (le test officiel ETS est sous copyright).
+          Si tu as des annales personnelles, on pourra les intégrer.
+        </div>
+        <p style="margin-top: 32px"><a href="index.html" class="btn btn-ghost">← Retour à l'accueil</a></p>
+      </div>
+    </main>
+    <div id="footer-slot"></div>
+  </div>
+  <script src="data/vocab.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/shared.js"></script>
+  <script>
+    Storage.load();
+    Shared.renderTopbar('toeic');
+    Shared.renderFooter();
+  </script>
+</body>
+</html>

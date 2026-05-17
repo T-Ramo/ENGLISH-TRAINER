@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Trainer — Grammaire</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <div class="app">
+    <div id="topbar-slot"></div>
+    <main>
+      <div class="container">
+        <div class="eyebrow">Module 02 — Structures</div>
+        <h1 style="margin-top: 8px">Grammaire</h1>
+        <p style="max-width: 540px; margin-top: 16px; color: var(--ink-soft); font-size: 1.05rem">
+          Ce module est <strong>en préparation</strong>. Il couvrira&nbsp;:
+        </p>
+        <ul style="margin-top: 16px; padding-left: 20px; color: var(--ink-soft); line-height: 2">
+          <li>Les temps verbaux (present simple, continuous, perfect, past, future…)</li>
+          <li>Pronoms personnels et possessifs</li>
+          <li>Prépositions de lieu et de temps</li>
+          <li>Conditionnels (0, 1, 2, 3)</li>
+          <li>Voix passive</li>
+          <li>Modaux (can, could, may, might, must, should…)</li>
+          <li>Pluriels irréguliers, quantifieurs, articles</li>
+        </ul>
+        <p style="margin-top: 32px"><a href="index.html" class="btn btn-ghost">← Retour à l'accueil</a></p>
+      </div>
+    </main>
+    <div id="footer-slot"></div>
+  </div>
+  <script src="data/vocab.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/shared.js"></script>
+  <script>
+    Storage.load();
+    Shared.renderTopbar('grammar');
+    Shared.renderFooter();
+  </script>
+</body>
+</html>

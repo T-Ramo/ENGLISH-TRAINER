@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Trainer — Statistiques</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <div class="app">
+    <div id="topbar-slot"></div>
+    <main>
+      <div class="container">
+        <div class="eyebrow">Module 06 — Données</div>
+        <h1 style="margin-top: 8px">Statistiques</h1>
+        <p style="max-width: 540px; margin-top: 16px; color: var(--ink-soft); font-size: 1.05rem">
+          Vue détaillée de ta progression. Disponible bientôt.
+        </p>
+        <div style="margin-top: 32px; padding: 24px; background: var(--paper-warm); border-radius: 12px">
+          <h3 style="margin-bottom: 12px">Aperçu rapide</h3>
+          <p class="mono" id="quick-stats" style="line-height: 1.8"></p>
+        </div>
+        <p style="margin-top: 32px"><a href="index.html" class="btn btn-ghost">← Retour à l'accueil</a></p>
+      </div>
+    </main>
+    <div id="footer-slot"></div>
+  </div>
+  <script src="data/vocab.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/shared.js"></script>
+  <script>
+    Storage.load();
+    Shared.renderTopbar('stats');
+    Shared.renderFooter();
+    const st = Storage.state;
+    const acc = st.totals.answersGiven
+      ? Math.round((st.totals.answersCorrect / st.totals.answersGiven) * 100) + '%'
+      : '—';
+    document.getElementById('quick-stats').innerHTML = `
+      Points : <strong>${st.points.toLocaleString('fr-FR')}</strong><br>
+      Série actuelle : <strong>${st.streak.current} jours</strong> (record : ${st.streak.best})<br>
+      Sessions complétées : <strong>${st.totals.sessionsCompleted}</strong><br>
+      Réponses données : <strong>${st.totals.answersGiven}</strong> dont <strong>${st.totals.answersCorrect}</strong> correctes<br>
+      Précision globale : <strong>${acc}</strong><br>
+      Mots vus au moins une fois : <strong>${Object.keys(st.vocab.cards).length}</strong> sur ${VOCAB.length}
+    `;
+  </script>
+</body>
+</html>
