@@ -1,0 +1,118 @@
+/* ============================================================
+   GRAMMAR MODULE SPECIFIC STYLES
+   ============================================================ */
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--s-5);
+  margin-top: var(--s-6);
+}
+
+.lesson-card {
+  background: var(--paper-warm);
+  border: 1px solid rgba(26, 22, 18, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--s-4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  text-align: left;
+}
+
+.lesson-card:hover { transform: translateY(-2px); border-color: var(--amber); box-shadow: var(--shadow); }
+.lesson-card.read { border-left: 4px solid var(--success); }
+
+.lesson-full {
+  max-width: 800px;
+  margin: 0 auto;
+  animation: fade-up 0.4s ease;
+}
+
+.rule-block {
+  background: white;
+  padding: var(--s-5);
+  border-radius: var(--radius);
+  border: 1px solid rgba(26, 22, 18, 0.05);
+  margin-bottom: var(--s-4);
+}
+
+.rule-block h3 { margin-bottom: var(--s-2); color: var(--moss-deep); font-size: 1.1rem; }
+
+.example-row {
+  padding: var(--s-3);
+  border-left: 2px solid var(--amber-light);
+  background: rgba(200, 132, 44, 0.03);
+  margin-bottom: var(--s-2);
+  font-size: 0.95rem;
+}
+
+.example-row em { color: var(--ink-soft); display: block; margin-top: 2px; font-size: 0.85rem; }
+
+.pitfall-box {
+  background: rgba(122, 46, 46, 0.05);
+  border: 1px solid rgba(122, 46, 46, 0.1);
+  padding: var(--s-4);
+  border-radius: var(--radius);
+  margin-top: var(--s-6);
+}
+
+.pitfall-box h4 { color: var(--burgundy); margin-bottom: var(--s-2); display: flex; align-items: center; gap: 8px; }
+
+/* Exercice Types */
+
+/* Reorder */
+.reorder-zone {
+  min-height: 80px;
+  padding: var(--s-4);
+  background: var(--paper);
+  border: 2px dashed rgba(26, 22, 18, 0.1);
+  border-radius: var(--radius);
+  margin: var(--s-5) 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  justify-content: center;
+  align-items: center;
+}
+
+.token-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  justify-content: center;
+}
+
+.reorder-token {
+  background: white;
+  border: 1px solid rgba(26, 22, 18, 0.15);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  transition: all 0.1s ease;
+}
+
+.reorder-token:hover { background: var(--paper-warm); }
+.reorder-token.used { opacity: 0.3; pointer-events: none; }
+
+/* Error Detection */
+.error-sentence {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  line-height: 1.8;
+  margin: var(--s-5) 0;
+}
+
+.error-word {
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.error-word:hover { background: rgba(200, 132, 44, 0.15); }
+.error-word.selected { background: var(--amber); color: white; }

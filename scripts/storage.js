@@ -35,6 +35,11 @@ const DEFAULT_STATE = {
     cards: {},
     history: [], // { date, mode, correct, total, points }
   },
+  grammar: {
+    cards: {}, // exercise_id -> { seen, correct, wrong, ease, intervalDays, nextDueAt }
+    lessonsRead: [], // ids des leçons consultées
+    history: [], // { date, mode, correct, total, points }
+  },
 };
 
 const Storage = {
@@ -53,6 +58,7 @@ const Storage = {
         this.state.settings = { ...DEFAULT_STATE.settings, ...this.state.settings };
         this.state.toeic = { ...DEFAULT_STATE.toeic, ...this.state.toeic };
         this.state.conj  = { ...DEFAULT_STATE.conj,  ...this.state.conj  };
+        this.state.grammar = { ...DEFAULT_STATE.grammar, ...this.state.grammar };
       } else {
         this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         this.state.user.createdAt = Date.now();
@@ -145,6 +151,37 @@ const Storage = {
       else learning++;
     }
     return { mastered, learning, untouched, total: wordIds.length };
+  },
+
+  // ----- Grammar card data -----
+  getGrammarCard(id) {
+    return this.state.grammar.cards[id] || null;
+  },
+
+  upsertGrammarCard(id, partial) {
+    const cur = this.state.grammar.cards[id] || {
+      seen: 0, correct: 0, wrong: 0,
+      lastSeenAt: null, nextDueAt: null,
+      ease: 2.5, intervalDays: 0,
+    };
+    this.state.grammar.cards[id] = { ...cur, ...partial };
+    this.save();
+  },
+
+  markLessonRead(lessonId) {
+    if (!this.state.grammar.lessonsRead.includes(lessonId)) {
+      this.state.grammar.lessonsRead.push(lessonId);
+      this.save();
+    }
+  },
+
+  getGrammarMasteryStats(exerciseIds) {
+    let mastered = 0;
+    for (const id of exerciseIds) {
+      const c = this.state.grammar.cards[id];
+      if (c && c.correct >= 3 && c.intervalDays >= 7) mastered++;
+    }
+    return { mastered, total: exerciseIds.length };
   },
 
   // ----- Conjugation card data -----

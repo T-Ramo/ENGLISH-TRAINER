@@ -11,7 +11,7 @@ const Shared = {
     slot.innerHTML = `
       <div class="topbar">
         <div class="topbar-inner">
-          <a href="index.html" class="logo">
+          <a href="index.html" class="logo" id="main-logo">
             <span class="logo-mark">E</span>
             <span class="logo-text">English Trainer</span>
           </a>

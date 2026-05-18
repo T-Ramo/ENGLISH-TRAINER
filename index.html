@@ -86,12 +86,12 @@
               </div>
             </a>
 
-            <a href="#" class="module-card disabled" onclick="return false">
+            <a href="grammar.html" class="module-card">
               <div class="module-num">02 — Structures</div>
               <h3 class="module-title">Grammaire</h3>
               <p class="module-desc">Temps, pronoms, prépositions, conditionnels, voix passive. Leçons + exercices interactifs.</p>
               <div class="module-foot">
-                <span><span class="pill">Bientôt</span></span>
+                <span><span class="pill pill-amber">Disponible</span></span>
                 <span class="module-arrow">→</span>
               </div>
             </a>
@@ -166,6 +166,11 @@
                 <div class="pbar-track"><div class="pbar-fill" id="pbar-3"></div></div>
               </div>
               <div class="pbar-item">
+                <span class="pbar-label">Leçons de grammaire lues</span>
+                <span class="pbar-num" id="pbar-grammar-num">0 / 33</span>
+                <div class="pbar-track"><div class="pbar-fill" id="pbar-grammar" style="background:var(--moss)"></div></div>
+              </div>
+              <div class="pbar-item">
                 <span class="pbar-label">Verbes irréguliers maîtrisés</span>
                 <span class="pbar-num" id="pbar-irreg-num">0 / 0</span>
                 <div class="pbar-track"><div class="pbar-fill" id="pbar-irreg" style="background:var(--burgundy)"></div></div>
@@ -215,6 +220,11 @@
     }
     bar(1); bar(2); bar(3);
 
+    // Barre grammaire
+    const readCount = st.grammar.lessonsRead.length;
+    document.getElementById('pbar-grammar').style.width = Math.round((readCount / 33) * 100) + '%';
+    document.getElementById('pbar-grammar-num').textContent = readCount + ' / 33 lues';
+
     // Barre verbes irréguliers
     if (typeof IRREGULAR_VERBS !== 'undefined' && typeof ConjEngine !== 'undefined') {
       const irregStats = ConjEngine.getIrregularStats();
@@ -236,6 +246,9 @@
       { id: 'conj-tense-master', label: '✦ Maître d\'un temps' },
       { id: 'conditional-pro', label: '⊛ Conditional Pro' },
       { id: 'modal-pro', label: '⊛ Modal Pro' },
+      { id: 'grammar-lesson-10', label: '📚 10 Leçons lues' },
+      { id: 'grammar-lesson-all', label: '🎓 Expert Grammaire' },
+      { id: 'grammar-b2', label: '🏆 Niveau B2 atteint' },
     ];
     const badgesRow = document.getElementById('badges-row');
     badgesRow.innerHTML = ALL_BADGES.map(b => {
