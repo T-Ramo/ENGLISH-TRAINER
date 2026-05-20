@@ -40,6 +40,10 @@ const DEFAULT_STATE = {
     lessonsRead: [], // ids des leçons consultées
     history: [], // { date, mode, correct, total, points }
   },
+  comprehension: {
+    cards: {}, // exercise_id -> { seen, correct, wrong, ease, intervalDays, nextDueAt, lastSeenAt }
+    history: [], // { date, type, correct, total, points }
+  },
 };
 
 const Storage = {
@@ -59,6 +63,7 @@ const Storage = {
         this.state.toeic = { ...DEFAULT_STATE.toeic, ...this.state.toeic };
         this.state.conj  = { ...DEFAULT_STATE.conj,  ...this.state.conj  };
         this.state.grammar = { ...DEFAULT_STATE.grammar, ...this.state.grammar };
+        this.state.comprehension = { ...DEFAULT_STATE.comprehension, ...this.state.comprehension };
       } else {
         this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         this.state.user.createdAt = Date.now();
@@ -221,6 +226,28 @@ const Storage = {
       return true;
     }
     return false;
+  },
+
+  // ----- Comprehension card data -----
+  getComprehensionCard(id) {
+    return (this.state.comprehension && this.state.comprehension.cards[id]) || null;
+  },
+
+  upsertComprehensionCard(id, partial) {
+    if (!this.state.comprehension) this.state.comprehension = { cards: {}, history: [] };
+    const cur = this.state.comprehension.cards[id] || {
+      seen: 0, correct: 0, wrong: 0,
+      lastSeenAt: null, nextDueAt: null,
+      ease: 2.5, intervalDays: 0,
+    };
+    this.state.comprehension.cards[id] = { ...cur, ...partial };
+    this.save();
+  },
+
+  pushComprehensionHistory(entry) {
+    if (!this.state.comprehension) this.state.comprehension = { cards: {}, history: [] };
+    this.state.comprehension.history.push(entry);
+    this.save();
   },
 };
 

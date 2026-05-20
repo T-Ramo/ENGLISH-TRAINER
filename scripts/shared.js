@@ -20,6 +20,7 @@ const Shared = {
             <a href="vocabulary.html" data-route="vocab">Vocabulaire</a>
             <a href="grammar.html" data-route="grammar">Grammaire</a>
             <a href="conjugation.html" data-route="conj">Conjugaison</a>
+            <a href="comprehension.html" data-route="comprehension">Compréhension</a>
             <a href="toeic.html" data-route="toeic">TOEIC</a>
             <a href="stats.html" data-route="stats">Stats</a>
           </nav>

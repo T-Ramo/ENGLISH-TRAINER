@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Trainer — Compréhension</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/comprehension.css" />
+</head>
+<body>
+  <div class="app">
+    <div id="topbar-slot"></div>
+    <main>
+      <div class="container">
+        <section class="vocab-hero anim-fade-up">
+          <div class="eyebrow">Module 04 — Compréhension</div>
+          <h1>Lecture &amp; Écoute</h1>
+        </section>
+        <div id="stage-root"></div>
+      </div>
+    </main>
+    <div id="footer-slot"></div>
+  </div>
+
+  <script src="data/comprehension-audio.js"></script>
+  <script src="data/comprehension-reading.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/shared.js"></script>
+  <script src="scripts/comprehension-engine.js"></script>
+
+  <script>
+    Storage.load();
+    Shared.renderTopbar('comprehension');
+    Shared.renderFooter();
+
+    const root = document.getElementById('stage-root');
+
+    // ================================================================
+    // DASHBOARD
+    // ================================================================
+    function renderDashboard(activeTab) {
+      const tab = activeTab || 'listening';
+      const stats = ComprehensionEngine.getStats();
+      const audioReady = typeof COMPREHENSION_AUDIO !== 'undefined' && COMPREHENSION_AUDIO.length > 0;
+      const readingReady = typeof COMPREHENSION_READING !== 'undefined' && COMPREHENSION_READING.length > 0;
+
+      const audioTotal  = audioReady  ? ComprehensionEngine.getAudioList().length : 0;
+      const readingTotal = readingReady ? ComprehensionEngine.getReadingList().length : 0;
+
+      root.innerHTML = `
+        <div class="comp-stats-bar anim-fade-up">
+          <div class="comp-stat-item">
+            <div class="comp-stat-value">${stats.listeningSessionsTotal}</div>
+            <div class="comp-stat-label">Sessions écoute</div>
+          </div>
+          <div class="comp-stat-item">
+            <div class="comp-stat-value">${stats.listeningAccuracy !== null ? stats.listeningAccuracy + '%' : '—'}</div>
+            <div class="comp-stat-label">Précision écoute</div>
+          </div>
+          <div class="comp-stat-item">
+            <div class="comp-stat-value">${stats.readingSessionsTotal}</div>
+            <div class="comp-stat-label">Sessions lecture</div>
+          </div>
+          <div class="comp-stat-item">
+            <div class="comp-stat-value">${stats.readingAccuracy !== null ? stats.readingAccuracy + '%' : '—'}</div>
+            <div class="comp-stat-label">Précision lecture</div>
+          </div>
+        </div>
+
+        <div class="comp-tabs">
+          <button class="comp-tab ${tab==='listening'?'active':''}" onclick="renderDashboard('listening')">Écoute (${audioTotal})</button>
+          <button class="comp-tab ${tab==='reading'?'active':''}" onclick="renderDashboard('reading')">Lecture (${readingTotal})</button>
+        </div>
+
+        <div id="tab-content"></div>
+      `;
+
+      if (tab === 'listening') renderListeningTab(audioReady);
+      else renderReadingTab(readingReady);
+    }
+
+    function renderListeningTab(audioReady) {
+      const sections = ComprehensionEngine.getAudioSections();
+
+      let html = `
+        <div class="comp-filters">
+          <label>Section :</label>
+          <select class="comp-select" id="filter-section">
+            <option value="all">Toutes</option>
+            ${sections.map(s => `<option value="${s}">${SECTION_LABELS[s] || s}</option>`).join('')}
+          </select>
+          <label style="margin-left:var(--s-3)">Exercices :</label>
+          <select class="comp-select" id="filter-count">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+          </select>
+        </div>`;
+
+      if (!audioReady) {
+        html += `
+          <div class="comp-empty">
+            <h3>Aucun audio disponible</h3>
+            <p>Lance le script Python pour générer les questions :</p>
+            <pre style="margin:16px auto;max-width:600px;background:var(--ink);color:var(--paper);padding:16px;border-radius:8px;text-align:left;font-size:0.85rem">ANTHROPIC_API_KEY=sk-ant-... python3 scripts/generate_comprehension_qcm.py</pre>
+          </div>`;
+      } else {
+        html += `
+          <button class="btn btn-primary btn-lg" style="margin-top:var(--s-4)" onclick="startSession('listening')">
+            Démarrer la session →
+          </button>`;
+      }
+
+      document.getElementById('tab-content').innerHTML = html;
+    }
+
+    function renderReadingTab(readingReady) {
+      const genres = ComprehensionEngine.getReadingGenres();
+
+      let html = `
+        <div class="comp-filters">
+          <label>Niveau :</label>
+          <select class="comp-select" id="filter-level">
+            <option value="all">Tous</option>
+            <option value="1">B1</option>
+            <option value="2">B2</option>
+            <option value="3">C1</option>
+          </select>
+          ${genres.length > 0 ? `
+          <label style="margin-left:var(--s-3)">Genre :</label>
+          <select class="comp-select" id="filter-genre">
+            <option value="all">Tous</option>
+            ${genres.map(g => `<option value="${g}">${GENRE_LABELS[g] || g}</option>`).join('')}
+          </select>` : ''}
+          <label style="margin-left:var(--s-3)">Exercices :</label>
+          <select class="comp-select" id="filter-count">
+            <option value="5">5</option>
+            <option value="10">10</option>
+          </select>
+        </div>`;
+
+      if (!readingReady) {
+        html += `
+          <div class="comp-empty">
+            <h3>Aucun texte disponible</h3>
+            <p>Les textes de lecture seront ajoutés prochainement dans <code>data/comprehension-reading.js</code>.</p>
+          </div>`;
+      } else {
+        html += `
+          <button class="btn btn-primary btn-lg" style="margin-top:var(--s-4)" onclick="startSession('reading')">
+            Démarrer la session →
+          </button>`;
+      }
+
+      document.getElementById('tab-content').innerHTML = html;
+    }
+
+    // ================================================================
+    // SESSION START
+    // ================================================================
+    function startSession(type) {
+      const countEl = document.getElementById('filter-count');
+      const count = countEl ? parseInt(countEl.value) : 5;
+
+      const filters = {};
+      if (type === 'listening') {
+        const sec = document.getElementById('filter-section');
+        if (sec) filters.section = sec.value;
+      } else {
+        const lv = document.getElementById('filter-level');
+        const gn = document.getElementById('filter-genre');
+        if (lv) filters.level = lv.value;
+        if (gn) filters.genre = gn.value;
+      }
+
+      const session = ComprehensionEngine.startSession({ type, filters, count });
+      if (!session.queue.length) {
+        alert('Aucun exercice disponible avec ces filtres.');
+        return;
+      }
+      renderExercise();
+    }
+
+    // ================================================================
+    // EXERCISE VIEW
+    // ================================================================
+    function renderExercise() {
+      const s = ComprehensionEngine.session;
+      const ex = ComprehensionEngine.current();
+      if (!ex) { renderSummary(); return; }
+
+      const progress = Math.round((s.index / s.queue.length) * 100);
+      const isListening = s.type === 'listening';
+
+      root.innerHTML = `
+        <div class="session-progress-bar">
+          <div class="session-progress-fill" style="width:${progress}%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-5)">
+          <button class="btn btn-ghost btn-sm" onclick="if(confirm('Quitter la session ?')) renderDashboard()">← Quitter</button>
+          <span class="mono" style="font-size:0.85rem;color:var(--ink-soft)">${s.index+1} / ${s.queue.length}</span>
+        </div>
+
+        ${isListening ? renderAudioPlayer(ex) : renderReadingText(ex)}
+
+        <div id="questions-area">
+          ${renderQuestions(ex, false)}
+        </div>
+
+        <div class="comp-action-row" id="action-row">
+          <button class="btn btn-primary btn-lg" onclick="submitCurrentExercise()">Valider les réponses</button>
+        </div>
+      `;
+
+      if (isListening) initAudioPlayer(ex);
+    }
+
+    function renderAudioPlayer(ex) {
+      return `
+        <div class="audio-player-wrap">
+          <div class="audio-player-title">
+            <div class="eyebrow">Listening · ${SECTION_LABELS[ex.section] || ex.section}</div>
+            ${ex.title}
+          </div>
+          <audio id="audio-el" preload="auto" src="${ComprehensionEngine.audioUrl(ex.audioPath)}"></audio>
+          <div class="audio-controls">
+            <button class="audio-btn play-btn" id="btn-play" onclick="togglePlay()">▶</button>
+            <button class="audio-btn" onclick="seekRel(-10)" title="−10s">−10s</button>
+            <button class="audio-btn" onclick="seekRel(+10)" title="+10s">+10s</button>
+            <div class="audio-progress-wrap">
+              <div class="audio-progress-track" id="progress-track" onclick="seekToClick(event)">
+                <div class="audio-progress-fill" id="progress-fill" style="width:0%"></div>
+              </div>
+              <div class="audio-time">
+                <span id="time-cur">0:00</span>
+                <span id="time-dur">—</span>
+              </div>
+            </div>
+            <div class="audio-speed-group">
+              ${['0.75','1','1.25'].map(sp => `
+                <button class="audio-btn ${sp==='1'?'active':''}" data-speed="${sp}" onclick="setSpeed(${sp})">${sp}×</button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="transcript-toggle" style="margin-bottom:var(--s-4)">
+          <button class="btn btn-ghost btn-sm" id="transcript-btn" onclick="toggleTranscript()">Voir le transcript</button>
+          <div class="transcript-box" id="transcript-box">${(ex.transcript||'').replace(/\n/g,'<br>')}</div>
+        </div>
+      `;
+    }
+
+    function renderReadingText(ex) {
+      return `
+        <div class="reading-meta">
+          <span class="pill pill-amber">Niveau ${LEVEL_LABELS[ex.level] || ex.level}</span>
+          <span class="pill">${GENRE_LABELS[ex.genre] || ex.genre}</span>
+          <strong style="font-family:var(--serif);font-size:1.1rem">${ex.title}</strong>
+        </div>
+        <div class="reading-body">${ex.body}</div>
+      `;
+    }
+
+    function renderQuestions(ex, answered, results) {
+      return ex.questions.map((q, qi) => {
+        const res = results ? results.questionResults.find(r => r.qId === q.id) : null;
+        return `
+          <div class="qcm-block">
+            <div class="qcm-question-num">Question ${qi + 1}</div>
+            <div class="qcm-prompt">${q.prompt}</div>
+            <div class="qcm-options">
+              ${q.options.map(opt => {
+                const letter = opt.charAt(0);
+                let cls = 'qcm-option';
+                if (answered) {
+                  cls += ' disabled';
+                  if (letter === q.correct) cls += ' correct';
+                  else if (res && res.given === letter) cls += ' wrong';
+                } else {
+                  cls += ' selectable';
+                }
+                return `
+                  <button class="${cls}" data-qid="${q.id}" data-letter="${letter}"
+                    onclick="${answered ? '' : `selectOption(this, '${q.id}', '${letter}')`}">
+                    <span class="qcm-option-letter">${letter}</span>
+                    <span>${opt.slice(3)}</span>
+                  </button>`;
+              }).join('')}
+            </div>
+            ${res ? `<div class="qcm-feedback visible ${res.ok?'ok':'bad'}">
+              ${res.ok ? '✓ Correct' : `✗ Réponse correcte : <strong>${q.correct}</strong>`} — ${q.explanation}
+            </div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    // Track selected answers in session state
+    const _selected = {};
+
+    function selectOption(btn, qid, letter) {
+      // Deselect other options for same question
+      btn.closest('.qcm-block').querySelectorAll('.qcm-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      _selected[qid] = letter;
+    }
+
+    function submitCurrentExercise() {
+      const ex = ComprehensionEngine.current();
+      const allAnswered = ex.questions.every(q => _selected[q.id]);
+      if (!allAnswered) {
+        alert('Réponds à toutes les questions avant de valider.');
+        return;
+      }
+
+      const results = ComprehensionEngine.submitExercise(_selected);
+      // Clear selections for next round
+      ex.questions.forEach(q => delete _selected[q.id]);
+
+      // Re-render questions with feedback
+      document.getElementById('questions-area').innerHTML = renderQuestions(ex, true, results);
+
+      // Update action row
+      const isLast = ComprehensionEngine.isLast();
+      document.getElementById('action-row').innerHTML = `
+        <div style="font-family:var(--mono);font-size:1rem;color:var(--amber-deep);font-weight:700">
+          +${results.exPoints} pts
+        </div>
+        <button class="btn btn-amber btn-lg" onclick="${isLast ? 'renderSummary()' : 'nextExercise()'}">
+          ${isLast ? 'Voir le résultat →' : 'Suivant →'}
+        </button>
+      `;
+
+      // Auto-show transcript after answering (listening only)
+      const transcriptBox = document.getElementById('transcript-box');
+      if (transcriptBox) {
+        transcriptBox.classList.add('visible');
+        document.getElementById('transcript-btn').textContent = 'Cacher le transcript';
+      }
+    }
+
+    function nextExercise() {
+      ComprehensionEngine.next();
+      renderExercise();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ================================================================
+    // AUDIO PLAYER LOGIC
+    // ================================================================
+    function initAudioPlayer(ex) {
+      const audio = document.getElementById('audio-el');
+      if (!audio) return;
+
+      audio.addEventListener('timeupdate', () => {
+        const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+        const fill = document.getElementById('progress-fill');
+        if (fill) fill.style.width = pct + '%';
+        const cur = document.getElementById('time-cur');
+        if (cur) cur.textContent = fmtTime(audio.currentTime);
+      });
+
+      audio.addEventListener('loadedmetadata', () => {
+        const dur = document.getElementById('time-dur');
+        if (dur) dur.textContent = fmtTime(audio.duration);
+      });
+
+      audio.addEventListener('ended', () => {
+        const btn = document.getElementById('btn-play');
+        if (btn) btn.textContent = '▶';
+      });
+
+      audio.addEventListener('error', () => {
+        const wrap = document.querySelector('.audio-player-wrap');
+        if (wrap) {
+          const err = document.createElement('p');
+          err.style.cssText = 'color:var(--amber-light);font-size:0.85rem;margin-top:8px';
+          err.textContent = 'Audio non disponible. Vérifiez le chemin ou uploadez sur R2.';
+          wrap.appendChild(err);
+        }
+      });
+    }
+
+    window.togglePlay = function() {
+      const audio = document.getElementById('audio-el');
+      const btn = document.getElementById('btn-play');
+      if (!audio) return;
+      if (audio.paused) { audio.play(); btn.textContent = '⏸'; }
+      else { audio.pause(); btn.textContent = '▶'; }
+    };
+
+    window.seekRel = function(sec) {
+      const audio = document.getElementById('audio-el');
+      if (audio) audio.currentTime = Math.max(0, audio.currentTime + sec);
+    };
+
+    window.seekToClick = function(e) {
+      const audio = document.getElementById('audio-el');
+      const track = document.getElementById('progress-track');
+      if (!audio || !track) return;
+      const rect = track.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = pct * audio.duration;
+    };
+
+    window.setSpeed = function(speed) {
+      const audio = document.getElementById('audio-el');
+      if (audio) audio.playbackRate = parseFloat(speed);
+      document.querySelectorAll('.audio-speed-group .audio-btn').forEach(b => {
+        b.classList.toggle('active', parseFloat(b.dataset.speed) === parseFloat(speed));
+      });
+    };
+
+    window.toggleTranscript = function() {
+      const box = document.getElementById('transcript-box');
+      const btn = document.getElementById('transcript-btn');
+      if (!box) return;
+      const visible = box.classList.toggle('visible');
+      btn.textContent = visible ? 'Cacher le transcript' : 'Voir le transcript';
+    };
+
+    function fmtTime(s) {
+      if (!s || isNaN(s)) return '0:00';
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return `${m}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    // ================================================================
+    // SUMMARY
+    // ================================================================
+    function renderSummary() {
+      const res = ComprehensionEngine.finish();
+      if (!res) { renderDashboard(); return; }
+
+      root.innerHTML = `
+        <div class="comp-summary">
+          <div class="eyebrow">Session terminée</div>
+          <div class="comp-summary-score">
+            ${res.accuracy}<span>%</span>
+          </div>
+          <p class="serif" style="font-size:1.1rem;color:var(--ink-soft)">de précision</p>
+
+          <div class="comp-result-grid">
+            <div class="comp-result-item">
+              <div class="comp-result-num">${res.totalCorrect}</div>
+              <div class="comp-result-label">Bonnes réponses</div>
+            </div>
+            <div class="comp-result-item">
+              <div class="comp-result-num">${res.totalQuestions}</div>
+              <div class="comp-result-label">Total questions</div>
+            </div>
+            <div class="comp-result-item">
+              <div class="comp-result-num">+${res.points}</div>
+              <div class="comp-result-label">Points gagnés</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:var(--s-3);justify-content:center;flex-wrap:wrap">
+            <button class="btn btn-amber btn-lg" onclick="renderDashboard()">Retour au module</button>
+            <a href="index.html" class="btn btn-ghost">Accueil</a>
+          </div>
+        </div>
+      `;
+    }
+
+    // ================================================================
+    // INIT
+    // ================================================================
+    renderDashboard();
+  </script>
+</body>
+</html>
