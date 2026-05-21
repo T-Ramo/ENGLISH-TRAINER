@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Generate 200 TOEIC Part 7 style reading texts with QCM questions using Gemini API.
+Generate 300 TOEIC Part 7 style reading texts with QCM questions using Mistral AI.
 
 Usage:
-    GEMINI_API_KEY=AIza... python3 scripts/generate_reading_texts.py
+    MISTRAL_API_KEY=... python3 scripts/generate_reading_texts.py
 
 Output: data/comprehension-reading.js
 """
@@ -15,9 +15,9 @@ import sys
 import time
 
 try:
-    from google import genai
+    from mistralai.client.sdk import Mistral
 except ImportError:
-    print("Missing dependency: pip install google-genai")
+    print("Missing dependency: pip install mistralai")
     sys.exit(1)
 
 CHECKPOINT_FILE = "scripts/.reading_checkpoint.json"
@@ -213,6 +213,109 @@ TEXTS_SPEC = [
     (3, "ad",      "risk management consulting for financial institutions"),
     (3, "ad",      "IPO preparation advisory service"),
     (3, "ad",      "corporate restructuring legal services"),
+    # ---- B1 extra +30 (total 90) ----
+    (1, "email",   "requesting feedback on a presentation"),
+    (1, "email",   "reporting a broken piece of equipment"),
+    (1, "email",   "asking for directions to the office"),
+    (1, "email",   "confirming attendance at a training session"),
+    (1, "email",   "apologizing for missing a meeting"),
+    (1, "notice",  "new security badge procedure"),
+    (1, "notice",  "updated kitchen cleaning rota"),
+    (1, "notice",  "reminder to submit timesheets"),
+    (1, "notice",  "temporary road closure near office"),
+    (1, "notice",  "charity fundraising event at work"),
+    (1, "ad",      "part-time office assistant vacancy"),
+    (1, "ad",      "end-of-year office party venue"),
+    (1, "ad",      "discounted public transport passes"),
+    (1, "ad",      "ergonomic chair for home office"),
+    (1, "ad",      "local restaurant delivery for lunch"),
+    (1, "memo",    "reminder to clean personal desk area"),
+    (1, "memo",    "update on staff car park allocation"),
+    (1, "memo",    "introduction of a new meeting room booking system"),
+    (1, "memo",    "reminder about confidential document handling"),
+    (1, "memo",    "announcement of a team-building activity"),
+    (1, "article", "how to make a good first impression at work"),
+    (1, "article", "the benefits of having a mentor"),
+    (1, "article", "tips for managing your inbox"),
+    (1, "article", "how to say no politely at work"),
+    (1, "article", "why learning a new skill is good for your career"),
+    (1, "report",  "monthly absenteeism summary"),
+    (1, "report",  "canteen food satisfaction survey"),
+    (1, "report",  "team meeting attendance record"),
+    (1, "report",  "monthly printer and copier usage log"),
+    (1, "report",  "end-of-quarter stationery stock report"),
+    # ---- B2 extra +45 (total 135) ----
+    (2, "email",   "requesting a salary review meeting"),
+    (2, "email",   "congratulating a colleague on a promotion"),
+    (2, "email",   "handling a misunderstanding with a supplier"),
+    (2, "email",   "requesting approval for a new hire"),
+    (2, "email",   "notifying a client of staff changes"),
+    (2, "email",   "sharing quarterly performance results with the team"),
+    (2, "email",   "arranging a client site visit"),
+    (2, "email",   "following up on an unpaid invoice"),
+    (2, "email",   "welcoming a new business partner"),
+    (2, "email",   "requesting legal review of a contract"),
+    (2, "notice",  "introduction of a hybrid work schedule"),
+    (2, "notice",  "new employee referral program"),
+    (2, "notice",  "annual general meeting announcement"),
+    (2, "notice",  "changes to the maternity and paternity leave policy"),
+    (2, "notice",  "new sustainability targets for the department"),
+    (2, "ad",      "data analyst position in a tech company"),
+    (2, "ad",      "business English course for professionals"),
+    (2, "ad",      "shared office co-working space"),
+    (2, "ad",      "HR software for mid-sized companies"),
+    (2, "ad",      "leadership development workshop"),
+    (2, "memo",    "new escalation procedure for customer complaints"),
+    (2, "memo",    "updated non-disclosure agreement policy"),
+    (2, "memo",    "launch of internal mentoring program"),
+    (2, "memo",    "new guidelines for social media use at work"),
+    (2, "memo",    "reminder about year-end tax documentation"),
+    (2, "article", "the growing importance of data literacy in business"),
+    (2, "article", "how to lead effective virtual meetings"),
+    (2, "article", "the benefits of cross-functional teams"),
+    (2, "article", "why customer experience drives revenue growth"),
+    (2, "article", "how to handle workplace conflicts professionally"),
+    (2, "article", "the impact of inflation on small business operations"),
+    (2, "article", "building resilience in the face of organisational change"),
+    (2, "article", "how to give constructive performance feedback"),
+    (2, "article", "the pros and cons of open-plan offices"),
+    (2, "article", "how businesses are adapting to climate regulations"),
+    (2, "report",  "year-end training effectiveness evaluation"),
+    (2, "report",  "remote work productivity analysis"),
+    (2, "report",  "customer onboarding process audit"),
+    (2, "report",  "employee benefits utilisation survey"),
+    (2, "report",  "monthly sales pipeline status report"),
+    (2, "report",  "procurement spend analysis by category"),
+    (2, "report",  "diversity and inclusion metrics report"),
+    (2, "report",  "digital marketing campaign performance"),
+    (2, "report",  "quarterly customer support resolution report"),
+    (2, "report",  "new product pilot feedback summary"),
+    # ---- C1 extra +25 (total 75) ----
+    (3, "email",   "advising the board on reputational risk"),
+    (3, "email",   "coordinating a cross-border regulatory response"),
+    (3, "email",   "negotiating executive remuneration with a headhunter"),
+    (3, "email",   "escalating a data breach to the Data Protection Officer"),
+    (3, "email",   "communicating a hostile takeover bid to employees"),
+    (3, "article", "the systemic risks of algorithmic trading"),
+    (3, "article", "how sovereign wealth funds are reshaping global markets"),
+    (3, "article", "the legal implications of generative AI in the workplace"),
+    (3, "article", "carbon credit markets and corporate decarbonisation"),
+    (3, "article", "the strategic logic of share buyback programmes"),
+    (3, "article", "antitrust enforcement in the digital economy"),
+    (3, "article", "the role of non-executive directors in corporate oversight"),
+    (3, "article", "private equity's influence on healthcare delivery"),
+    (3, "article", "how geopolitical fragmentation is redrawing trade routes"),
+    (3, "article", "the accountability gap in AI governance frameworks"),
+    (3, "report",  "independent remuneration policy benchmarking report"),
+    (3, "report",  "cross-border M&A regulatory impact assessment"),
+    (3, "report",  "ESG materiality assessment for annual disclosure"),
+    (3, "report",  "internal whistleblowing programme effectiveness review"),
+    (3, "report",  "supply chain human rights due diligence audit"),
+    (3, "memo",    "legal risk assessment for proposed market entry"),
+    (3, "memo",    "board communication protocol during a crisis"),
+    (3, "memo",    "post-merger cultural integration roadmap"),
+    (3, "notice",  "update on sanctions compliance obligations"),
+    (3, "notice",  "mandatory ESG disclosure training for senior managers"),
 ]
 
 PROMPT_TEMPLATE = """You are an expert TOEIC test writer. Create one reading comprehension exercise.
@@ -263,7 +366,7 @@ def save_checkpoint(cp):
         json.dump(cp, f, indent=2, ensure_ascii=False)
 
 
-def call_gemini(client, level, genre, topic):
+def call_mistral(client, level, genre, topic):
     prompt = PROMPT_TEMPLATE.format(
         level_label=LEVEL_LABELS[level],
         genre=genre,
@@ -272,8 +375,11 @@ def call_gemini(client, level, genre, topic):
         questions_count=Q_COUNTS[level],
         extra_q=EXTRA_Q[level],
     )
-    response = client.models.generate_content(model="gemini-2.0-flash-lite", contents=prompt)
-    raw = response.text.strip()
+    response = client.chat.complete(
+        model="mistral-small-latest",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    raw = response.choices[0].message.content.strip()
     raw = re.sub(r'^```json\s*', '', raw)
     raw = re.sub(r'^```\s*', '', raw)
     raw = re.sub(r'\s*```$', '', raw)
@@ -285,7 +391,7 @@ def call_gemini(client, level, genre, topic):
 
 def build_js(entries):
     lines = [
-        "/* AUTO-GENERATED by scripts/generate_reading_texts.py (Gemini API) */",
+        "/* AUTO-GENERATED by scripts/generate_reading_texts.py (Mistral AI) */",
         "/* Re-run the script to update. Do not edit manually. */",
         "",
         "const COMPREHENSION_READING = [",
@@ -301,12 +407,12 @@ def main():
     project_root = os.path.dirname(script_dir)
     os.chdir(project_root)
 
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("MISTRAL_API_KEY")
     if not api_key:
-        print("Error: GEMINI_API_KEY not set.")
+        print("Error: MISTRAL_API_KEY not set.")
         sys.exit(1)
 
-    client = genai.Client(api_key=api_key)
+    client = Mistral(api_key=api_key)
     checkpoint = load_checkpoint()
     results = []
     processed = 0
@@ -326,7 +432,7 @@ def main():
         print(f"  [{i+1}/{len(TEXTS_SPEC)}] {LEVEL_LABELS[level]} · {genre} · {topic[:45]}")
 
         try:
-            data = call_gemini(client, level, genre, topic)
+            data = call_mistral(client, level, genre, topic)
             # Tag questions with proper ids
             for qi, q in enumerate(data.get("questions", [])):
                 q["id"] = f"{eid}-q{qi+1}"

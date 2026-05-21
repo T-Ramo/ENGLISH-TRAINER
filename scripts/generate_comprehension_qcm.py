@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Generate QCM questions for ELLLO audio comprehension exercises using Gemini API (free tier).
+Generate QCM questions for ELLLO audio comprehension exercises using Mistral AI.
 
 Usage:
-    GEMINI_API_KEY=AIza... python3 scripts/generate_comprehension_qcm.py
+    MISTRAL_API_KEY=... python3 scripts/generate_comprehension_qcm.py
 
 Options:
     --catalog   Path to catalog.json   (default: DownloadMP3/ello_b2/catalog.json)
@@ -21,9 +21,9 @@ import sys
 import time
 
 try:
-    from google import genai
+    from mistralai.client.sdk import Mistral
 except ImportError:
-    print("Missing dependency: pip install google-genai")
+    print("Missing dependency: pip install mistralai")
     sys.exit(1)
 
 CHECKPOINT_FILE = "scripts/.qcm_checkpoint.json"
@@ -94,9 +94,9 @@ def read_transcript(audio_dir, local_path):
         return f.read().strip()
 
 
-def call_gemini(client, transcript, dry_run=False):
+def call_mistral(client, transcript, dry_run=False):
     if dry_run:
-        print("  [DRY RUN] Would call Gemini with", len(transcript), "chars")
+        print("  [DRY RUN] Would call Mistral with", len(transcript), "chars")
         return [
             {"id": "q1", "prompt": "PLACEHOLDER Q1", "options": ["A. x", "B. y", "C. z", "D. w"], "correct": "A", "explanation": "placeholder"},
             {"id": "q2", "prompt": "PLACEHOLDER Q2", "options": ["A. x", "B. y", "C. z", "D. w"], "correct": "B", "explanation": "placeholder"},
@@ -104,10 +104,11 @@ def call_gemini(client, transcript, dry_run=False):
         ]
 
     prompt = PROMPT_TEMPLATE.format(transcript=transcript[:3000])
-    response = client.models.generate_content(model="gemini-2.0-flash-lite", contents=prompt)
-    raw = response.text.strip()
-
-    # Extract JSON array even if Gemini adds surrounding text or markdown
+    response = client.chat.complete(
+        model="mistral-small-latest",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    raw = response.choices[0].message.content.strip()
     raw = re.sub(r'^```json\s*', '', raw)
     raw = re.sub(r'^```\s*', '', raw)
     raw = re.sub(r'\s*```$', '', raw)
@@ -144,16 +145,15 @@ def main():
     project_root = os.path.dirname(script_dir)
     os.chdir(project_root)
 
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("MISTRAL_API_KEY")
     if not api_key and not args.dry_run:
-        print("Error: GEMINI_API_KEY not set.")
-        print("Get a free key at: https://aistudio.google.com/app/apikey")
-        print("Then run: GEMINI_API_KEY=AIza... python3 scripts/generate_comprehension_qcm.py")
+        print("Error: MISTRAL_API_KEY not set.")
+        print("Then run: MISTRAL_API_KEY=... python3 scripts/generate_comprehension_qcm.py")
         sys.exit(1)
 
     client = None
     if not args.dry_run:
-        client = genai.Client(api_key=api_key)
+        client = Mistral(api_key=api_key)
 
     with open(args.catalog, encoding="utf-8") as f:
         catalog = json.load(f)
@@ -186,7 +186,7 @@ def main():
         print(f"  [{i+1}/{len(catalog)}] {eid} — {entry['title'][:50]}")
 
         try:
-            questions = call_gemini(client, transcript, dry_run=args.dry_run)
+            questions = call_mistral(client, transcript, dry_run=args.dry_run)
             record = {
                 "id": eid,
                 "section": entry["section"],
