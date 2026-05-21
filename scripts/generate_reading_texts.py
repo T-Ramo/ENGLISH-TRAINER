@@ -320,28 +320,30 @@ TEXTS_SPEC = [
 
 PROMPT_TEMPLATE = """You are an expert TOEIC test writer. Create one reading comprehension exercise.
 
+⚠️ CRITICAL LANGUAGE RULE: The "body" field and ALL questions/options MUST be written in ENGLISH ONLY. Do NOT write French in the body or questions. Only the "explanation" fields should be in French.
+
 Specifications:
 - Level: {level_label}
 - Document type: {genre}
 - Topic: {topic}
 - Length: {word_count} words (strict)
 - Style: authentic {genre} format with proper layout (To:/From:/Subject: for emails, bold headers for articles, etc.)
-- Language: professional English, appropriate for TOEIC {level_label}
+- Language: professional English throughout — body, title, questions, and options must ALL be in English
 - {questions_count} multiple-choice questions (A, B, C, D) — TOEIC Part 7 style
 - Question types: 1 main idea, 1 specific detail, {extra_q}
-- Explanations in French (1-2 sentences)
+- Explanations ONLY in French (1-2 sentences)
 
 Return ONLY this JSON (no markdown, no extra text):
 {{
-  "title": "short descriptive title",
-  "body": "the full document text (use \\n for line breaks)",
+  "title": "short descriptive title in English",
+  "body": "the full document text in ENGLISH (use \\n for line breaks)",
   "questions": [
     {{
       "id": "q1",
-      "prompt": "...",
-      "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+      "prompt": "Question in English?",
+      "options": ["A. English option", "B. English option", "C. English option", "D. English option"],
       "correct": "A",
-      "explanation": "..."
+      "explanation": "Explication en français uniquement."
     }}
   ]
 }}"""
