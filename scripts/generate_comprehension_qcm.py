@@ -30,15 +30,17 @@ CHECKPOINT_FILE = "scripts/.qcm_checkpoint.json"
 
 PROMPT_TEMPLATE = """You are an English language teacher creating TOEIC-style comprehension questions.
 
+⚠️ CRITICAL: ALL questions, prompts, and answer options MUST be written in ENGLISH ONLY. Do NOT use French in prompts or options. Only the "explanation" field should be in French.
+
 For the transcript below, generate exactly 3 multiple-choice questions.
 
 Rules:
 - Question 1: main idea or purpose of the audio
 - Question 2: specific detail directly stated in the transcript
 - Question 3: inference or speaker's attitude/intention
-- 4 options each (A, B, C, D), only one correct
+- 4 options each (A, B, C, D), only one correct — ALL in English
 - Distractors must be plausible, not obviously wrong
-- Explanation in French (1-2 sentences max), citing the key phrase
+- "explanation" field ONLY in French (1-2 sentences max), citing the key phrase
 - Difficulty: B2 level
 - Return ONLY a valid JSON array, no extra text, no markdown
 
@@ -47,28 +49,28 @@ Transcript:
 {transcript}
 ---
 
-Return ONLY this JSON array:
+Return ONLY this JSON array (prompts and options in ENGLISH, explanations in French):
 [
   {{
     "id": "q1",
-    "prompt": "...",
-    "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+    "prompt": "English question?",
+    "options": ["A. English option", "B. English option", "C. English option", "D. English option"],
     "correct": "A",
-    "explanation": "..."
+    "explanation": "Explication en français."
   }},
   {{
     "id": "q2",
-    "prompt": "...",
-    "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+    "prompt": "English question?",
+    "options": ["A. English option", "B. English option", "C. English option", "D. English option"],
     "correct": "B",
-    "explanation": "..."
+    "explanation": "Explication en français."
   }},
   {{
     "id": "q3",
-    "prompt": "...",
-    "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+    "prompt": "English question?",
+    "options": ["A. English option", "B. English option", "C. English option", "D. English option"],
     "correct": "C",
-    "explanation": "..."
+    "explanation": "Explication en français."
   }}
 ]"""
 
