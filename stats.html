@@ -5,45 +5,622 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>English Trainer — Statistiques</title>
   <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/stats.css" />
 </head>
 <body>
   <div class="app">
     <div id="topbar-slot"></div>
     <main>
       <div class="container">
-        <div class="eyebrow">Module 06 — Données</div>
-        <h1 style="margin-top: 8px">Statistiques</h1>
-        <p style="max-width: 540px; margin-top: 16px; color: var(--ink-soft); font-size: 1.05rem">
-          Vue détaillée de ta progression. Disponible bientôt.
-        </p>
-        <div style="margin-top: 32px; padding: 24px; background: var(--paper-warm); border-radius: 12px">
-          <h3 style="margin-bottom: 12px">Aperçu rapide</h3>
-          <p class="mono" id="quick-stats" style="line-height: 1.8"></p>
-        </div>
-        <p style="margin-top: 32px"><a href="index.html" class="btn btn-ghost">← Retour à l'accueil</a></p>
+        <section class="vocab-hero anim-fade-up">
+          <div class="eyebrow">Module 06 — Données</div>
+          <h1>Statistiques &amp; Recommandations</h1>
+        </section>
+        <div id="stage-root"></div>
       </div>
     </main>
     <div id="footer-slot"></div>
   </div>
-  <script src="data/vocab.js"></script>
+
   <script src="scripts/storage.js"></script>
   <script src="scripts/shared.js"></script>
+  <script src="data/vocab.js"></script>
+
   <script>
-    Storage.load();
-    Shared.renderTopbar('stats');
-    Shared.renderFooter();
-    const st = Storage.state;
-    const acc = st.totals.answersGiven
-      ? Math.round((st.totals.answersCorrect / st.totals.answersGiven) * 100) + '%'
-      : '—';
-    document.getElementById('quick-stats').innerHTML = `
-      Points : <strong>${st.points.toLocaleString('fr-FR')}</strong><br>
-      Série actuelle : <strong>${st.streak.current} jours</strong> (record : ${st.streak.best})<br>
-      Sessions complétées : <strong>${st.totals.sessionsCompleted}</strong><br>
-      Réponses données : <strong>${st.totals.answersGiven}</strong> dont <strong>${st.totals.answersCorrect}</strong> correctes<br>
-      Précision globale : <strong>${acc}</strong><br>
-      Mots vus au moins une fois : <strong>${Object.keys(st.vocab.cards).length}</strong> sur ${VOCAB.length}
-    `;
+  // ── Analysis engine ──────────────────────────────────────────────────────
+  const NOW = Date.now();
+  const DAY = 86400000;
+
+  function analyzeCards(cards) {
+    const all = Object.values(cards || {});
+    const seen = all.filter(c => c.seen > 0);
+    const tc = seen.reduce((s, c) => s + (c.correct || 0), 0);
+    const tw = seen.reduce((s, c) => s + (c.wrong || 0), 0);
+    const due = all.filter(c => c.nextDueAt && c.nextDueAt <= NOW).length;
+    const struggling = all.filter(c => (c.ease || 2.5) < 1.8 && (c.seen || 0) >= 3).length;
+    const mastered = all.filter(c => (c.correct || 0) >= 3 && (c.intervalDays || 0) >= 7).length;
+    return {
+      total: all.length, seen: seen.length,
+      correct: tc, wrong: tw,
+      accuracy: (tc + tw) > 0 ? tc / (tc + tw) : null,
+      due, struggling, mastered,
+    };
+  }
+
+  function analyzeHistory(history) {
+    const h = history || [];
+    const last = h.length ? new Date(h[h.length - 1].date).getTime() : null;
+    const daysSince = last ? Math.floor((NOW - last) / DAY) : null;
+    const week = h.filter(e => (NOW - new Date(e.date).getTime()) < 7 * DAY);
+    const weekCorrect = week.reduce((s, e) => s + (e.correct || 0), 0);
+    const weekTotal   = week.reduce((s, e) => s + (e.total   || 0), 0);
+    // Activity per day (last 60 days)
+    const byDay = {};
+    h.forEach(e => {
+      const d = e.date.slice(0, 10);
+      byDay[d] = (byDay[d] || 0) + (e.total || 1);
+    });
+    return { sessions: h.length, last, daysSince, weekCorrect, weekTotal, byDay };
+  }
+
+  function analyzeToeic(toeic) {
+    const history = (toeic && toeic.history) || [];
+    const last = history.length ? history[history.length - 1] : null;
+    const daysSince = last ? Math.floor((NOW - new Date(last.date).getTime()) / DAY) : null;
+    const scores = history.map(h => h.scaled).filter(Boolean);
+    const trend = scores.length >= 3
+      ? scores[scores.length-1] - scores[scores.length-3]
+      : null;
+    return { history, last, daysSince, scores, trend };
+  }
+
+  function buildStats(state) {
+    const vocabTotal = typeof VOCAB !== 'undefined' ? VOCAB.length : 0;
+    return {
+      vocab:         { cards: analyzeCards(state.vocab?.cards),        hist: analyzeHistory([]) },
+      conj:          { cards: analyzeCards(state.conj?.cards),         hist: analyzeHistory(state.conj?.history) },
+      grammar:       { cards: analyzeCards(state.grammar?.cards),      hist: analyzeHistory(state.grammar?.history) },
+      comprehension: { cards: analyzeCards(state.comprehension?.cards),hist: analyzeHistory(state.comprehension?.history) },
+      toeic:         analyzeToeic(state.toeic),
+      vocabTotal,
+      global: {
+        points:   state.points || 0,
+        streak:   state.streak || { current: 0, best: 0 },
+        totals:   state.totals || { answersGiven: 0, answersCorrect: 0 },
+      },
+    };
+  }
+
+  // ── Recommendation engine ────────────────────────────────────────────────
+  const MODULES = [
+    { key: 'vocab',         label: 'Vocabulaire',    url: 'vocabulary.html',    ideal: 2 },
+    { key: 'conj',          label: 'Conjugaison',    url: 'conjugation.html',   ideal: 3 },
+    { key: 'grammar',       label: 'Grammaire',      url: 'grammar.html',       ideal: 4 },
+    { key: 'comprehension', label: 'Compréhension',  url: 'comprehension.html', ideal: 5 },
+  ];
+
+  function buildRecommendations(stats) {
+    const recs = [];
+
+    // 1. Due cards per module
+    MODULES.forEach(({ key, label, url }) => {
+      const due = stats[key]?.cards?.due || 0;
+      if (due === 0) return;
+      recs.push({
+        priority: due > 20 ? 'high' : due > 5 ? 'medium' : 'low',
+        icon: '📋',
+        title: `${due} carte${due > 1 ? 's' : ''} à réviser — ${label}`,
+        reason: due > 20
+          ? `Tes révisions s'accumulent. Plus tu attends, plus c'est dur de rattraper.`
+          : `Quelques révisions dues — reste à jour pour consolider ta mémoire.`,
+        action: 'Réviser maintenant',
+        url,
+        score: due > 20 ? 100 : due > 5 ? 60 : 20,
+      });
+    });
+
+    // 2. Inactive modules
+    MODULES.forEach(({ key, label, url, ideal }) => {
+      const ds = stats[key]?.hist?.daysSince;
+      if (ds === null || ds === undefined) return;
+      if (ds < ideal) return;
+      recs.push({
+        priority: ds > 14 ? 'high' : ds > 7 ? 'medium' : 'low',
+        icon: '⏰',
+        title: `Inactif depuis ${ds} jour${ds > 1 ? 's' : ''} — ${label}`,
+        reason: ds > 14
+          ? `La mémoire à long terme s'effrite sans pratique régulière.`
+          : `Une petite session suffit à maintenir ta progression.`,
+        action: 'S\'entraîner',
+        url,
+        score: ds > 14 ? 90 : ds > 7 ? 50 : 15,
+      });
+    });
+
+    // 3. Low accuracy
+    MODULES.forEach(({ key, label, url }) => {
+      const acc = stats[key]?.cards?.accuracy;
+      if (acc === null || acc === undefined) return;
+      if (acc >= 0.65) return;
+      const pct = Math.round(acc * 100);
+      recs.push({
+        priority: acc < 0.50 ? 'high' : 'medium',
+        icon: '⚠️',
+        title: `Précision faible (${pct}%) — ${label}`,
+        reason: acc < 0.50
+          ? `Plus d'une erreur sur deux. Reviens sur les bases de ce module.`
+          : `Taux de réussite améliorable. Focus sur les items difficiles.`,
+        action: 'Travailler les erreurs',
+        url,
+        score: acc < 0.50 ? 80 : 45,
+      });
+    });
+
+    // 4. Struggling items
+    MODULES.forEach(({ key, label, url }) => {
+      const st = stats[key]?.cards?.struggling || 0;
+      if (st < 5) return;
+      recs.push({
+        priority: st > 15 ? 'medium' : 'low',
+        icon: '🔁',
+        title: `${st} items difficiles — ${label}`,
+        reason: `Ces items ont un facteur de facilité bas. Une révision ciblée accélérera leur mémorisation.`,
+        action: 'Cibler les difficultés',
+        url,
+        score: st > 15 ? 40 : 20,
+      });
+    });
+
+    // 5. TOEIC insights from last test
+    const lt = stats.toeic.last;
+    if (lt) {
+      const p5pct = lt.p5t ? Math.round((lt.p5c / lt.p5t) * 100) : null;
+      const p6pct = lt.p6t ? Math.round((lt.p6c / lt.p6t) * 100) : null;
+      const p7pct = lt.p7t ? Math.round((lt.p7c / lt.p7t) * 100) : null;
+
+      if (p5pct !== null && p5pct < 60) {
+        recs.push({
+          priority: p5pct < 45 ? 'high' : 'medium',
+          icon: '📝',
+          title: `TOEIC P5 faible (${p5pct}%) → Renforce la grammaire`,
+          reason: `La Partie 5 teste la grammaire et le vocabulaire. Travaille le Module 03 pour progresser.`,
+          action: 'Ouvrir Grammaire',
+          url: 'grammar.html',
+          score: p5pct < 45 ? 85 : 55,
+        });
+      }
+      if (p6pct !== null && p6pct < 60) {
+        recs.push({
+          priority: p6pct < 45 ? 'high' : 'medium',
+          icon: '📝',
+          title: `TOEIC P6 faible (${p6pct}%) → Vocabulaire + grammaire en contexte`,
+          reason: `La Partie 6 nécessite de maîtriser les connecteurs et la morphologie des mots. Modules 01 + 03.`,
+          action: 'Ouvrir Vocabulaire',
+          url: 'vocabulary.html',
+          score: p6pct < 45 ? 82 : 52,
+        });
+      }
+      if (p7pct !== null && p7pct < 60) {
+        recs.push({
+          priority: p7pct < 45 ? 'high' : 'medium',
+          icon: '📖',
+          title: `TOEIC P7 faible (${p7pct}%) → Améliore la compréhension écrite`,
+          reason: `La Partie 7 est la plus longue. S'entraîner sur les textes du Module 04 est la meilleure préparation.`,
+          action: 'Ouvrir Compréhension',
+          url: 'comprehension.html',
+          score: p7pct < 45 ? 88 : 58,
+        });
+      }
+
+      // TOEIC score stagnating
+      const scores = stats.toeic.scores;
+      if (scores.length >= 3) {
+        const last3 = scores.slice(-3);
+        const range = Math.max(...last3) - Math.min(...last3);
+        if (range < 25) {
+          recs.push({
+            priority: 'medium',
+            icon: '📈',
+            title: 'Score TOEIC stagnant — intensifie l\'entraînement',
+            reason: `Tes 3 derniers scores varient de moins de 25 pts. Pour progresser, augmente la fréquence des modules vocabulaire et grammaire.`,
+            action: 'Voir les tests',
+            url: 'toeic.html',
+            score: 48,
+          });
+        }
+      }
+    }
+
+    // 6. TOEIC test due
+    const tds = stats.toeic.daysSince;
+    if (tds === null) {
+      recs.push({
+        priority: 'low',
+        icon: '🎯',
+        title: 'Lance ton premier test TOEIC',
+        reason: `Faire un test blanc te donnera un score de référence et des recommandations ciblées.`,
+        action: 'Commencer un test',
+        url: 'toeic.html',
+        score: 35,
+      });
+    } else if (tds >= 14) {
+      recs.push({
+        priority: 'medium',
+        icon: '🎯',
+        title: `Test TOEIC — il y a ${tds} jours`,
+        reason: `Un test régulier mesure ta progression et révèle tes points faibles actuels.`,
+        action: 'Faire un test',
+        url: 'toeic.html',
+        score: 42,
+      });
+    }
+
+    // 7. Streak maintenance
+    const streak = stats.global.streak.current;
+    if (streak >= 3) {
+      recs.push({
+        priority: 'low',
+        icon: '🔥',
+        title: `Maintiens ta série de ${streak} jours !`,
+        reason: `La régularité est la clé de la mémorisation à long terme.`,
+        action: 'S\'entraîner',
+        url: 'vocabulary.html',
+        score: 10,
+      });
+    }
+
+    // Sort by score desc
+    recs.sort((a, b) => b.score - a.score);
+    return recs;
+  }
+
+  // ── Rendering ────────────────────────────────────────────────────────────
+  function pct(v) { return v !== null && v !== undefined ? Math.round(v * 100) + '%' : '—'; }
+  function fmtNum(n) { return (n || 0).toLocaleString('fr-FR'); }
+
+  function renderHero(stats) {
+    const g = stats.global;
+    const acc = g.totals.answersGiven > 0
+      ? Math.round((g.totals.answersCorrect / g.totals.answersGiven) * 100) : null;
+    return `
+      <div class="stats-hero-bar">
+        <div class="stats-hero-item">
+          <div class="stats-hero-val">${g.streak.current}</div>
+          <div class="stats-hero-lbl">🔥 Jours de série</div>
+        </div>
+        <div class="stats-hero-item">
+          <div class="stats-hero-val">${fmtNum(g.points)}</div>
+          <div class="stats-hero-lbl">⭐ Points XP</div>
+        </div>
+        <div class="stats-hero-item">
+          <div class="stats-hero-val">${acc !== null ? acc + '%' : '—'}</div>
+          <div class="stats-hero-lbl">✅ Précision globale</div>
+        </div>
+        <div class="stats-hero-item">
+          <div class="stats-hero-val">${fmtNum(g.totals.answersGiven)}</div>
+          <div class="stats-hero-lbl">📊 Réponses données</div>
+        </div>
+      </div>`;
+  }
+
+  function renderRecommendations(recs) {
+    if (!recs.length) {
+      return `<div class="stats-section">
+        <h2 class="stats-section-title">🎯 Recommandations</h2>
+        <div class="rec-empty">Tout est à jour ! Continue comme ça. 🎉</div>
+      </div>`;
+    }
+
+    const priorityLabel = { high: '🔴 Urgent', medium: '🟡 Important', low: '🟢 Conseil' };
+    const topRecs = recs.slice(0, 6);
+
+    return `
+      <div class="stats-section">
+        <h2 class="stats-section-title">🎯 Recommandations personnalisées</h2>
+        <div class="rec-list">
+          ${topRecs.map(r => `
+            <div class="rec-card rec-${r.priority}">
+              <div class="rec-icon">${r.icon}</div>
+              <div class="rec-body">
+                <div class="rec-priority-label">${priorityLabel[r.priority]}</div>
+                <div class="rec-title">${r.title}</div>
+                <div class="rec-reason">${r.reason}</div>
+              </div>
+              <a href="${r.url}" class="btn btn-sm ${r.priority === 'high' ? 'btn-primary' : 'btn-ghost'} rec-btn">
+                ${r.action} →
+              </a>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  function renderModules(stats) {
+    const modules = [
+      { key: 'vocab',  label: 'Vocabulaire', icon: '📚', url: 'vocabulary.html',
+        total: stats.vocabTotal, ideal: '1–2 jours' },
+      { key: 'conj',   label: 'Conjugaison', icon: '🔄', url: 'conjugation.html',
+        total: null, ideal: '2–3 jours' },
+      { key: 'grammar',label: 'Grammaire',   icon: '📐', url: 'grammar.html',
+        total: null, ideal: '3–5 jours' },
+      { key: 'comprehension', label: 'Compréhension', icon: '🎧', url: 'comprehension.html',
+        total: null, ideal: '5–7 jours' },
+    ];
+
+    const cards = modules.map(m => {
+      const d = stats[m.key];
+      const c = d.cards;
+      const h = d.hist;
+      const acc = c.accuracy !== null ? Math.round(c.accuracy * 100) : null;
+      const masteredPct = (m.total && c.mastered) ? Math.round((c.mastered / m.total) * 100) : null;
+      const dueLabel = c.due > 0 ? `<span class="stat-badge badge-due">${c.due} dues</span>` : '';
+      const struggleLabel = c.struggling > 0
+        ? `<span class="stat-badge badge-struggle">${c.struggling} difficiles</span>` : '';
+      const lastLabel = h.daysSince !== null
+        ? (h.daysSince === 0 ? 'Aujourd\'hui' : `Il y a ${h.daysSince}j`)
+        : 'Jamais';
+      const lastColor = h.daysSince === null ? 'var(--ink-soft)'
+        : h.daysSince === 0 ? 'var(--moss)'
+        : h.daysSince <= 3  ? 'var(--ink)'
+        : h.daysSince <= 7  ? 'var(--amber-deep)'
+        : 'var(--burgundy)';
+
+      // Bar segments
+      const mastPct  = m.total ? Math.round((c.mastered / m.total) * 100) : 0;
+      const learnPct = m.total ? Math.round(((c.seen - c.mastered) / m.total) * 100) : 0;
+
+      return `
+        <div class="mod-card">
+          <div class="mod-header">
+            <span class="mod-icon">${m.icon}</span>
+            <span class="mod-label">${m.label}</span>
+            <a href="${m.url}" class="btn btn-sm btn-ghost mod-btn">Ouvrir →</a>
+          </div>
+          <div class="mod-stats">
+            <div class="mod-stat">
+              <div class="mod-stat-val">${acc !== null ? acc + '%' : '—'}</div>
+              <div class="mod-stat-lbl">Précision</div>
+            </div>
+            <div class="mod-stat">
+              <div class="mod-stat-val" style="color:${lastColor}">${lastLabel}</div>
+              <div class="mod-stat-lbl">Dernier entraînement</div>
+            </div>
+            <div class="mod-stat">
+              <div class="mod-stat-val">${c.seen}</div>
+              <div class="mod-stat-lbl">Cartes vues</div>
+            </div>
+            ${m.total ? `<div class="mod-stat">
+              <div class="mod-stat-val">${c.mastered}</div>
+              <div class="mod-stat-lbl">Maîtrisées / ${m.total}</div>
+            </div>` : `<div class="mod-stat">
+              <div class="mod-stat-val">${fmtNum(h.sessions)}</div>
+              <div class="mod-stat-lbl">Sessions</div>
+            </div>`}
+          </div>
+          ${m.total ? `
+          <div class="mod-progress-wrap">
+            <div class="mod-progress-bar">
+              <div class="mod-progress-seg mastered" style="width:${mastPct}%"></div>
+              <div class="mod-progress-seg learning" style="width:${learnPct}%"></div>
+            </div>
+            <div class="mod-progress-legend">
+              <span class="leg-dot mastered"></span> Maîtrisés ${c.mastered}
+              <span class="leg-dot learning" style="margin-left:12px"></span> En cours ${c.seen - c.mastered}
+              <span style="color:var(--ink-soft);margin-left:12px">Non commencés ${m.total - c.seen}</span>
+            </div>
+          </div>` : ''}
+          <div class="mod-badges">
+            ${dueLabel}${struggleLabel}
+            <span class="stat-badge badge-freq">Idéal : tous les ${m.ideal}</span>
+          </div>
+        </div>`;
+    });
+
+    return `
+      <div class="stats-section">
+        <h2 class="stats-section-title">📊 Progression par module</h2>
+        <div class="mod-grid">${cards.join('')}</div>
+      </div>`;
+  }
+
+  function renderToeicChart(stats) {
+    const history = stats.toeic.history;
+    if (!history.length) {
+      return `<div class="stats-section">
+        <h2 class="stats-section-title">🎯 Historique TOEIC</h2>
+        <div class="rec-empty">Aucun test passé pour l'instant.</div>
+      </div>`;
+    }
+
+    const last = history[history.length - 1];
+    const scores = history.map(h => h.scaled || 0);
+    const best = Math.max(...scores);
+    const avg  = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+
+    // SVG line chart
+    const W = 500, H = 140, PAD = 30;
+    const maxS = 495, minS = 0;
+    const pts = scores.map((s, i) => {
+      const x = PAD + (scores.length === 1 ? (W - PAD*2) / 2 : i * (W - PAD*2) / (scores.length - 1));
+      const y = H - PAD - ((s - minS) / (maxS - minS)) * (H - PAD*2);
+      return [x, y];
+    });
+    const polyline = pts.map(([x,y]) => `${x},${y}`).join(' ');
+    const dots = pts.map(([x,y], i) => `
+      <circle cx="${x}" cy="${y}" r="4" fill="var(--amber-deep)" />
+      <text x="${x}" y="${y - 8}" font-size="10" fill="var(--ink)" text-anchor="middle">${scores[i]}</text>`
+    ).join('');
+    // Gridlines at 250, 400
+    const gridY250 = H - PAD - (250 / maxS) * (H - PAD*2);
+    const gridY400 = H - PAD - (400 / maxS) * (H - PAD*2);
+
+    const chart = `
+      <svg viewBox="0 0 ${W} ${H}" class="toeic-chart-svg">
+        <line x1="${PAD}" y1="${gridY250}" x2="${W-PAD}" y2="${gridY250}" stroke="rgba(0,0,0,0.1)" stroke-dasharray="4 4"/>
+        <text x="${PAD-4}" y="${gridY250+4}" font-size="9" fill="var(--ink-soft)" text-anchor="end">250</text>
+        <line x1="${PAD}" y1="${gridY400}" x2="${W-PAD}" y2="${gridY400}" stroke="rgba(0,0,0,0.1)" stroke-dasharray="4 4"/>
+        <text x="${PAD-4}" y="${gridY400+4}" font-size="9" fill="var(--ink-soft)" text-anchor="end">400</text>
+        <polyline points="${polyline}" fill="none" stroke="var(--amber-deep)" stroke-width="2.5" stroke-linejoin="round"/>
+        ${dots}
+        <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="rgba(0,0,0,0.15)"/>
+      </svg>`;
+
+    // Per-part breakdown of last test
+    const partBreakdown = (last.p5t || last.p6t || last.p7t) ? `
+      <div class="toeic-parts-breakdown">
+        ${[
+          { label:'P5 — Phrases', c: last.p5c, t: last.p5t || 30 },
+          { label:'P6 — Complétion', c: last.p6c, t: last.p6t || 16 },
+          { label:'P7 — Lecture', c: last.p7c, t: last.p7t || 54 },
+        ].map(p => {
+          const pp = Math.round(((p.c||0) / p.t) * 100);
+          const color = pp >= 70 ? 'var(--moss)' : pp >= 50 ? 'var(--amber-deep)' : 'var(--burgundy)';
+          return `<div class="toeic-part-item">
+            <div class="toeic-part-lbl">${p.label}</div>
+            <div class="toeic-part-bar-wrap">
+              <div class="toeic-part-bar" style="width:${pp}%;background:${color}"></div>
+            </div>
+            <div class="toeic-part-score" style="color:${color}">${p.c||0}/${p.t} (${pp}%)</div>
+          </div>`;
+        }).join('')}
+      </div>` : '';
+
+    return `
+      <div class="stats-section">
+        <h2 class="stats-section-title">🎯 Progression TOEIC Lecture</h2>
+        <div class="toeic-chart-wrap">
+          <div class="toeic-chart-stats">
+            <div class="toeic-chart-stat">
+              <div class="toeic-chart-val">${last.scaled || '—'}</div>
+              <div class="toeic-chart-lbl">Dernier score</div>
+            </div>
+            <div class="toeic-chart-stat">
+              <div class="toeic-chart-val">${best}</div>
+              <div class="toeic-chart-lbl">Meilleur</div>
+            </div>
+            <div class="toeic-chart-stat">
+              <div class="toeic-chart-val">${avg}</div>
+              <div class="toeic-chart-lbl">Moyenne</div>
+            </div>
+            <div class="toeic-chart-stat">
+              <div class="toeic-chart-val">${history.length}</div>
+              <div class="toeic-chart-lbl">Tests</div>
+            </div>
+          </div>
+          ${scores.length > 1 ? chart : '<p style="color:var(--ink-soft);font-size:.9rem;padding:16px 0">Passe au moins 2 tests pour voir la courbe.</p>'}
+          ${partBreakdown}
+        </div>
+      </div>`;
+  }
+
+  function renderActivityCalendar(stats) {
+    // Merge all modules' byDay activity
+    const allByDay = {};
+    ['conj','grammar','comprehension'].forEach(key => {
+      const bd = stats[key]?.hist?.byDay || {};
+      Object.entries(bd).forEach(([d, v]) => {
+        allByDay[d] = (allByDay[d] || 0) + v;
+      });
+    });
+
+    // Last 60 days
+    const days = [];
+    for (let i = 59; i >= 0; i--) {
+      const d = new Date(NOW - i * DAY);
+      days.push(d.toISOString().slice(0, 10));
+    }
+
+    const maxVal = Math.max(...Object.values(allByDay), 1);
+
+    const cells = days.map(d => {
+      const val = allByDay[d] || 0;
+      const intensity = val === 0 ? 0 : Math.ceil((val / maxVal) * 4);
+      const title = val > 0 ? `${d}: ${val} activités` : d;
+      return `<div class="cal-cell intensity-${intensity}" title="${title}"></div>`;
+    }).join('');
+
+    // Week labels
+    const weekLabels = ['L','M','M','J','V','S','D'].map(l =>
+      `<div class="cal-week-label">${l}</div>`).join('');
+
+    const activeDays = days.filter(d => allByDay[d] > 0).length;
+    const streak = stats.global.streak;
+
+    return `
+      <div class="stats-section">
+        <h2 class="stats-section-title">📅 Activité — 60 derniers jours</h2>
+        <div class="cal-meta">
+          <span>${activeDays} jours actifs</span>
+          <span>Série actuelle : <strong>${streak.current}j</strong></span>
+          <span>Record : <strong>${streak.best}j</strong></span>
+        </div>
+        <div class="cal-wrap">
+          <div class="cal-week-labels">${weekLabels}</div>
+          <div class="cal-grid">${cells}</div>
+        </div>
+        <div class="cal-legend">
+          <span style="color:var(--ink-soft);font-size:.75rem">Moins</span>
+          ${[0,1,2,3,4].map(i => `<div class="cal-cell intensity-${i}" style="display:inline-block"></div>`).join('')}
+          <span style="color:var(--ink-soft);font-size:.75rem">Plus</span>
+        </div>
+      </div>`;
+  }
+
+  function renderTrainingPlan(stats, recs) {
+    // Today's plan based on due cards and recommendations
+    const todayItems = [];
+
+    MODULES.forEach(({ key, label, url }) => {
+      const due = stats[key]?.cards?.due || 0;
+      if (due > 0) todayItems.push({ label: `${label} — ${due} révisions dues`, url, priority: due > 10 ? 'high' : 'medium' });
+    });
+
+    // Add TOEIC if 14+ days
+    if (stats.toeic.daysSince >= 14) {
+      todayItems.push({ label: 'Passer un test TOEIC blanc', url: 'toeic.html', priority: 'low' });
+    }
+
+    if (!todayItems.length) {
+      return `<div class="stats-section">
+        <h2 class="stats-section-title">📅 Plan du jour</h2>
+        <div class="plan-done">✅ Rien de dû aujourd'hui — reviens demain !</div>
+      </div>`;
+    }
+
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    todayItems.sort((a,b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+    return `
+      <div class="stats-section">
+        <h2 class="stats-section-title">📅 Plan du jour</h2>
+        <div class="plan-list">
+          ${todayItems.map((item, i) => `
+            <div class="plan-item">
+              <span class="plan-num">${i+1}</span>
+              <span class="plan-label">${item.label}</span>
+              <a href="${item.url}" class="btn btn-sm btn-primary">Commencer →</a>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  // ── Main ─────────────────────────────────────────────────────────────────
+  Storage.load();
+  Shared.renderTopbar('stats');
+  Shared.renderFooter();
+
+  const state = Storage.state;
+  const stats = buildStats(state);
+  const recs  = buildRecommendations(stats);
+
+  const root = document.getElementById('stage-root');
+  root.innerHTML = [
+    renderHero(stats),
+    renderTrainingPlan(stats, recs),
+    renderRecommendations(recs),
+    renderModules(stats),
+    renderToeicChart(stats),
+    renderActivityCalendar(stats),
+  ].join('');
   </script>
 </body>
 </html>

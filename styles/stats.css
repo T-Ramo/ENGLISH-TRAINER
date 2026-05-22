@@ -1,0 +1,473 @@
+/* ============================================================
+   MODULE 06 — Statistiques & Recommandations
+   ============================================================ */
+
+/* ── Hero bar ─────────────────────────────────────────────── */
+.stats-hero-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4);
+  margin-bottom: var(--s-6);
+  padding: var(--s-5) var(--s-5);
+  background: var(--paper-warm);
+  border: 1px solid var(--paper-deep);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.stats-hero-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.stats-hero-val {
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.stats-hero-lbl {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+/* ── Section wrapper ──────────────────────────────────────── */
+.stats-section {
+  margin-bottom: var(--s-7);
+}
+
+.stats-section-title {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: var(--s-5);
+  padding-bottom: var(--s-3);
+  border-bottom: 2px solid var(--paper-deep);
+}
+
+/* ── Recommendations ──────────────────────────────────────── */
+.rec-empty,
+.plan-done {
+  padding: var(--s-5);
+  background: var(--paper-warm);
+  border: 1px solid var(--paper-deep);
+  border-radius: var(--radius-lg);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.rec-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  background: var(--paper-warm);
+  border: 1px solid var(--paper-deep);
+  border-left: 4px solid var(--paper-deep);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s;
+}
+
+.rec-card:hover { box-shadow: var(--shadow); }
+
+.rec-card.rec-high  { border-left-color: var(--burgundy); }
+.rec-card.rec-medium{ border-left-color: var(--amber-deep); }
+.rec-card.rec-low   { border-left-color: var(--moss); }
+
+.rec-icon {
+  font-size: 1.5rem;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.rec-body { min-width: 0; }
+
+.rec-priority-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  color: var(--ink-soft);
+}
+
+.rec-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.rec-reason {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.rec-btn { white-space: nowrap; flex-shrink: 0; }
+
+/* ── Training plan ────────────────────────────────────────── */
+.plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.plan-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-5);
+  background: var(--paper-warm);
+  border: 1px solid var(--paper-deep);
+  border-radius: var(--radius-lg);
+}
+
+.plan-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--amber-deep);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.plan-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* ── Module cards ─────────────────────────────────────────── */
+.mod-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+
+.mod-card {
+  background: var(--paper-warm);
+  border: 1px solid var(--paper-deep);
+  border-radius: var(--radius-lg);
+  padding: var(--s-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.mod-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+
+.mod-icon { font-size: 1.2rem; }
+
+.mod-label {
+  font-weight: 700;
+  font-size: 1rem;
+  flex: 1;
+  color: var(--ink);
+}
+
+.mod-btn { margin-left: auto; }
+
+.mod-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+
+.mod-stat { text-align: center; }
+
+.mod-stat-val {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.mod-stat-lbl {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+/* Progress bar */
+.mod-progress-wrap { margin-bottom: var(--s-3); }
+
+.mod-progress-bar {
+  height: 8px;
+  background: var(--paper-deep);
+  border-radius: 99px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 6px;
+}
+
+.mod-progress-seg {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.mod-progress-seg.mastered { background: var(--moss); }
+.mod-progress-seg.learning { background: var(--amber-light); }
+
+.mod-progress-legend {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.leg-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.leg-dot.mastered { background: var(--moss); }
+.leg-dot.learning { background: var(--amber-light); }
+
+/* Badges */
+.mod-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
+
+.stat-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.stat-badge.badge-due      { background: rgba(122, 46, 46, 0.12); color: var(--burgundy); }
+.stat-badge.badge-struggle { background: rgba(168, 106, 28, 0.12); color: var(--amber-deep); }
+.stat-badge.badge-freq     { background: rgba(74, 93, 58, 0.12);  color: var(--moss-deep); }
+
+/* ── TOEIC chart ──────────────────────────────────────────── */
+.toeic-chart-wrap {
+  background: var(--paper-warm);
+  border: 1px solid var(--paper-deep);
+  border-radius: var(--radius-lg);
+  padding: var(--s-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.toeic-chart-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4);
+  margin-bottom: var(--s-4);
+}
+
+.toeic-chart-stat { text-align: center; }
+
+.toeic-chart-val {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--amber-deep);
+  line-height: 1;
+}
+
+.toeic-chart-lbl {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.toeic-chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: var(--s-3) 0;
+}
+
+/* TOEIC part breakdown */
+.toeic-parts-breakdown {
+  margin-top: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.toeic-part-item {
+  display: grid;
+  grid-template-columns: 160px 1fr 100px;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.toeic-part-lbl {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.toeic-part-bar-wrap {
+  height: 8px;
+  background: var(--paper-deep);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.toeic-part-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.toeic-part-score {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ── Activity calendar ────────────────────────────────────── */
+.cal-meta {
+  display: flex;
+  gap: var(--s-5);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: var(--s-4);
+}
+
+.cal-meta strong { color: var(--ink); }
+
+.cal-wrap {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin-bottom: var(--s-3);
+  overflow-x: auto;
+}
+
+.cal-week-labels {
+  display: grid;
+  grid-template-rows: repeat(7, 14px);
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.cal-week-label {
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+  line-height: 14px;
+  text-align: right;
+  width: 14px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 14px);
+  grid-auto-flow: column;
+  gap: 2px;
+}
+
+.cal-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.cal-cell.intensity-0 { background: var(--paper-deep); }
+.cal-cell.intensity-1 { background: rgba(74, 93, 58, 0.25); }
+.cal-cell.intensity-2 { background: rgba(74, 93, 58, 0.45); }
+.cal-cell.intensity-3 { background: rgba(74, 93, 58, 0.70); }
+.cal-cell.intensity-4 { background: var(--moss); }
+
+.cal-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .stats-hero-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .mod-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mod-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .toeic-chart-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .toeic-part-item {
+    grid-template-columns: 120px 1fr 80px;
+  }
+
+  .rec-card {
+    grid-template-columns: auto 1fr;
+    gap: var(--s-3);
+  }
+
+  .rec-btn {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .plan-item {
+    grid-template-columns: auto 1fr;
+    gap: var(--s-3);
+  }
+
+  .plan-item .btn {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-hero-bar {
+    grid-template-columns: 1fr 1fr;
+    padding: var(--s-4);
+  }
+
+  .stats-hero-val { font-size: 1.7rem; }
+
+  .mod-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}

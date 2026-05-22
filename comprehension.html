@@ -257,7 +257,7 @@
           <span class="pill">${GENRE_LABELS[ex.genre] || ex.genre}</span>
           <strong style="font-family:var(--serif);font-size:1.1rem">${ex.title}</strong>
         </div>
-        <div class="reading-body">${ex.body}</div>
+        <div class="reading-body">${ex.body.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>
       `;
     }
 
