@@ -5,41 +5,524 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>English Trainer — Tests TOEIC</title>
   <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/toeic.css" />
 </head>
 <body>
   <div class="app">
     <div id="topbar-slot"></div>
     <main>
       <div class="container">
-        <div class="eyebrow">Module 05 — Examen</div>
-        <h1 style="margin-top: 8px">Tests TOEIC blancs</h1>
-        <p style="max-width: 540px; margin-top: 16px; color: var(--ink-soft); font-size: 1.05rem">
-          Module en préparation. Il inclura&nbsp;:
-        </p>
-        <ul style="margin-top: 16px; padding-left: 20px; color: var(--ink-soft); line-height: 2">
-          <li>Tests complets format TOEIC Listening &amp; Reading (200 questions, 2h)</li>
-          <li>Mini-tests par section (Part 1 à 7)</li>
-          <li>Scoring officiel converti sur 990</li>
-          <li>Debrief détaillé : score par section + erreurs récurrentes</li>
-          <li>Recommandations personnalisées (vocabulaire à revoir, grammaire à travailler)</li>
-          <li>Historique des scores et courbe de progression</li>
-        </ul>
-        <div style="margin-top: 32px; padding: 16px; background: rgba(200, 132, 44, 0.1); border-left: 3px solid var(--amber); border-radius: 4px">
-          <strong>Note :</strong> les questions seront créées <em>dans le style</em> TOEIC (le test officiel ETS est sous copyright).
-          Si tu as des annales personnelles, on pourra les intégrer.
-        </div>
-        <p style="margin-top: 32px"><a href="index.html" class="btn btn-ghost">← Retour à l'accueil</a></p>
+        <section class="vocab-hero anim-fade-up">
+          <div class="eyebrow">Module 05 — Examen</div>
+          <h1>Tests TOEIC</h1>
+        </section>
+        <div id="stage-root"></div>
       </div>
     </main>
     <div id="footer-slot"></div>
   </div>
-  <script src="data/vocab.js"></script>
+
   <script src="scripts/storage.js"></script>
   <script src="scripts/shared.js"></script>
+  <script src="data/toeic-tests.js"></script>
+
   <script>
+    // ── Score conversion (Reading raw/100 → scaled 5–495) ────────────────────
+    const SCORE_TABLE = [
+      [0,5],[5,25],[10,50],[15,80],[20,110],[25,140],[30,170],[35,200],
+      [40,225],[45,250],[50,275],[55,300],[60,325],[65,350],[70,375],
+      [75,400],[80,425],[85,445],[90,460],[95,477],[100,495]
+    ];
+    function rawToScaled(correct, total) {
+      const pct = Math.round((correct / total) * 100);
+      for (let i = 0; i < SCORE_TABLE.length - 1; i++) {
+        const [r0, s0] = SCORE_TABLE[i], [r1, s1] = SCORE_TABLE[i + 1];
+        if (pct >= r0 && pct <= r1)
+          return Math.round(s0 + (pct - r0) / (r1 - r0) * (s1 - s0));
+      }
+      return pct >= 100 ? 495 : 5;
+    }
+
+    // ── App state ─────────────────────────────────────────────────────────────
+    let _view = 'dashboard';
+    let _test = null;
+    let _flat = [];
+    let _answers = {};
+    let _idx = 0;
+    let _timeLeft = 75 * 60;
+    let _timerInterval = null;
+    let _reviewData = null;
+
+    // ── Flatten test into ordered question list ───────────────────────────────
+    function flattenTest(test) {
+      const qs = [];
+      test.part5.forEach(q => qs.push({ part: 5, qId: q.id, num: q.num, data: q }));
+      test.part6.forEach(passage =>
+        passage.blanks.forEach(b => qs.push({ part: 6, qId: b.id, num: b.num, data: b, passage }))
+      );
+      test.part7.forEach(ex =>
+        ex.questions.forEach(q => qs.push({ part: 7, qId: q.id, num: q.num, data: q, exercise: ex }))
+      );
+      return qs;
+    }
+
+    function partLabel(p) {
+      return p === 5 ? 'Partie 5 — Phrases incomplètes'
+           : p === 6 ? 'Partie 6 — Complétion de texte'
+           :           'Partie 7 — Compréhension écrite';
+    }
+
+    function fmtTime(sec) {
+      const m = Math.floor(sec / 60), s = sec % 60;
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function processBody(text) {
+      return (text || '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    }
+
+    // ── Persistence ───────────────────────────────────────────────────────────
+    function saveProgress() {
+      if (!_test) return;
+      localStorage.setItem(`toeic_p_${_test.id}`, JSON.stringify({ answers: _answers, idx: _idx, timeLeft: _timeLeft }));
+    }
+    function loadProgress(id) {
+      try { const r = localStorage.getItem(`toeic_p_${id}`); return r ? JSON.parse(r) : null; } catch { return null; }
+    }
+    function clearProgress(id) { localStorage.removeItem(`toeic_p_${id}`); }
+
+    function saveResult(id, result) {
+      localStorage.setItem(`toeic_r_${id}`, JSON.stringify(result));
+      if (!Storage.state.toeic) Storage.state.toeic = { history: [] };
+      Storage.state.toeic.history.push({ date: new Date().toISOString(), testId: id, ...result });
+      Storage.save();
+    }
+    function loadResult(id) {
+      try { const r = localStorage.getItem(`toeic_r_${id}`); return r ? JSON.parse(r) : null; } catch { return null; }
+    }
+
+    // ── Timer ─────────────────────────────────────────────────────────────────
+    function startTimer() {
+      clearInterval(_timerInterval);
+      _timerInterval = setInterval(() => {
+        _timeLeft--;
+        saveProgress();
+        const el = document.getElementById('toeic-timer');
+        if (el) {
+          el.textContent = fmtTime(_timeLeft);
+          el.className = 'toeic-timer' + (_timeLeft < 300 ? ' urgent' : _timeLeft < 900 ? ' warning' : '');
+        }
+        if (_timeLeft <= 0) submitTest(true);
+      }, 1000);
+    }
+    function stopTimer() { clearInterval(_timerInterval); }
+
+    // ── Render dispatcher ─────────────────────────────────────────────────────
+    function render() {
+      Shared.renderTopbar('toeic');
+      Shared.renderFooter();
+      const root = document.getElementById('stage-root');
+      if (_view === 'dashboard') { root.innerHTML = renderDashboard(); return; }
+      if (_view === 'review')    { root.innerHTML = renderReviewPage(); return; }
+      root.innerHTML = renderTestShell();
+      renderCurrentQuestion();
+      renderPalette();
+    }
+
+    // ── Dashboard ─────────────────────────────────────────────────────────────
+    function renderDashboard() {
+      if (!TOEIC_TESTS || !TOEIC_TESTS.length) {
+        return `<div class="toeic-empty">
+          <p>Les tests sont en cours de génération.</p>
+          <p style="color:var(--ink-soft);font-size:.9rem;margin-top:8px">
+            Reviens dans quelques minutes — le contenu est généré automatiquement.
+          </p>
+        </div>`;
+      }
+
+      const history = (Storage.state.toeic && Storage.state.toeic.history) || [];
+      const scores = history.map(h => h.scaled).filter(Boolean);
+      const best = scores.length ? Math.max(...scores) : null;
+      const avg  = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : null;
+
+      return `
+        <div class="toeic-stats-bar">
+          <div class="toeic-stat"><div class="toeic-stat-val">${history.length}</div><div class="toeic-stat-lbl">Tests passés</div></div>
+          <div class="toeic-stat"><div class="toeic-stat-val">${best ?? '—'}</div><div class="toeic-stat-lbl">Meilleur score</div></div>
+          <div class="toeic-stat"><div class="toeic-stat-val">${avg ?? '—'}</div><div class="toeic-stat-lbl">Moyenne</div></div>
+          <div class="toeic-stat"><div class="toeic-stat-val">Reading</div><div class="toeic-stat-lbl">Section testée</div></div>
+        </div>
+        <div class="toeic-test-list">
+          ${TOEIC_TESTS.map(t => {
+            const result = loadResult(t.id);
+            const prog   = loadProgress(t.id);
+            const done   = prog ? Object.keys(prog.answers).length : 0;
+            let pill, actions;
+            if (result) {
+              const color = result.scaled >= 400 ? 'pill-moss' : result.scaled >= 250 ? 'pill-amber' : 'pill-red';
+              pill = `<span class="pill ${color}">Score : ${result.scaled} / 495</span>`;
+              actions = `<button class="btn btn-ghost btn-sm" onclick="startReview('${t.id}')">Revoir</button>
+                         <button class="btn btn-primary btn-sm" onclick="startTest('${t.id}', true)">Recommencer</button>`;
+            } else if (prog) {
+              pill = `<span class="pill pill-amber">En cours — ${done}/100</span>`;
+              actions = `<button class="btn btn-primary" onclick="startTest('${t.id}', false)">Continuer</button>`;
+            } else {
+              pill = `<span class="pill">Non commencé</span>`;
+              actions = `<button class="btn btn-primary" onclick="startTest('${t.id}', true)">Commencer</button>`;
+            }
+            return `
+              <div class="toeic-test-card">
+                <div class="toeic-test-info">
+                  <div class="toeic-test-title">${t.title}</div>
+                  <div class="toeic-test-meta">100 questions · 75 min · Lecture (P5 + P6 + P7)</div>
+                  ${pill}
+                </div>
+                <div class="toeic-test-actions">${actions}</div>
+              </div>`;
+          }).join('')}
+        </div>`;
+    }
+
+    // ── Start / resume ────────────────────────────────────────────────────────
+    function startTest(testId, fresh) {
+      _test = TOEIC_TESTS.find(t => t.id === testId);
+      if (!_test) return;
+      _flat = flattenTest(_test);
+      _reviewData = null;
+      if (fresh) {
+        clearProgress(testId);
+        _answers = {}; _idx = 0; _timeLeft = 75 * 60;
+      } else {
+        const s = loadProgress(testId);
+        _answers  = s ? (s.answers || {}) : {};
+        _idx      = s ? (s.idx || 0) : 0;
+        _timeLeft = s ? (s.timeLeft ?? 75 * 60) : 75 * 60;
+      }
+      _view = 'test';
+      render();
+      startTimer();
+    }
+
+    // ── Test shell ────────────────────────────────────────────────────────────
+    function renderTestShell() {
+      const done = Object.keys(_answers).length;
+      return `
+        <div class="toeic-exam">
+          <div class="toeic-header">
+            <div class="toeic-header-left">
+              <span class="toeic-test-name">${_test.title}</span>
+              <span class="toeic-part-badge" id="toeic-part-badge"></span>
+            </div>
+            <div class="toeic-header-center">
+              <span class="toeic-timer" id="toeic-timer">${fmtTime(_timeLeft)}</span>
+              <span class="toeic-timer-lbl">restantes</span>
+            </div>
+            <div class="toeic-header-right">
+              <span class="toeic-progress-lbl" id="toeic-progress">${done}/100</span>
+            </div>
+          </div>
+
+          <div class="toeic-body">
+            <div class="toeic-question-area" id="toeic-question-area"></div>
+          </div>
+
+          <div class="toeic-footer">
+            <div class="toeic-nav">
+              <button class="btn btn-ghost" id="btn-prev" onclick="goTo(_idx - 1)">← Précédent</button>
+              <div class="toeic-palette-wrap">
+                <div class="toeic-palette" id="toeic-palette"></div>
+              </div>
+              <button class="btn btn-ghost" id="btn-next" onclick="goTo(_idx + 1)">Suivant →</button>
+            </div>
+            <div class="toeic-footer-actions">
+              <button class="btn btn-ghost btn-sm" onclick="backToDashboard()">Abandonner</button>
+              <button class="btn btn-primary" onclick="confirmSubmit()">Terminer le test</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderCurrentQuestion() {
+      if (!_flat.length) return;
+      const item = _flat[_idx];
+      const area  = document.getElementById('toeic-question-area');
+      const badge = document.getElementById('toeic-part-badge');
+      if (badge) badge.textContent = partLabel(item.part);
+      if (item.part === 5) area.innerHTML = renderP5(item);
+      else if (item.part === 6) area.innerHTML = renderP6(item);
+      else area.innerHTML = renderP7(item);
+      const prev = document.getElementById('btn-prev');
+      const next = document.getElementById('btn-next');
+      if (prev) prev.disabled = _idx === 0;
+      if (next) next.disabled = _idx === _flat.length - 1;
+    }
+
+    // ── Part 5 ────────────────────────────────────────────────────────────────
+    function renderP5(item) {
+      const q = item.data;
+      const chosen = _answers[item.qId] || null;
+      const sentence = q.sentence.replace(/_____/g, '<span class="toeic-blank">_____</span>');
+      return `
+        <div class="toeic-qnum">Question ${item.num}</div>
+        <div class="toeic-p5-sentence">${sentence}</div>
+        <div class="toeic-options">
+          ${q.options.map(opt => {
+            const letter = opt.charAt(0);
+            return `<button class="toeic-opt${chosen === letter ? ' selected' : ''}"
+              onclick="selectAnswer('${item.qId}','${letter}')">
+              <span class="toeic-opt-letter">${letter}</span><span>${opt.slice(3)}</span>
+            </button>`;
+          }).join('')}
+        </div>`;
+    }
+
+    // ── Part 6 ────────────────────────────────────────────────────────────────
+    function renderP6(item) {
+      const passage = item.passage;
+      const curBlankIdx = passage.blanks.findIndex(b => b.id === item.data.id);
+      let bodyHtml = processBody(passage.body || '');
+      passage.blanks.forEach((b, i) => {
+        const isActive = i === curBlankIdx;
+        bodyHtml = bodyHtml.replace(
+          `[${i + 1}]`,
+          `<span class="toeic-p6-blank${isActive ? ' active' : ''}">[${b.num}]</span>`
+        );
+      });
+      const q = item.data;
+      const chosen = _answers[item.qId] || null;
+      return `
+        <div class="toeic-p6-wrap">
+          <div class="toeic-p6-passage">
+            <div class="toeic-p6-intro">${passage.intro || ''}</div>
+            <div class="toeic-p6-body">${bodyHtml}</div>
+          </div>
+          <div class="toeic-p6-right">
+            <div class="toeic-qnum">Question ${item.num}</div>
+            <div class="toeic-p6-hint">Choisissez le mot ou groupe de mots qui complète le texte.</div>
+            <div class="toeic-options">
+              ${q.options.map(opt => {
+                const letter = opt.charAt(0);
+                return `<button class="toeic-opt${chosen === letter ? ' selected' : ''}"
+                  onclick="selectAnswer('${item.qId}','${letter}')">
+                  <span class="toeic-opt-letter">${letter}</span><span>${opt.slice(3)}</span>
+                </button>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ── Part 7 ────────────────────────────────────────────────────────────────
+    function renderP7(item) {
+      const ex = item.exercise;
+      const q  = item.data;
+      const chosen = _answers[item.qId] || null;
+      const body = ex.body || (ex.passages && ex.passages[0]) || '';
+
+      const passagesHtml = ex.type === 'double'
+        ? `<div class="toeic-p7-double">${(ex.passages || []).map((p, i) => `
+            <div class="toeic-p7-passage">
+              <div class="toeic-p7-doc-label">Document ${i + 1}</div>
+              <div class="toeic-p7-body">${processBody(p)}</div>
+            </div>`).join('')}</div>`
+        : `<div class="toeic-p7-passage"><div class="toeic-p7-body">${processBody(body)}</div></div>`;
+
+      return `
+        <div class="toeic-p7-wrap">
+          <div class="toeic-p7-left">
+            <div class="toeic-p7-intro">${ex.intro || ''}</div>
+            ${passagesHtml}
+          </div>
+          <div class="toeic-p7-right">
+            <div class="toeic-p7-qnav">
+              ${ex.questions.map(qq => {
+                const isCur = qq.id === q.id;
+                const isAns = !!_answers[qq.id];
+                const fi = _flat.findIndex(f => f.qId === qq.id);
+                return `<button class="toeic-p7-qpill${isCur ? ' active' : ''}${isAns ? ' answered' : ''}"
+                  onclick="goTo(${fi})">${qq.num}</button>`;
+              }).join('')}
+            </div>
+            <div class="toeic-qnum">Question ${item.num}</div>
+            <div class="toeic-p7-prompt">${q.prompt}</div>
+            <div class="toeic-options">
+              ${q.options.map(opt => {
+                const letter = opt.charAt(0);
+                return `<button class="toeic-opt${chosen === letter ? ' selected' : ''}"
+                  onclick="selectAnswer('${item.qId}','${letter}')">
+                  <span class="toeic-opt-letter">${letter}</span><span>${opt.slice(3)}</span>
+                </button>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ── Palette ───────────────────────────────────────────────────────────────
+    function renderPalette() {
+      const el = document.getElementById('toeic-palette');
+      if (!el) return;
+      el.innerHTML = _flat.map((item, i) =>
+        `<button class="pal-btn p${item.part}${_answers[item.qId] ? ' answered' : ''}${i === _idx ? ' current' : ''}"
+          onclick="goTo(${i})" title="Q${item.num}">${item.num}</button>`
+      ).join('');
+    }
+
+    // ── Navigation & answer ───────────────────────────────────────────────────
+    function goTo(idx) {
+      if (idx < 0 || idx >= _flat.length) return;
+      _idx = idx;
+      saveProgress();
+      renderCurrentQuestion();
+      renderPalette();
+      document.getElementById('toeic-progress').textContent = `${Object.keys(_answers).length}/100`;
+    }
+
+    function selectAnswer(qId, letter) {
+      _answers[qId] = letter;
+      saveProgress();
+      renderCurrentQuestion();
+      renderPalette();
+      document.getElementById('toeic-progress').textContent = `${Object.keys(_answers).length}/100`;
+      // Auto-advance to next unanswered
+      const next = _flat.findIndex((f, i) => i > _idx && !_answers[f.qId]);
+      if (next >= 0) setTimeout(() => goTo(next), 280);
+    }
+
+    // ── Submit ────────────────────────────────────────────────────────────────
+    function confirmSubmit() {
+      const unanswered = _flat.filter(f => !_answers[f.qId]).length;
+      if (unanswered > 0 && !confirm(`${unanswered} question(s) sans réponse. Terminer quand même ?`)) return;
+      submitTest(false);
+    }
+
+    function submitTest(timeUp) {
+      stopTimer();
+      clearProgress(_test.id);
+
+      let p5c=0,p5t=0,p6c=0,p6t=0,p7c=0,p7t=0;
+      const questionResults = _flat.map(item => {
+        const given   = _answers[item.qId] || null;
+        const correct = item.data.correct;
+        const ok = given === correct;
+        if (item.part===5){p5t++;if(ok)p5c++;}
+        else if(item.part===6){p6t++;if(ok)p6c++;}
+        else{p7t++;if(ok)p7c++;}
+        return { qId: item.qId, given, correct, ok };
+      });
+
+      const totalCorrect = p5c + p6c + p7c;
+      const scaled = rawToScaled(totalCorrect, 100);
+      _reviewData = { totalCorrect, scaled, p5c, p5t, p6c, p6t, p7c, p7t, questionResults, timeUp };
+      saveResult(_test.id, { scaled, totalCorrect, p5c, p5t, p6c, p6t, p7c, p7t, questionResults });
+      Storage.registerActivity();
+      Storage.addPoints(Math.round(scaled / 10));
+      _view = 'review';
+      render();
+    }
+
+    // ── Review ────────────────────────────────────────────────────────────────
+    function startReview(testId) {
+      _test = TOEIC_TESTS.find(t => t.id === testId);
+      if (!_test) return;
+      _flat = flattenTest(_test);
+      const saved = loadResult(testId);
+      if (!saved) return;
+      _reviewData = saved;
+      _view = 'review';
+      render();
+    }
+
+    function renderReviewPage() {
+      if (!_reviewData || !_test) return `<p>Aucun résultat.</p>`;
+      const r = _reviewData;
+      const total = r.totalCorrect ?? (r.p5c + r.p6c + r.p7c);
+      const scaled = r.scaled;
+      const pct = Math.round((total / 100) * 100);
+      const color = scaled >= 400 ? 'var(--moss)' : scaled >= 250 ? 'var(--amber-deep)' : 'var(--burgundy)';
+      const band  = scaled >= 400 ? '🟢 Niveau avancé (B2–C1)' : scaled >= 250 ? '🟡 Intermédiaire (B1–B2)' : '🔴 Débutant (A2–B1)';
+
+      const parts = [
+        { label:'Partie 5 — Phrases incomplètes', c:r.p5c, t:r.p5t??30 },
+        { label:'Partie 6 — Complétion de texte',  c:r.p6c, t:r.p6t??16 },
+        { label:'Partie 7 — Compréhension écrite', c:r.p7c, t:r.p7t??54 },
+      ];
+
+      const partsHtml = parts.map(p => {
+        const pp = Math.round((p.c / p.t) * 100);
+        return `<div class="review-part-row">
+          <div class="review-part-label">${p.label}</div>
+          <div class="review-part-bar-wrap"><div class="review-part-bar" style="width:${pp}%"></div></div>
+          <div class="review-part-score">${p.c}/${p.t} <span class="review-part-pct">${pp}%</span></div>
+        </div>`;
+      }).join('');
+
+      // Detailed question breakdown
+      let detailHtml = '';
+      if (r.questionResults && _flat.length) {
+        const byPart = [5, 6, 7].map(part => ({
+          part,
+          items: r.questionResults
+            .map(res => ({ res, flat: _flat.find(f => f.qId === res.qId) }))
+            .filter(x => x.flat && x.flat.part === part)
+        }));
+
+        detailHtml = `<div class="review-detail"><h3>Détail question par question</h3>
+          ${byPart.map(bp => `
+            <div class="review-detail-part">
+              <div class="review-detail-part-title">${partLabel(bp.part)}</div>
+              ${bp.items.map(({ res, flat }) => {
+                const q = flat.data;
+                const givenOpt = q.options.find(o => o.charAt(0) === res.given);
+                const correctOpt = q.options.find(o => o.charAt(0) === res.correct);
+                return `<div class="review-q ${res.ok ? 'ok' : 'bad'}">
+                  <div class="review-q-header">
+                    <span class="review-q-num">Q${flat.num}</span>
+                    <span class="review-q-status">${res.ok ? '✓ Correct' : `✗ Tu as répondu ${res.given || '—'}`}</span>
+                  </div>
+                  ${flat.part === 5 ? `<div class="review-q-sentence">${q.sentence}</div>` : ''}
+                  ${flat.part === 7 ? `<div class="review-q-prompt">${q.prompt}</div>` : ''}
+                  ${!res.ok ? `<div class="review-q-correct-ans">Bonne réponse : ${correctOpt || res.correct}</div>` : ''}
+                  <div class="review-q-explanation">${q.explanation || ''}</div>
+                </div>`;
+              }).join('')}
+            </div>`).join('')}
+        </div>`;
+      }
+
+      return `
+        <div class="toeic-review">
+          ${r.timeUp ? `<div class="review-timeout-banner">⏰ Temps écoulé — test soumis automatiquement.</div>` : ''}
+          <div class="review-score-hero">
+            <div class="review-score-circle" style="border-color:${color}">
+              <div class="review-score-num" style="color:${color}">${scaled}</div>
+              <div class="review-score-denom">/ 495</div>
+              <div class="review-score-label">Score TOEIC Lecture</div>
+            </div>
+            <div class="review-score-meta">
+              <div class="review-raw">${total}/100 bonnes réponses (${pct}%)</div>
+              <div class="review-band">${band}</div>
+              <div class="review-equiv">Équivalent TOEIC total estimé : <strong>${scaled * 2} ± 50 / 990</strong></div>
+            </div>
+          </div>
+          <div class="review-parts">${partsHtml}</div>
+          ${detailHtml}
+          <div class="review-actions">
+            <button class="btn btn-ghost" onclick="backToDashboard()">← Retour</button>
+            <button class="btn btn-primary" onclick="startTest('${_test.id}', true)">Recommencer</button>
+          </div>
+        </div>`;
+    }
+
+    function backToDashboard() {
+      stopTimer();
+      _view = 'dashboard'; _test = null; _flat = []; _answers = {};
+      render();
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
     Storage.load();
-    Shared.renderTopbar('toeic');
-    Shared.renderFooter();
+    render();
   </script>
 </body>
 </html>

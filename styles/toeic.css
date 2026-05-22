@@ -1,0 +1,699 @@
+/* ============================================================
+   TOEIC TEST MODULE — styles
+   ============================================================ */
+
+/* ── Dashboard ─────────────────────────────────────────────── */
+
+.toeic-stats-bar {
+  display: flex;
+  gap: var(--s-4);
+  background: var(--paper-warm);
+  border-radius: var(--radius-lg);
+  padding: var(--s-4) var(--s-5);
+  margin-bottom: var(--s-5);
+  flex-wrap: wrap;
+}
+
+.toeic-stat {
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+}
+
+.toeic-stat-val {
+  font-family: var(--mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.toeic-stat-lbl {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.toeic-test-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.toeic-test-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  background: var(--paper);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: var(--radius-lg);
+  transition: box-shadow 0.15s;
+}
+
+.toeic-test-card:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+
+.toeic-test-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toeic-test-title {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.toeic-test-meta {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.toeic-test-actions {
+  display: flex;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+
+.toeic-empty {
+  padding: var(--s-6);
+  text-align: center;
+  color: var(--ink-soft);
+  background: var(--paper-warm);
+  border-radius: var(--radius-lg);
+}
+
+/* ── Exam layout ───────────────────────────────────────────── */
+
+.toeic-exam {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: calc(100vh - 120px);
+}
+
+.toeic-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s-3) var(--s-4);
+  background: var(--paper);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.toeic-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toeic-test-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.toeic-part-badge {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.toeic-header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.toeic-timer {
+  font-family: var(--mono);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  transition: color 0.3s;
+}
+
+.toeic-timer.warning { color: var(--amber-deep); }
+.toeic-timer.urgent  { color: var(--burgundy); animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.toeic-timer-lbl {
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.toeic-header-right {
+  text-align: right;
+}
+
+.toeic-progress-lbl {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+/* ── Question area ─────────────────────────────────────────── */
+
+.toeic-body {
+  flex: 1;
+  padding: var(--s-4) 0;
+}
+
+.toeic-question-area {
+  min-height: 400px;
+}
+
+.toeic-qnum {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--s-3);
+}
+
+/* ── Part 5 ────────────────────────────────────────────────── */
+
+.toeic-p5-sentence {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: var(--s-4);
+  max-width: 640px;
+  padding: var(--s-4);
+  background: var(--paper-warm);
+  border-radius: var(--radius);
+}
+
+.toeic-blank {
+  font-weight: 700;
+  color: var(--amber-deep);
+  letter-spacing: 0.05em;
+}
+
+/* ── Options (shared) ──────────────────────────────────────── */
+
+.toeic-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  max-width: 520px;
+}
+
+.toeic-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  background: var(--paper-warm);
+  cursor: pointer;
+  text-align: left;
+  font-size: 1rem;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.toeic-opt:hover {
+  background: color-mix(in srgb, var(--amber) 10%, var(--paper));
+  border-color: var(--amber);
+}
+
+.toeic-opt.selected {
+  background: color-mix(in srgb, var(--amber) 15%, var(--paper));
+  border-color: var(--amber-deep);
+}
+
+.toeic-opt-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.toeic-opt.selected .toeic-opt-letter {
+  background: var(--amber-deep);
+}
+
+/* ── Part 6 ────────────────────────────────────────────────── */
+
+.toeic-p6-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .toeic-p6-wrap { grid-template-columns: 1fr; }
+}
+
+.toeic-p6-passage {
+  background: var(--paper-warm);
+  border-radius: var(--radius);
+  padding: var(--s-4);
+}
+
+.toeic-p6-intro {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin-bottom: var(--s-3);
+}
+
+.toeic-p6-body {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.toeic-p6-blank {
+  display: inline-block;
+  padding: 0 6px;
+  border-bottom: 2px solid var(--ink-soft);
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin: 0 2px;
+}
+
+.toeic-p6-blank.active {
+  border-color: var(--amber-deep);
+  color: var(--amber-deep);
+  background: color-mix(in srgb, var(--amber) 15%, transparent);
+  border-radius: 3px;
+}
+
+.toeic-p6-hint {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: var(--s-3);
+  font-style: italic;
+}
+
+/* ── Part 7 ────────────────────────────────────────────────── */
+
+.toeic-p7-wrap {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .toeic-p7-wrap { grid-template-columns: 1fr; }
+}
+
+.toeic-p7-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.toeic-p7-intro {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.toeic-p7-passage {
+  background: var(--paper-warm);
+  border-radius: var(--radius);
+  padding: var(--s-4);
+}
+
+.toeic-p7-doc-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--amber-deep);
+  margin-bottom: var(--s-2);
+}
+
+.toeic-p7-body {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.toeic-p7-double {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.toeic-p7-right {
+  position: sticky;
+  top: 90px;
+}
+
+.toeic-p7-qnav {
+  display: flex;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.toeic-p7-qpill {
+  padding: 4px 10px;
+  border: 1px solid var(--ink-soft);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink-soft);
+  transition: all 0.1s;
+}
+
+.toeic-p7-qpill.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.toeic-p7-qpill.answered {
+  border-color: var(--amber-deep);
+  color: var(--amber-deep);
+}
+
+.toeic-p7-qpill.active.answered {
+  background: var(--amber-deep);
+  color: var(--paper);
+  border-color: var(--amber-deep);
+}
+
+.toeic-p7-prompt {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: var(--s-3);
+  font-weight: 500;
+}
+
+/* ── Footer with palette ───────────────────────────────────── */
+
+.toeic-footer {
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding: var(--s-3) 0 var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.toeic-nav {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+.toeic-palette-wrap {
+  flex: 1;
+  overflow-x: auto;
+}
+
+.toeic-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 4px 0;
+}
+
+.pal-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: var(--paper-warm);
+  color: var(--ink-soft);
+  transition: all 0.1s;
+  padding: 0;
+}
+
+.pal-btn:hover { background: var(--amber); color: var(--paper); }
+
+.pal-btn.p5 { border-color: rgba(100,140,100,0.3); }
+.pal-btn.p6 { border-color: rgba(200,132,44,0.3); }
+.pal-btn.p7 { border-color: rgba(120,60,80,0.2); }
+
+.pal-btn.answered { background: var(--ink); color: var(--paper); border-color: transparent; }
+.pal-btn.current  { outline: 2px solid var(--amber-deep); outline-offset: 1px; }
+
+.toeic-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-3);
+}
+
+/* ── Review page ───────────────────────────────────────────── */
+
+.toeic-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.review-timeout-banner {
+  padding: var(--s-3) var(--s-4);
+  background: color-mix(in srgb, var(--burgundy) 10%, var(--paper));
+  border-left: 3px solid var(--burgundy);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.review-score-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  flex-wrap: wrap;
+}
+
+.review-score-circle {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 5px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--paper-warm);
+}
+
+.review-score-num {
+  font-family: var(--mono);
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.review-score-denom {
+  font-size: 1rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.review-score-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.review-score-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.review-raw {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.review-band {
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
+.review-equiv {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.review-parts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  background: var(--paper-warm);
+  border-radius: var(--radius-lg);
+  padding: var(--s-4) var(--s-5);
+}
+
+.review-part-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.review-part-label {
+  width: 240px;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.review-part-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.review-part-bar {
+  height: 100%;
+  background: var(--amber-deep);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.review-part-score {
+  width: 80px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.review-part-pct {
+  font-weight: 400;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+/* Detailed review */
+.review-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.review-detail h3 {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  margin-bottom: var(--s-2);
+}
+
+.review-detail-part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.review-detail-part-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: var(--s-2);
+}
+
+.review-q {
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--radius);
+  border-left: 3px solid transparent;
+  background: var(--paper-warm);
+}
+
+.review-q.ok  { border-left-color: var(--moss); }
+.review-q.bad { border-left-color: var(--burgundy); }
+
+.review-q-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.review-q-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+
+.review-q-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.review-q.ok  .review-q-status { color: var(--moss); }
+.review-q.bad .review-q-status { color: var(--burgundy); }
+
+.review-q-sentence,
+.review-q-prompt {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.review-q-correct-ans {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--moss);
+  margin-bottom: 4px;
+}
+
+.review-q-explanation {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.review-actions {
+  display: flex;
+  gap: var(--s-3);
+  justify-content: flex-end;
+  padding-bottom: var(--s-5);
+}
+
+/* ── Utility ───────────────────────────────────────────────── */
+
+.pill-moss { background: color-mix(in srgb, var(--moss) 15%, var(--paper)); color: var(--moss); }
+.pill-red  { background: color-mix(in srgb, var(--burgundy) 12%, var(--paper)); color: var(--burgundy); }
