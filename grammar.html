@@ -63,12 +63,42 @@
     function renderLesson(id) {
       const l = LESSONS.find(x => x.id === id);
       Storage.markLessonRead(id);
+      const cat = GRAMMAR_CATEGORIES[l.category];
       stageRoot.innerHTML = `<div class="lesson-full">
         <button class="btn btn-ghost btn-sm" onclick="renderSelection()">← Retour</button>
-        <h1 class="serif" style="margin:20px 0">${l.label}</h1>
-        ${(l.rules || []).map((r, i) => `<div class="rule-block"><h3>${i+1}. ${r.title}</h3><p>${r.content}</p></div>`).join('')}
-        ${(l.pitfalls || []).length ? `<div class="pitfall-box"><h4>⚠️ Pièges</h4><ul>${l.pitfalls.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
-        <button class="btn btn-amber btn-lg" style="margin-top:30px" onclick="startSession('lesson', '${l.id}')">S'entraîner →</button>
+        <div style="display:flex;align-items:center;gap:12px;margin:20px 0 8px">
+          <span class="pill pill-${cat.color}">Tier ${l.tier}</span>
+          <span class="pill pill-ink" style="font-size:0.75rem">${cat.label}</span>
+        </div>
+        <h1 class="serif" style="margin:0 0 6px">${l.label}</h1>
+        <p class="muted" style="margin-bottom:28px">${l.summary}</p>
+
+        ${(l.rules || []).map((r, i) => `
+          <div class="rule-block">
+            <h3>${i+1}. ${r.title}</h3>
+            <p>${r.content.replace(/①/g,'<span class="pill-num">1</span>').replace(/②/g,'<span class="pill-num">2</span>').replace(/③/g,'<span class="pill-num">3</span>').replace(/④/g,'<span class="pill-num">4</span>').replace(/⑤/g,'<span class="pill-num">5</span>').replace(/✅/g,'<span style="color:var(--moss)">✓</span>').replace(/❌/g,'<span style="color:var(--burgundy)">✗</span>')}</p>
+          </div>`).join('')}
+
+        ${(l.examples || []).length ? `
+          <div class="examples-block" style="margin:28px 0">
+            <h4 style="margin-bottom:14px">Exemples</h4>
+            ${l.examples.map(e => `
+              <div class="example-row">
+                <span class="example-en">${e.en}</span>
+                <span class="example-fr">${e.fr}</span>
+              </div>`).join('')}
+          </div>` : ''}
+
+        ${(l.pitfalls || []).length ? `
+          <div class="pitfall-box">
+            <h4>⚠️ Pièges fréquents</h4>
+            <ul>${l.pitfalls.map(p => `<li>${p.replace(/❌/g,'<span style="color:var(--burgundy)">✗</span>').replace(/✅/g,'<span style="color:var(--moss)">✓</span>')}</li>`).join('')}</ul>
+          </div>` : ''}
+
+        <div style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn btn-amber btn-lg" onclick="startSession('lesson', '${l.id}')">S'entraîner sur cette leçon →</button>
+          <button class="btn btn-ghost" onclick="renderSelection()">Voir toutes les leçons</button>
+        </div>
       </div>`;
     }
 
@@ -155,14 +185,29 @@
       overlay.innerHTML = `
         <div class="lesson-modal" style="text-align:left">
           <button class="lesson-modal-close" onclick="this.parentElement.parentElement.remove()">✕</button>
-          <h2 class="serif">${l.label}</h2>
-          <div style="margin-top:20px">
+          <h2 class="serif" style="margin-bottom:4px">${l.label}</h2>
+          <p class="muted" style="font-size:0.85rem;margin-bottom:16px">${l.summary || ''}</p>
+          <div>
             ${(l.rules || []).map((r, i) => `
               <div class="rule-block">
-                <h3 style="font-size:1rem">${i+1}. ${r.title}</h3>
-                <p style="font-size:0.9rem">${r.content}</p>
+                <h3 style="font-size:0.95rem">${i+1}. ${r.title}</h3>
+                <p style="font-size:0.85rem;line-height:1.6">${r.content}</p>
               </div>
             `).join('')}
+            ${(l.examples || []).length ? `
+              <div class="examples-block" style="margin-top:14px">
+                <h4 style="font-size:0.85rem;margin-bottom:8px">Exemples</h4>
+                ${l.examples.map(e => `
+                  <div class="example-row">
+                    <span class="example-en" style="font-size:0.85rem">${e.en}</span>
+                    <span class="example-fr" style="font-size:0.8rem">${e.fr}</span>
+                  </div>`).join('')}
+              </div>` : ''}
+            ${(l.pitfalls || []).length ? `
+              <div class="pitfall-box" style="margin-top:14px">
+                <h4 style="font-size:0.85rem">⚠️ Pièges</h4>
+                <ul style="font-size:0.8rem">${l.pitfalls.map(p => `<li>${p}</li>`).join('')}</ul>
+              </div>` : ''}
           </div>
         </div>
       `;

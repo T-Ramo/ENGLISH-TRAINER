@@ -1,91 +1,1150 @@
 const GRAMMAR_CATEGORIES = {
-  determiners: { label: 'Articles & déterminants', order: 1, color: 'amber' },
-  pronouns:    { label: 'Pronoms', order: 2, color: 'moss' },
-  adjectives:  { label: 'Adjectifs & adverbes', order: 3, color: 'burgundy' },
-  prepositions:{ label: 'Prépositions', order: 4, color: 'ink' },
-  verbal:      { label: 'Structures verbales', order: 5, color: 'amber-deep' },
-  connectors:  { label: 'Connecteurs & ordre des mots', order: 6, color: 'moss-deep' },
-  nouns:       { label: 'Pluriels & noms', order: 7, color: 'rose' },
+  tenses:      { label: 'Temps & aspects verbaux', order: 1, color: 'moss' },
+  determiners: { label: 'Articles & déterminants',  order: 2, color: 'amber' },
+  pronouns:    { label: 'Pronoms',                   order: 3, color: 'moss' },
+  adjectives:  { label: 'Adjectifs & comparaison',   order: 4, color: 'burgundy' },
+  prepositions:{ label: 'Prépositions',              order: 5, color: 'ink' },
+  verbal:      { label: 'Structures verbales',       order: 6, color: 'amber-deep' },
+  connectors:  { label: 'Connecteurs & syntaxe',     order: 7, color: 'moss-deep' },
+  nouns:       { label: 'Noms & déterminants',       order: 8, color: 'rose' },
 };
 
-// Difficulté : 1 (B1), 2 (B1+), 3 (B2/Avancé)
+// Difficulté : 1 (B1), 2 (B1+/B2), 3 (B2/Avancé TOEIC)
 const LESSONS = [
-  // --- DÉTERMINANTS ---
+
+  // ══════════════════════════════════════════════
+  //  TEMPS & ASPECTS VERBAUX
+  // ══════════════════════════════════════════════
+  {
+    id: 'present-tenses',
+    category: 'tenses',
+    tier: 1,
+    label: 'Present Simple & Continuous',
+    summary: 'Distinguer le présent d\'habitude (simple) du présent en cours (continuous).',
+    rules: [
+      {
+        title: 'Present Simple — formation',
+        content: 'Sujet + base verbale (+ -s à la 3e pers. sing.). Négatif : don\'t / doesn\'t + base. Question : Do/Does + sujet + base. Ex : She works every day. / Does he speak English?'
+      },
+      {
+        title: 'Present Simple — usages',
+        content: '① Habitudes, routines : I go to the gym on Mondays. ② Vérités générales : Water boils at 100°C. ③ États permanents : She lives in Paris. ④ Horaires fixes : The train leaves at 9 am. ⑤ Commentaires sportifs / narration historique : He shoots and scores!'
+      },
+      {
+        title: 'Present Continuous — formation',
+        content: 'Sujet + am/is/are + V-ing. Négatif : am/is/are + not + V-ing. Question : Am/Is/Are + sujet + V-ing? Ex : They are working on a new project.'
+      },
+      {
+        title: 'Present Continuous — usages',
+        content: '① Action en cours maintenant : She is reading a report. ② Situation temporaire : I\'m staying at a hotel this week. ③ Changement progressif : Prices are rising. ④ Futur planifié : We are meeting the client tomorrow. ⑤ Habitude agaçante (always) : He is always interrupting me!'
+      },
+      {
+        title: 'Verbes non-continus (stative verbs)',
+        content: 'Certains verbes expriment un état et n\'ont pas de forme continue : believe, belong, contain, depend, hate, know, like, love, mean, need, own, prefer, realize, remember, seem, understand, want. ❌ I am knowing the answer. ✅ I know the answer. Exceptions : think/see peuvent avoir les deux formes avec sens différent.'
+      }
+    ],
+    examples: [
+      { en: 'She usually takes the bus, but today she is driving.', fr: 'Elle prend habituellement le bus, mais aujourd\'hui elle conduit.' },
+      { en: 'The company is currently expanding into Asia.', fr: 'L\'entreprise est actuellement en train de s\'étendre en Asie.' },
+      { en: 'Water freezes at 0°C.', fr: 'L\'eau gèle à 0°C.' },
+      { en: 'I am thinking of changing jobs.', fr: 'Je pense à changer de travail (processus de réflexion).' }
+    ],
+    pitfalls: [
+      'Ne jamais utiliser le continuous avec les stative verbs : ❌ I am knowing → ✅ I know.',
+      '"Always" avec le continuous = habitude agaçante : He is always losing his keys (irritation).',
+      'Le présent simple peut exprimer le futur pour les horaires : The meeting starts at 10.'
+    ]
+  },
+
+  {
+    id: 'past-tenses',
+    category: 'tenses',
+    tier: 1,
+    label: 'Past Simple, Continuous & Perfect',
+    summary: 'Les trois temps du passé et leurs usages respectifs.',
+    rules: [
+      {
+        title: 'Past Simple — formation & usage',
+        content: 'Verbes réguliers : + -ed (worked, finished). Irréguliers à mémoriser (go→went, buy→bought, write→wrote). Usage : ① Action terminée à un moment précis du passé : He left at 8 pm. ② Série d\'actions passées : She opened the door, walked in and sat down. ③ Habitude passée révolue : I played football when I was young.'
+      },
+      {
+        title: 'Past Continuous — formation & usage',
+        content: 'Was/Were + V-ing. Usage : ① Action en cours à un moment du passé : At 9 pm, I was watching TV. ② Action interrompue par une autre : I was cooking when the phone rang. ③ Deux actions parallèles : While she was reading, he was cooking. ④ Contexte/atmosphère d\'un récit : It was raining and people were rushing home.'
+      },
+      {
+        title: 'Past Perfect — formation & usage',
+        content: 'Had + V3 (participe passé). Usage : action ANTÉRIEURE à une autre action passée (la ligne du temps : plus-que-parfait → passé simple). ① She had already eaten when he arrived. ② After he had finished the report, he sent it. Clés : already, just, by the time, after, before, when (avec antériorité).'
+      },
+      {
+        title: 'Past Simple vs Past Perfect',
+        content: 'Quand deux actions passées sont mentionnées, utiliser le Past Perfect pour la PREMIÈRE (plus ancienne). Ex : When I arrived at the station, the train had already left. (Le départ = avant l\'arrivée.) Mais si la chronologie est déjà claire (after/before), le Past Simple suffit : After he finished, he left.'
+      },
+      {
+        title: 'Used to / Would — habitudes passées',
+        content: '"Used to + base verbale" décrit une habitude ou un état passé révolu : I used to smoke. He used to be shy. "Would + base verbale" décrit uniquement des actions répétées passées (pas des états) : Every summer, we would go to the coast. ❌ I would be shy. (état → used to uniquement).'
+      }
+    ],
+    examples: [
+      { en: 'I was talking to a client when the alarm went off.', fr: 'Je parlais à un client quand l\'alarme s\'est déclenchée.' },
+      { en: 'By the time she arrived, we had already made a decision.', fr: 'Quand elle est arrivée, nous avions déjà pris une décision.' },
+      { en: 'He used to work in finance before joining us.', fr: 'Il travaillait dans la finance avant de nous rejoindre.' },
+      { en: 'She hadn\'t seen the report before the meeting started.', fr: 'Elle n\'avait pas vu le rapport avant que la réunion commence.' }
+    ],
+    pitfalls: [
+      '"Used to" est uniquement au passé — il n\'y a pas de forme présente : ❌ I use to go → ✅ I go.',
+      'Past Perfect ne s\'utilise que quand il y a une référence à une action passée antérieure — pas automatiquement avec "before/after".',
+      'Conflit courant : "When I came home, he left" (séquence) vs "When I came home, he had left" (il était déjà parti avant).'
+    ]
+  },
+
+  {
+    id: 'present-perfect',
+    category: 'tenses',
+    tier: 2,
+    label: 'Present Perfect',
+    summary: 'Le temps qui relie passé et présent — différence clé avec le Past Simple.',
+    rules: [
+      {
+        title: 'Formation',
+        content: 'Have/Has + V3 (participe passé). Négatif : haven\'t/hasn\'t + V3. Question : Have/Has + sujet + V3? Ex : She has finished the report. / Have you ever been to London?'
+      },
+      {
+        title: 'Usages principaux',
+        content: '① Expérience de vie (sans date précise) : I have visited Japan twice. ② Résultat présent d\'une action passée : He has broken his leg (il a encore la jambe cassée). ③ Action récente pertinente maintenant : The CEO has just resigned. ④ Situation qui a commencé dans le passé et continue : She has worked here for 10 years / since 2015.'
+      },
+      {
+        title: 'Marqueurs temporels clés',
+        content: 'FOR + durée : I have worked here for 3 years. SINCE + point de départ : since 2020, since Monday, since I was a child. JUST / ALREADY / YET : She has just left. He has already eaten. Have you done it yet? EVER / NEVER : Have you ever tried sushi? I have never been to Australia.'
+      },
+      {
+        title: 'Present Perfect vs Past Simple',
+        content: 'PAST SIMPLE = action à un moment précis et révolu. PRESENT PERFECT = lien avec le présent, pas de date précise. Ex : I saw him YESTERDAY (past simple — moment précis). / I have seen him (present perfect — expérience, sans date). ⚠️ Avec "when", "ago", "last year", "in 2018" → toujours Past Simple.'
+      },
+      {
+        title: 'Present Perfect Continuous',
+        content: 'Have/has + been + V-ing. Insiste sur la DURÉE et le processus en cours ou récemment terminé : I have been working all day (je suis fatigué). She has been waiting for an hour. Comparer : I have written 3 emails (résultat) vs I have been writing emails (activité prolongée).'
+      }
+    ],
+    examples: [
+      { en: 'I have lived in London since 2019.', fr: 'J\'habite à Londres depuis 2019 (et j\'y suis encore).' },
+      { en: 'She has just submitted the proposal.', fr: 'Elle vient de soumettre la proposition.' },
+      { en: 'Have you ever worked abroad?', fr: 'As-tu déjà travaillé à l\'étranger ?' },
+      { en: 'The company has been growing steadily for the past decade.', fr: 'L\'entreprise croît régulièrement depuis dix ans.' }
+    ],
+    pitfalls: [
+      'Avec "yesterday, last week, in 2020" → TOUJOURS Past Simple : ❌ I have seen him yesterday → ✅ I saw him yesterday.',
+      '"For" vs "Since" : FOR + durée (for 3 years), SINCE + point de départ (since 2020). Ne pas confondre.',
+      '"Already" se place entre have et V3 : She has already left. "Yet" va en fin de phrase (négatif/question) : Has he arrived yet?'
+    ]
+  },
+
+  {
+    id: 'future-tenses',
+    category: 'tenses',
+    tier: 2,
+    label: 'Future Forms',
+    summary: 'Will, be going to, Present Continuous et Present Simple pour le futur.',
+    rules: [
+      {
+        title: 'Will — décision spontanée & prédiction',
+        content: 'Usage : ① Décision prise au moment où on parle : "The phone is ringing." "I\'ll get it!" ② Prédiction basée sur opinion/croyance (sans preuve visible) : I think it will rain next week. ③ Promesses, offres, refus : I will help you. ④ Faits futurs certains : She will be 30 next year.'
+      },
+      {
+        title: 'Be going to — intention & preuve visible',
+        content: 'Usage : ① Intention décidée à l\'avance : We are going to launch a new product in Q3. ② Prédiction basée sur preuve visible : Look at those clouds — it is going to rain. Clé : "going to" implique qu\'une décision est déjà prise ou qu\'un signe est visible.'
+      },
+      {
+        title: 'Present Continuous — futur planifié',
+        content: 'Pour des arrangements futurs concrets, avec date/heure/lieu précis : I am meeting the CEO tomorrow at 3 pm. We are flying to New York on Friday. La différence avec "going to" : le présent continu implique un arrangement concret (rendez-vous pris), "going to" une simple intention.'
+      },
+      {
+        title: 'Present Simple — futur d\'horaire',
+        content: 'Pour des programmes fixes, horaires officiels : The conference starts at 9 am. The train leaves at 7:30. My flight arrives on Monday. Limité aux transports, événements prévus officiellement.'
+      },
+      {
+        title: 'Future Continuous & Perfect',
+        content: 'FUTURE CONTINUOUS (will be + V-ing) : action en cours à un moment futur précis : At 10 tomorrow I will be presenting to the board. FUTURE PERFECT (will have + V3) : action terminée avant un moment futur : By Friday, we will have sent all the invoices.'
+      }
+    ],
+    examples: [
+      { en: 'A: I can\'t open this file. B: I\'ll help you.', fr: 'Décision spontanée au moment de parler.' },
+      { en: 'We\'re going to rebrand the company next year.', fr: 'Intention déjà décidée.' },
+      { en: 'I\'m having lunch with the investors on Thursday.', fr: 'Arrangement concret planifié.' },
+      { en: 'By the time you arrive, I will have finished the report.', fr: 'Le rapport sera terminé avant votre arrivée.' }
+    ],
+    pitfalls: [
+      '"Going to" ≠ "will" : avec une preuve visible → going to ; décision spontanée → will.',
+      'Ne pas utiliser "will" pour un plan déjà établi : ❌ I will meet him tomorrow (si rendez-vous pris) → ✅ I\'m meeting him tomorrow.',
+      '"By + futur" → Future Perfect : By 2030, renewable energy will have replaced most fossil fuels.'
+    ]
+  },
+
+  {
+    id: 'passive-voice',
+    category: 'tenses',
+    tier: 2,
+    label: 'Passive Voice',
+    summary: 'Mettre l\'accent sur l\'action ou l\'objet plutôt que sur le sujet.',
+    rules: [
+      {
+        title: 'Formation générale',
+        content: 'BE (conjugué au temps voulu) + V3 (participe passé). Le complément d\'agent est introduit par "by" (facultatif). Tableau : Present simple : is/are made. Past simple : was/were made. Present perfect : has/have been made. Future : will be made. Modal : must be done / should be completed.'
+      },
+      {
+        title: 'Quand utiliser le passif',
+        content: '① L\'agent est inconnu : My car was stolen last night. ② L\'agent est évident ou sans importance : The report has been submitted. ③ Pour mettre l\'accent sur le résultat : Three people were injured. ④ Style formel/académique/business : All expenses must be approved by the CFO. ⑤ Pour varier la structure.'
+      },
+      {
+        title: 'Passif avec modaux',
+        content: 'Modal + be + V3 (présent/futur) : The contract must be signed before Friday. This issue should be addressed immediately. Modal + have been + V3 (passé) : The report should have been sent yesterday. The problem could have been avoided.'
+      },
+      {
+        title: 'Passif impersonnel — Say/Think/Know/Believe',
+        content: 'Structure : It is said that + proposition. Ou : Sujet + is said to be/have + V3. Ex : "It is believed that the merger will succeed." = "The merger is believed to succeed." "It is known that he resigned." = "He is known to have resigned." Très fréquent dans la presse et les rapports.'
+      },
+      {
+        title: 'Passif + gérondif et causatif',
+        content: 'Passif + gérondif : He hates being told what to do. She resents being ignored. Causatif "have/get sth done" : We had the office renovated. I need to get my car fixed. (Faire faire par quelqu\'un d\'autre.) Au passé : She had her hair cut yesterday.'
+      }
+    ],
+    examples: [
+      { en: 'The new policy will be implemented next month.', fr: 'La nouvelle politique sera mise en place le mois prochain.' },
+      { en: 'Three employees have been promoted this quarter.', fr: 'Trois employés ont été promus ce trimestre.' },
+      { en: 'The meeting should have been rescheduled earlier.', fr: 'La réunion aurait dû être reprogrammée plus tôt.' },
+      { en: 'It is expected that sales will double by Q4.', fr: 'On s\'attend à ce que les ventes doublent d\'ici le T4.' }
+    ],
+    pitfalls: [
+      'Le passif NE S\'UTILISE PAS avec les verbes intransitifs (arrive, come, die, happen) — ils n\'ont pas d\'objet.',
+      '❌ "I was explained the procedure" → ✅ "The procedure was explained to me" (explain ne s\'utilise pas avec pronom sujet au passif).',
+      'Ne pas oublier "been" dans les temps composés : ❌ The report has submitted → ✅ has been submitted.'
+    ]
+  },
+
+  {
+    id: 'conditionals',
+    category: 'tenses',
+    tier: 2,
+    label: 'Conditionals (0→3 + Mixed)',
+    summary: 'Les quatre types de conditionnels et les conditionnels mixtes.',
+    rules: [
+      {
+        title: 'Conditionnel 0 — Vérités générales',
+        content: 'If + présent simple, présent simple. Pour des faits toujours vrais, des lois scientifiques, des procédures. Ex : If you heat ice, it melts. If the system crashes, reboot the server. On peut remplacer "if" par "when" sans changer le sens.'
+      },
+      {
+        title: 'Conditionnel 1 — Futur réel / probable',
+        content: 'If + présent simple, will + base verbale. Pour des situations futures réalistes, des conséquences probables. Ex : If we miss the deadline, the client will cancel the contract. Variantes : If + présent simple, can/may/might/must/should + base. "Unless" remplace "if not" : Unless you hurry, we\'ll be late.'
+      },
+      {
+        title: 'Conditionnel 2 — Hypothèse présente / irréelle',
+        content: 'If + prétérit, would + base verbale. Pour des situations imaginaires ou improbables dans le présent/futur. Ex : If I were the CEO, I would cut costs. (Je ne suis pas PDG.) If we had more budget, we could hire more staff. Note : "If I were" (pas "was") est grammaticalement correct au conditionnel 2, surtout en anglais formel.'
+      },
+      {
+        title: 'Conditionnel 3 — Regret passé / irréel',
+        content: 'If + past perfect, would have + V3. Pour des situations passées qui ne se sont pas réalisées — regrets, reproches. Ex : If she had prepared better, she would have got the job. If I had known about the meeting, I would have attended. Contraction : I\'d have = I would have.'
+      },
+      {
+        title: 'Conditionnel mixte',
+        content: 'Regret passé + conséquence présente : If + past perfect, would + base. Ex : If I had studied medicine (past), I would be a doctor now. Ou : situation présente + résultat passé : If I were more organized (présent), I would have met the deadline (passé). Inversion formelle : Had I known (= If I had known). Were it not for him (= If it weren\'t for him). Should you need help (= If you should need).'
+      }
+    ],
+    examples: [
+      { en: 'If revenues fall below target, we will review the budget.', fr: 'Si les revenus sont en dessous de la cible, nous réviserons le budget. (Cond. 1)' },
+      { en: 'If I were you, I would accept the offer.', fr: 'À ta place, j\'accepterais l\'offre. (Cond. 2)' },
+      { en: 'If she had checked the data, she wouldn\'t have made that error.', fr: 'Si elle avait vérifié les données, elle n\'aurait pas commis cette erreur. (Cond. 3)' },
+      { en: 'Had I been informed earlier, I could have helped.', fr: 'Si j\'avais été informé plus tôt, j\'aurais pu aider. (Inversion formelle)' }
+    ],
+    pitfalls: [
+      '❌ "If I would know" → ✅ "If I knew" — on n\'utilise JAMAIS "would" dans la proposition en "if".',
+      'Cond. 2 formel : "If I were" (pas "was") : "If I were you / If he were here".',
+      '"Unless" = "if not" : Unless you call her = If you don\'t call her. Ne pas écrire "unless you don\'t" (double négation).'
+    ]
+  },
+
+  // ══════════════════════════════════════════════
+  //  ARTICLES & DÉTERMINANTS
+  // ══════════════════════════════════════════════
   {
     id: 'articles-a-an-the',
     category: 'determiners',
     tier: 1,
-    label: 'A / An / The',
-    summary: 'Usage des articles définis (the), indéfinis (a/an) et de l\'article zéro.',
+    label: 'A / An / The / Ø',
+    summary: 'Maîtriser les quatre articles : indéfini, défini et zéro.',
     rules: [
-      { title: 'A vs An', content: 'On choisit selon le SON initial : "a university" (son /j/), "an hour" (h muet).' },
-      { title: 'The', content: 'Pour un objet spécifique, unique ou déjà mentionné.' },
-      { title: 'Article Zéro', content: 'Pas d\'article pour les concepts généraux, les sports, et la plupart des pays.' }
+      {
+        title: 'A vs An — selon le SON, pas l\'orthographe',
+        content: 'A + son consonantique initial : a car, a university (/j/), a one-way street (/w/), a European country (/j/). An + son vocalique initial : an apple, an hour (h muet), an MBA (/em/), an honest man (h muet), an unusual idea. La règle est phonétique : "an MP" car on prononce /em-pi/, "a member of parliament" car on prononce /m/.'
+      },
+      {
+        title: 'A/An — usages de l\'article indéfini',
+        content: '① Première mention d\'un élément non spécifique : I saw a man outside. ② Catégorie / profession : She is a lawyer. He is an engineer. ③ Sens générique d\'un seul représentant de la catégorie : A dog is man\'s best friend. ④ Quantité "un(e)" : I need a pen. Give me a minute. ⑤ Après "such", "quite", "what" : What a great idea! Such a pity. Quite a challenge.'
+      },
+      {
+        title: 'The — article défini',
+        content: '① Élément déjà mentionné ou identifiable : I bought a book. The book is great. ② Unique en son genre : the sun, the moon, the internet, the environment. ③ Superlatifs : the fastest, the most important. ④ Instruments de musique : She plays the piano. ⑤ Groupes nationaux, fleuves, chaînes de montagnes, océans : the French, the Thames, the Alps, the Pacific. ⑥ Noms composés de pays : the United States, the UAE, the Netherlands. ⑦ Ordinal : the first, the second.'
+      },
+      {
+        title: 'Article zéro Ø — pas d\'article',
+        content: '① Noms indénombrables au sens général : Water is essential. Knowledge is power. Advice is valuable. ② Noms pluriels au sens général : Dogs are loyal animals. ③ Langues : She speaks French. ④ Sports et jeux : He plays football / chess. ⑤ Repas : We had lunch. Have breakfast first. ⑥ La plupart des pays, villes, rues : France, London, Oxford Street. ⑦ Transport idiomatique : by car, by train, on foot. ⑧ Titres suivis d\'un nom propre : President Biden, Doctor Smith, Professor Jones.'
+      },
+      {
+        title: 'Pièges articles + TOEIC',
+        content: '① "School/prison/hospital/church/bed" : sans article quand on va pour leur fonction : go to school (étudier), be in hospital (soigner) vs "The school is old" (bâtiment). ② "In the morning/afternoon/evening" mais "at night". ③ "On the radio/phone" mais "on TV" (sans "the"). ④ Articles avec maladies : have a cold / a headache, mais have cancer / pneumonia (sans article).'
+      }
     ],
     examples: [
-      { en: 'He is an honest man.', fr: 'C\'est un homme honnête.' },
-      { en: 'I love music.', fr: 'J\'aime la musique (en général).' }
+      { en: 'She is an honest woman with a unique perspective.', fr: '"An" (h muet) + "a" (son /j/ dans unique).' },
+      { en: 'The president of the company gave a speech.', fr: '"The" car identifiable + "a" car première mention.' },
+      { en: 'He went to university in London, not the one in Oxford.', fr: 'Zéro article (fonction) vs "the one" (référent spécifique).' },
+      { en: 'Knowledge is power, but a good education opens doors.', fr: 'Zéro article (général) vs "a" (instance).' }
     ],
-    pitfalls: ['Attention au son "U" : "a university" (son /j/) mais "an umbrella" (son /ʌ/).', 'Pas d\'article devant les sports ou les repas.']
-  },
-  { 
-    id: 'some-any-no', category: 'determiners', tier: 1, label: 'Some / Any / No', 
-    summary: 'Quantifieurs pour l\'affirmation, négation et question.',
-    rules: [
-      { title: 'Some', content: 'Utilisé dans les phrases affirmatives ou les offres polies. Ex: I have some water.' },
-      { title: 'Any', content: 'Utilisé dans les questions et les phrases négatives. Ex: Do you have any ideas?' },
-      { title: 'No', content: 'Exprime la négation avec un verbe à la forme affirmative. Ex: I have no money.' }
+    pitfalls: [
+      '"A/an" devant un sigle se détermine par la prononciation de la 1ère lettre : an FBI agent (/ef/), a NASA mission (/en/).',
+      'Pas d\'article devant les langues, sports, repas : ❌ I love the football → ✅ I love football.',
+      '"The" est obligatoire devant les superlatifs : ❌ She is best student → ✅ She is the best student.'
     ]
   },
-  { id: 'much-many', category: 'determiners', tier: 1, label: 'Much / Many / A lot of', summary: 'Quantifieurs de quantité.', rules: [{ title: 'Many', content: 'Utilisé pour les noms pluriels dénombrables. Ex: many books.' }, { title: 'Much', content: 'Pour les noms singuliers indénombrables. Ex: much water.' }, { title: 'A lot of', content: 'Utilisable pour les deux, surtout à l\'affirmatif.' }], pitfalls: ['"Information" et "Advice" sont indénombrables (much advice).'] },
-  
-  // --- PRONOMS ---
-  { id: 'personal-pronouns', category: 'pronouns', tier: 1, label: 'Personal Pronouns', summary: 'Sujets (I, you), Objets (me, him) et Possessifs.' },
-  { id: 'reflexive-pronouns', category: 'pronouns', tier: 2, label: 'Reflexive Pronouns', summary: 'Usage de myself, yourself...', rules: [{ title: 'Action sur soi', content: 'Quand S et O sont identiques. Ex: He looks at himself.' }, { title: 'Emphase', content: 'Pour souligner qui a fait l\'action. Ex: I did it myself!' }] },
-  { id: 'relative-pronouns', category: 'pronouns', tier: 2, label: 'Relative Pronouns', summary: 'Lier deux propositions.', rules: [{ title: 'Who / Whom', content: 'Who pour le sujet humain, Whom pour l\'objet (après préposition).' }, { title: 'Which / That', content: 'Which pour les objets, That pour tout (sauf après virgule).' }, { title: 'Whose', content: 'Exprime la possession. Ex: The man whose car is red.' }] },
 
-  // --- ADJECTIFS ---
-  { id: 'comparatives', category: 'adjectives', tier: 1, label: 'Comparatives', summary: 'Comparer deux éléments.', rules: [{ title: 'Adjectifs courts', content: 'Ajout de -er + than. Ex: taller than.' }, { title: 'Adjectifs longs', content: 'More + adjectif + than. Ex: more expensive than.' }], pitfalls: ['Good -> better, Bad -> worse, Far -> further.'] },
-  { id: 'superlatives', category: 'adjectives', tier: 1, label: 'Superlatives', summary: 'Le cran le plus élevé.', rules: [{ title: 'Structure', content: 'the + adj-est (courts) ou the most + adj (longs).' }], pitfalls: ['Ne pas oublier "the" devant le superlatif.'] },
-  { 
-    id: 'adjective-order', category: 'adjectives', tier: 2, label: 'Adjective Order', 
-    summary: 'Ordre : Opinion > Taille > Âge > Couleur > Origine.',
-    rules: [{ title: 'Règle', content: 'A beautiful (opinion) large (taille) old (âge) brown (couleur) table.' }]
-  },
-  { id: 'too-enough', category: 'adjectives', tier: 2, label: 'Too / Enough', summary: 'Exprimer l\'excès ou la suffisance.', rules: [{ title: 'Too', content: 'Avant l\'adjectif (too hot) ou avant "much/many".' }, { title: 'Enough', content: 'Après l\'adjectif (good enough) mais avant le nom (enough time).' }] },
-
-  // --- PRÉPOSITIONS ---
-  { id: 'prepositions-time', category: 'prepositions', tier: 1, label: 'Time (In/On/At)', summary: 'In/On/At pour le temps.', rules: [{ title: 'At', content: 'Heures précises, moments (at noon, at night).' }, { title: 'On', content: 'Jours et dates (on Monday, on July 4th).' }, { title: 'In', content: 'Mois, années, saisons, périodes longues.' }] },
-  { id: 'prepositions-place', category: 'prepositions', tier: 1, label: 'Place (In/On/At)', summary: 'Localisation spatiale.', rules: [{ title: 'At', content: 'Point précis, adresse, lieu de fonction (at school).' }, { title: 'On', content: 'Surface (on the table, on the wall).' }, { title: 'In', content: 'Espace fermé, pays, villes.' }] },
-  
-  // --- STRUCTURES VERBALES ---
-  { 
-    id: 'gerund-infinitive', category: 'verbal', tier: 2, label: 'Gerund vs Infinitive', 
-    summary: 'Verbes suivis de -ing ou to + infinitif.',
+  {
+    id: 'some-any-no',
+    category: 'determiners',
+    tier: 1,
+    label: 'Some / Any / No + composés',
+    summary: 'Quantifieurs de base + composés (something, anyone, nobody…).',
     rules: [
-      { title: 'Gérondif (-ing)', content: 'Après enjoy, avoid, suggest, stop (habitude), mind.' },
-      { title: 'Infinitif (to)', content: 'Après want, decide, hope, plan, refuse.' }
+      {
+        title: 'Some — affirmatif + offres polies',
+        content: '① Phrases affirmatives : I have some questions. There is some milk in the fridge. ② Offres : Would you like some coffee? Can I get you some help? ③ Demandes polies : Could I have some information? ④ "Some" + singulier = "un certain" : Some manager left without signing. (quelqu\'un — indéterminé)'
+      },
+      {
+        title: 'Any — questions, négatif, libre choix',
+        content: '① Questions : Do you have any experience? Is there any news? ② Phrases négatives : I don\'t have any money. There isn\'t any time left. ③ Sens "n\'importe lequel" (affirmatif) : Any employee can apply — this means ALL employees can. You can call any time.'
+      },
+      {
+        title: 'No — remplace "not any"',
+        content: '"No" + nom = not any + nom, mais avec un verbe affirmatif. ① There is no milk = There isn\'t any milk. ② I have no experience in finance. ③ No problem! No way! (expressions fixes). ⚠️ Avec "no", le verbe est AFFIRMATIF. Avec "any", le verbe est NÉGATIF : He has no idea / He doesn\'t have any idea.'
+      },
+      {
+        title: 'Composés : something/anything/nothing…',
+        content: 'Some- : something, someone, somebody, somewhere → affirmatif, offres. Any- : anything, anyone, anybody, anywhere → questions, négatif, libre choix. No- : nothing, nobody, no one, nowhere → négatif avec verbe affirmatif. Every- : everything, everyone, everybody, everywhere → totalité. Ex : Is there anything I can do? There is nothing I can do. Someone is waiting for you.'
+      },
+      {
+        title: 'Some/Any + of',
+        content: '"Some of" et "any of" sont suivis d\'un nom avec déterminant (the, my, these…). Some of the students passed. Any of my colleagues could help. None of them agreed. ≠ Some students passed (général, sans "of").'
+      }
+    ],
+    examples: [
+      { en: 'Would you like some tea? I have some left.', fr: 'Offre polie + affirmatif.' },
+      { en: 'I don\'t have any doubt about the decision.', fr: 'Négatif avec "any".' },
+      { en: 'There is no budget for this project.', fr: 'Équivalent de "there isn\'t any budget".' },
+      { en: 'Anyone can join the meeting — it\'s open to all.', fr: '"Any" = n\'importe qui.' }
+    ],
+    pitfalls: [
+      '❌ "I have any questions" dans une phrase affirmative → ✅ "I have some questions".',
+      '"No one" s\'écrit en deux mots ; "nobody" en un seul — les deux sont corrects.',
+      'Après "hardly, scarcely, barely", utiliser "any" et non "some" : I hardly have any time.'
     ]
   },
-  { id: 'reported-speech', category: 'verbal', tier: 3, label: 'Reported Speech', summary: 'Concordance des temps et transformation des pronoms.' },
-  { id: 'question-tags', category: 'verbal', tier: 2, label: 'Question Tags', summary: 'Don\'t you? Aren\'t I? Formation et usage.' },
-  { id: 'modals-deduction', category: 'verbal', tier: 3, label: 'Modals of Deduction', summary: 'Must be, can\'t be, might be (certitude et probabilité).' },
-  { id: 'phrasal-verbs', category: 'verbal', tier: 2, label: 'Phrasal Verbs (Business)', summary: 'Bring up, call off, take over, put off, get ahead...' },
 
-  // --- CONNECTEURS ---
-  { id: 'linking-words', category: 'connectors', tier: 2, label: 'Linking Words', summary: 'However, Therefore, Moreover, Nevertheless.' },
-  { id: 'word-order', category: 'connectors', tier: 3, label: 'Word Order & Inversion', summary: 'Structure de la phrase et inversion emphatique.' },
+  {
+    id: 'much-many',
+    category: 'determiners',
+    tier: 1,
+    label: 'Quantifieurs : Much / Many / Few / Little',
+    summary: 'Exprimer la quantité selon que le nom est dénombrable ou non.',
+    rules: [
+      {
+        title: 'Noms dénombrables vs indénombrables',
+        content: 'DÉNOMBRABLES (ont un pluriel) : books, employees, ideas, meetings. → Many, few, a few, several, a number of. INDÉNOMBRABLES (pas de pluriel) : information, advice, furniture, luggage, news, equipment, progress, research, knowledge, traffic, work. → Much, little, a little, a great deal of. Pièges courants : ❌ informations, advices, furnitures → ces formes n\'existent pas.'
+      },
+      {
+        title: 'Many vs Much',
+        content: 'MANY + nom dénombrable pluriel : How many employees? Too many meetings. Many colleagues agreed. MUCH + nom indénombrable : How much time? Too much stress. Much attention has been paid. En pratique, "much" est surtout utilisé dans les questions et les négatifs ; à l\'affirmatif, on préfère "a lot of / a great deal of".'
+      },
+      {
+        title: 'A lot of / Lots of / Plenty of',
+        content: 'Ces trois expressions s\'utilisent avec les DEUX types de noms. A lot of time / a lot of people. Lots of work / lots of ideas. Plenty of space / plenty of options (= plus que suffisant). Registre : "lots of" est plus informel que "a lot of". Dans un rapport professionnel : "a great deal of time", "a large number of clients".'
+      },
+      {
+        title: 'Few vs A few / Little vs A little',
+        content: 'FEW (sans article) = presque aucun, insuffisant, sens négatif : Few employees responded to the survey (= presque personne). LITTLE (sans article) = presque pas, sens négatif : Little progress has been made. A FEW = quelques, assez pour : A few candidates were selected (= il y en avait quand même). A LITTLE = un peu, suffisant : We have a little time left — enough to finish.'
+      },
+      {
+        title: 'Noms collectifs et pièges courants',
+        content: 'TOUJOURS SINGULIERS (indénombrables) : news (the news IS good), advice, information, research, evidence, furniture, luggage, equipment, progress, staff, traffic. TOUJOURS PLURIELS : people (= les gens), police, cattle, scissors, trousers, glasses. NOMS COLLECTIFS (peuvent être sing. ou plur. en UK) : team, government, company → The team are/is ready.'
+      }
+    ],
+    examples: [
+      { en: 'We don\'t have much time left, but a few ideas are promising.', fr: 'Much + indénombrable / a few + dénombrable.' },
+      { en: 'The news is bad — little progress has been made.', fr: '"News" = singulier ; "little" = presque aucun.' },
+      { en: 'A great deal of effort has gone into this project.', fr: 'Registre formel pour "beaucoup de" + indénombrable.' },
+      { en: 'Few candidates met all the criteria.', fr: 'Presque aucun — sens négatif sans article.' }
+    ],
+    pitfalls: [
+      '❌ "Many informations / many advices" → ✅ "much information / some advice" (indénombrables).',
+      '"The news ARE" → ❌ toujours "The news IS" (singulier en anglais).',
+      '"Few" ≠ "a few" : "Few people came" (quasi-personne) ≠ "A few people came" (quelques-uns sont venus).'
+    ]
+  },
 
-  // --- NOMS ---
-  { id: 'plural-nouns', category: 'nouns', tier: 1, label: 'Plural Nouns', summary: 'Réguliers et irréguliers (children, feet, teeth).' },
-  { id: 'possessive-s', category: 'nouns', tier: 1, label: 'Possessive \'s', summary: 'L\'appartenance : Tom\'s car vs the legs of the table.' }
+  // ══════════════════════════════════════════════
+  //  PRONOMS
+  // ══════════════════════════════════════════════
+  {
+    id: 'personal-pronouns',
+    category: 'pronouns',
+    tier: 1,
+    label: 'Personal Pronouns',
+    summary: 'Pronoms sujets, objets, possessifs adjectifs et possessifs pronoms.',
+    rules: [
+      {
+        title: 'Tableau complet des pronoms',
+        content: 'Sujet → Objet → Possessif adj. → Possessif pronom → Réfléchi. I → me → my → mine → myself. You → you → your → yours → yourself. He → him → his → his → himself. She → her → her → hers → herself. It → it → its → — → itself. We → us → our → ours → ourselves. You → you → your → yours → yourselves. They → them → their → theirs → themselves.'
+      },
+      {
+        title: 'Pronoms sujets vs pronoms objets',
+        content: 'SUJET (avant le verbe) : I, you, he, she, it, we, they. Ex : She wrote the report. OBJET (après le verbe ou après une préposition) : me, you, him, her, it, us, them. Ex : Give it to me. He called her. Between you and me. ⚠️ Après "than" et "as" en comparaison formelle : She is taller than I (am). / He is as tall as she (is). En informel : She is taller than me.'
+      },
+      {
+        title: 'Pronoms possessifs adjectifs (déterminants)',
+        content: 'My, your, his, her, its, our, their. S\'utilisent devant un nom : my report, her idea, their budget, its value. ⚠️ IT\'S (contraction de it is) ≠ ITS (possessif). Ex : It\'s a good plan. / Its main advantage is...'
+      },
+      {
+        title: 'Pronoms possessifs (standalones)',
+        content: 'Mine, yours, his, hers, ours, theirs. Remplacent un nom déjà mentionné : This is my report. / Yours is on the desk. Is this pen yours or mine? The mistake was theirs, not ours. ⚠️ Jamais d\'article devant : ❌ the mine → ✅ mine.'
+      },
+      {
+        title: 'It vs They pour organisations / pays',
+        content: '"It" pour les organisations, entreprises, pays quand on les traite comme des entités abstraites : The company has increased its prices. France has signed the agreement. "They" si on pense aux personnes composant l\'organisation (usage britannique courant) : The company said they would not comment. Les deux sont acceptés selon le registre.'
+      }
+    ],
+    examples: [
+      { en: 'He gave her the report, but she didn\'t read it.', fr: 'Pronoms sujets + objet + objet.' },
+      { en: 'This project is mine, not theirs.', fr: 'Pronoms possessifs standalone.' },
+      { en: 'The company has revised its policy.', fr: '"Its" possessif (≠ "it\'s" = it is).' },
+      { en: 'Between you and me, the plan won\'t work.', fr: 'Après préposition → pronom objet "me".' }
+    ],
+    pitfalls: [
+      '❌ "Its great" (possessif) ≠ ✅ "It\'s great" (it is). Très fréquent comme faute.',
+      'Après "between, for, to, with, from" → pronom OBJET : ❌ between you and I → ✅ between you and me.',
+      '❌ "A friend of my" → ✅ "A friend of mine" (double possessif = of + pronom possessif).'
+    ]
+  },
+
+  {
+    id: 'reflexive-pronouns',
+    category: 'pronouns',
+    tier: 2,
+    label: 'Reflexive Pronouns',
+    summary: 'Myself, yourself… pour l\'action réfléchie, l\'emphase et les expressions idiomatiques.',
+    rules: [
+      {
+        title: 'Formation',
+        content: 'Myself, yourself, himself, herself, itself, ourselves, yourselves, themselves. Formés avec "self" (sing.) ou "selves" (plur.). ⚠️ Il n\'existe pas de "hisself" ou "theirselves" — ces formes sont incorrectes.'
+      },
+      {
+        title: 'Usage 1 — Action réfléchie (sujet = objet)',
+        content: 'Quand le sujet et l\'objet sont la même personne. He cut himself while cooking. She blamed herself for the mistake. The system will update itself automatically. ⚠️ Avec certains verbes, le pronom réfléchi est généralement omis en anglais (contrairement au français) : get up, feel, concentrate, relax, shave, wash, dress : He shaves every morning (pas "himself" obligatoire en anglais standard).'
+      },
+      {
+        title: 'Usage 2 — Emphase (intensifier)',
+        content: 'Placé directement après le sujet ou en fin de phrase pour insister. She wrote the report herself (= personne d\'autre). I myself heard the conversation. The CEO himself attended the meeting. They built the application themselves. Sens : "en personne" ou "sans aide".'
+      },
+      {
+        title: 'Usage 3 — By + pronom réfléchi = seul/sans aide',
+        content: '"By + réfléchi" = alone, without help. She completed the project by herself. He lives by himself. They managed everything by themselves. ≈ on one\'s own : She completed it on her own.'
+      },
+      {
+        title: 'Expressions idiomatiques avec réfléchis',
+        content: 'Help yourself (servez-vous). Behave yourself! (tiens-toi bien). Enjoy yourself! (amuse-toi). Make yourself at home. Teach yourself (apprendre seul). Pull yourself together (ressaisis-toi). Come to oneself (reprendre ses esprits). By/for oneself (seul, de soi-même). Suit yourself (comme tu veux).'
+      }
+    ],
+    examples: [
+      { en: 'She trained herself in Python over six months.', fr: 'Action réfléchie — elle s\'est formée seule.' },
+      { en: 'The director himself reviewed our proposal.', fr: 'Emphase — "en personne".' },
+      { en: 'I\'d rather do it myself than hire a consultant.', fr: '"By myself" = sans aide.' },
+      { en: 'Help yourself to the food after the meeting.', fr: 'Expression idiomatique fixe.' }
+    ],
+    pitfalls: [
+      '❌ "Theirselves, hisself" — ces formes n\'existent pas. Utiliser "themselves, himself".',
+      'Ne pas utiliser le réfléchi pour renforcer le sens possessif : ❌ "myself car" → ✅ "my own car".',
+      '"Myself" ne remplace pas "I" ou "me" par souci de politesse : ❌ "Contact myself" → ✅ "Contact me".'
+    ]
+  },
+
+  {
+    id: 'relative-pronouns',
+    category: 'pronouns',
+    tier: 2,
+    label: 'Relative Pronouns & Clauses',
+    summary: 'Who, which, that, whose, whom, where — relatives définitives et explicatives.',
+    rules: [
+      {
+        title: 'Who, Whom, Whose — pour les personnes',
+        content: 'WHO = pronom sujet (remplace un sujet humain) : The candidate who applied yesterday is qualified. WHOM = pronom objet (après une préposition ou comme objet direct, registre formel) : The manager whom you met is leaving. / The person to whom I spoke... WHOSE = possession pour personnes et objets : The employee whose contract was renewed is delighted. The company whose profits tripled is going public.'
+      },
+      {
+        title: 'Which — pour les objets, animaux, idées',
+        content: 'WHICH remplace un nom non-humain. Sujet : The report which was submitted yesterday... Objet : The laptop which I bought last week... Idée / proposition entière : He was late, which surprised everyone. (Référent = toute la proposition précédente.) ⚠️ Ne jamais utiliser "which" pour une personne.'
+      },
+      {
+        title: 'That — polyvalent (restrictive uniquement)',
+        content: 'THAT peut remplacer who ou which dans les relatives DÉFINITIVES (sans virgules) : The man that called / The report that I wrote. Mais JAMAIS "that" dans une relative EXPLICATIVE (entre virgules) : ❌ London, that is the capital of England, ... → ✅ London, which is the capital. "That" peut être omis quand il est objet de la relative : The report (that) I wrote is ready.'
+      },
+      {
+        title: 'Where, When, Why — pour lieux, temps, raisons',
+        content: 'WHERE : The office where we work is downtown. WHEN : The year when she joined was 2018. WHY : That is the reason why I refused. "When" et "why" peuvent être omis : The day (when) I arrived... / The reason (why) I left...'
+      },
+      {
+        title: 'Relative définitive vs explicative (restrictive vs non-restrictive)',
+        content: 'DÉFINITIVE (sans virgules) : identifie précisément le nom — essentielle au sens. The employee who was late was fired. (pas toutes les employés, seulement celui qui était en retard) EXPLICATIVE (avec virgules) : ajoute une information optionnelle sur un nom déjà identifié. Mr. Smith, who was late, was fired. (Mr Smith est déjà identifié — la relative est un commentaire.) ⚠️ Jamais "that" dans une relative explicative. Pas d\'omission du pronom possible.'
+      }
+    ],
+    examples: [
+      { en: 'The manager whose team exceeded targets received a bonus.', fr: '"Whose" exprime la possession.' },
+      { en: 'The proposal that we discussed needs revision.', fr: '"That" dans une relative définitive.' },
+      { en: 'Our CFO, who has 20 years of experience, will lead the talks.', fr: 'Relative explicative (virgules) — information additionnelle.' },
+      { en: 'This is the issue to which the board has not yet responded.', fr: '"Which" après préposition — registre formel.' }
+    ],
+    pitfalls: [
+      '❌ "The company which employees are unhappy" → ✅ "whose employees" (possession).',
+      '"That" ne peut jamais suivre une virgule : ❌ "London, that is..." → ✅ "London, which is...".',
+      'Après une préposition, uniquement "whom" (personnes) ou "which" (objets) : the person to whom / the issue to which.'
+    ]
+  },
+
+  // ══════════════════════════════════════════════
+  //  ADJECTIFS & COMPARAISON
+  // ══════════════════════════════════════════════
+  {
+    id: 'comparatives',
+    category: 'adjectives',
+    tier: 1,
+    label: 'Comparatives',
+    summary: 'Comparer deux éléments : supériorité, infériorité, égalité et double comparative.',
+    rules: [
+      {
+        title: 'Comparatif de supériorité — formation',
+        content: 'Adjectifs courts (1 syllabe) → + -er + than : tall→taller, fast→faster, cheap→cheaper. Adjectifs 2 syllabes en -y → -ier + than : happy→happier, easy→easier, heavy→heavier. Adjectifs longs (2+ syllabes) → more + adj + than : more expensive, more efficient, more comfortable. Doublage de la consonne finale : big→bigger, hot→hotter, thin→thinner.'
+      },
+      {
+        title: 'Comparatifs irréguliers',
+        content: 'Good → better. Bad → worse. Far → farther (distance physique) / further (fig. + distance). Little → less. Much/many → more. Old → older / elder (pour les membres d\'une famille : my elder brother). Late → later (temps) / latter (le dernier de deux éléments mentionnés).'
+      },
+      {
+        title: 'Comparatif d\'égalité — as... as',
+        content: 'As + adjectif/adverbe + as. Positif : She is as experienced as her colleague. Négatif : This model is not as efficient as the previous one. Avec des noms : He earns as much money as I do. Expressions fixes : as soon as possible (ASAP), as long as, as well as, as far as I know.'
+      },
+      {
+        title: 'Modificateurs de comparatifs',
+        content: 'Pour nuancer la différence : much / far / considerably / significantly + comparatif : This method is much faster. The new version is far more reliable. Sales are considerably higher than last year. Légère différence : a little / slightly / a bit : This option is a little more expensive. ⚠️ Jamais "very" devant un comparatif : ❌ very faster → ✅ much faster.'
+      },
+      {
+        title: 'Double comparative',
+        content: 'The + comparatif, the + comparatif : exprime une proportion. The more you practice, the better you get. The sooner we start, the earlier we finish. The harder the challenge, the greater the reward. The more sophisticated the system, the more difficult it is to operate.'
+      }
+    ],
+    examples: [
+      { en: 'Our new software is considerably more efficient than the old one.', fr: 'Modificateur + comparatif long.' },
+      { en: 'She is not as experienced as her predecessor, but she is much more dynamic.', fr: 'Égalité négative + supériorité.' },
+      { en: 'The more clients we have, the better our margins will be.', fr: 'Double comparative.' },
+      { en: 'Sales this quarter were far worse than expected.', fr: 'Comparatif irrégulier + modificateur.' }
+    ],
+    pitfalls: [
+      '❌ "More faster, more better" → ✅ "faster, better" (pas de double comparatif).',
+      '❌ "Very faster" → ✅ "much faster" / "far faster" (pas "very" devant un comparatif).',
+      '"Further" (supplémentaire, additionnel) vs "farther" (distance) : no further questions / farther from home.'
+    ]
+  },
+
+  {
+    id: 'superlatives',
+    category: 'adjectives',
+    tier: 1,
+    label: 'Superlatives',
+    summary: 'Exprimer le degré extrême. Formation, irréguliers et structures idiomatiques.',
+    rules: [
+      {
+        title: 'Formation du superlatif',
+        content: 'Adjectifs courts (1 syllabe) → the + adj-est : the tallest, the fastest, the cheapest. Adjectifs 2 syllabes en -y → the + -iest : the happiest, the easiest. Adjectifs longs (2+ syllabes) → the most/least + adj : the most expensive, the least efficient. Doublage : the biggest, the hottest. "The" est OBLIGATOIRE devant un superlatif.'
+      },
+      {
+        title: 'Superlatifs irréguliers',
+        content: 'Good → the best. Bad → the worst. Far → the farthest / the furthest. Little → the least. Much/many → the most. Old → the oldest / the eldest (famille).'
+      },
+      {
+        title: 'Superlatif + Present Perfect (ever)',
+        content: 'Le superlatif est fréquemment suivi du présent perfect avec "ever" pour exprimer une expérience unique : It is the best book I have ever read. This is the worst quarter we have ever had. She is the most talented person I have ever worked with.'
+      },
+      {
+        title: 'Superlatif + of / in',
+        content: 'OF + groupe/ensemble : He is the most experienced of all the candidates. / the best of the three options. IN + lieu/période : the tallest building in the world / the most profitable quarter in our history. ⚠️ "Of" pour un groupe dénombrable, "in" pour un lieu, une organisation, une période.'
+      },
+      {
+        title: 'Structures avec superlatif',
+        content: 'By far the + superlatif : This is by far the best solution. One of the + superlatif + nom pluriel : She is one of the most respected managers in the industry. The + superlatif + possible : Please respond as soon as possible. / We need the most cost-effective option possible.'
+      }
+    ],
+    examples: [
+      { en: 'This is by far the most challenging project we have undertaken.', fr: '"By far" renforce le superlatif.' },
+      { en: 'He is one of the most influential CEOs of his generation.', fr: '"One of the" + superlatif + pluriel.' },
+      { en: 'That was the worst financial quarter in the company\'s history.', fr: '"In" + organisation/période.' },
+      { en: 'It\'s the best deal I\'ve ever been offered.', fr: 'Superlatif + present perfect + ever.' }
+    ],
+    pitfalls: [
+      '❌ "She is best student" → ✅ "She is the best student" — "the" obligatoire.',
+      '❌ "Most fastest" → ✅ "the fastest" — pas de double superlatif.',
+      '"One of the best" → le nom qui suit est TOUJOURS pluriel : one of the best solutions (pas "solution").'
+    ]
+  },
+
+  {
+    id: 'adjective-order',
+    category: 'adjectives',
+    tier: 2,
+    label: 'Adjective Order (OSASCOMP)',
+    summary: 'L\'ordre obligatoire des adjectifs multiples devant un nom.',
+    rules: [
+      {
+        title: 'L\'ordre OSASCOMP',
+        content: '① Opinion (beautiful, horrible, useful, expensive) ② Size / Taille (big, small, large, tall) ③ Age / Âge (old, new, young, ancient) ④ Shape / Forme (round, square, triangular) ⑤ Colour / Couleur (red, dark, light) ⑥ Origin / Origine (French, American, Japanese) ⑦ Material / Matière (leather, wooden, cotton, metal) ⑧ Purpose / Fonction (racing car, writing desk). Moyen mnémotechnique : "A SCARY OLD PHOTO CAN MAKE YOU DREAM" — Attitude, Size, Age, Shape, Colour, Origin, Material, Purpose.'
+      },
+      {
+        title: 'Application pratique',
+        content: 'En pratique, on accumule rarement plus de 2-3 adjectifs devant un nom. Exemples : a beautiful (opinion) large (size) old (age) brown (colour) table. An expensive (opinion) Italian (origin) leather (material) bag. A new (age) solar (material/purpose) energy (purpose) project. La règle s\'applique même si on n\'utilise que 2 adjectifs : a small old table ✅ / ❌ an old small table.'
+      },
+      {
+        title: 'Adjectifs de couleur et d\'origine combinés',
+        content: 'Couleur avant origine : a dark blue Japanese car. Deux couleurs : a black and white photograph. Nuances de couleur : a light grey suit / a deep navy background. Origin (nationalité) précède toujours material et purpose : a French leather wallet ✅ / ❌ a leather French wallet.'
+      },
+      {
+        title: 'Adjectifs composés (compound adjectives)',
+        content: 'Formés de deux éléments liés par un trait d\'union. Adj + V-ing : a time-consuming process, a thought-provoking question. Adj + V3 : a well-known company, a highly-skilled engineer. Nombre + nom : a five-year plan, a three-day conference. ⚠️ Avec trait d\'union avant le nom : a well-known fact. Sans trait d\'union après be : The fact is well known.'
+      }
+    ],
+    examples: [
+      { en: 'She wore a stunning (opinion) long (size) black (colour) Italian (origin) silk (material) dress.', fr: 'Ordre complet : opinion → taille → couleur → origine → matière.' },
+      { en: 'We need a cost-effective (compound) long-term (compound) strategy.', fr: 'Adjectifs composés — ici l\'ordre est plus flexible.' },
+      { en: 'They launched a new (age) solar-powered (material/purpose) vehicle.', fr: 'Âge avant matière/fonction.' },
+      { en: 'It was an honest (opinion) small (size) family (purpose) business.', fr: 'Opinion → taille → fonction.' }
+    ],
+    pitfalls: [
+      'L\'ordre n\'est pas facultatif : ❌ "a black big old table" → ✅ "a big old black table".',
+      'Pas de virgule entre les adjectifs qui suivent OSASCOMP ; virgule possible entre deux adjectifs d\'opinion : a wonderful, inspiring speech.',
+      '"A well-known" (avant nom) → "well known" (après be) : without hyphen after a verb.'
+    ]
+  },
+
+  {
+    id: 'too-enough',
+    category: 'adjectives',
+    tier: 2,
+    label: 'Too / Enough',
+    summary: 'Exprimer l\'excès (too) et la suffisance (enough) avec adjectifs, adverbes et noms.',
+    rules: [
+      {
+        title: 'Too — excès négatif',
+        content: 'TOO + adjectif/adverbe : The price is too high. He spoke too quickly. Structure avec infinitif (conséquence) : too + adj + to + inf : It\'s too expensive to buy. She\'s too tired to continue. Avec "for + objet" : It\'s too complicated for me to understand. The task is too heavy for one person to carry.'
+      },
+      {
+        title: 'Too much / Too many',
+        content: 'TOO MUCH + indénombrable (quantité excessive) : too much stress, too much noise, too much information. TOO MANY + dénombrable pluriel : too many meetings, too many errors, too many candidates. Aussi : adverbe : He works too much. / You talk too much.'
+      },
+      {
+        title: 'Enough — suffisance',
+        content: 'ENOUGH se place APRÈS l\'adjectif ou l\'adverbe : The room is big enough. She speaks quickly enough. ENOUGH se place AVANT le nom : We have enough time. There is enough room for everyone. ⚠️ Erreur classique : ❌ "enough big" → ✅ "big enough".'
+      },
+      {
+        title: 'Enough + infinitif (résultat)',
+        content: 'adj + enough + to + inf : Is the candidate experienced enough to lead the team? She was confident enough to present to the board. Avec "for + objet" : The salary is not high enough for me to accept. Is the office large enough for the whole team?'
+      },
+      {
+        title: 'Not enough vs Too little / Too few',
+        content: 'NOT ENOUGH + nom : There isn\'t enough time. We don\'t have enough resources. TOO LITTLE + indénombrable : too little time, too little effort. TOO FEW + dénombrable : too few employees, too few options. Contraste : not enough money ≈ too little money. not enough staff ≈ too few staff members.'
+      }
+    ],
+    examples: [
+      { en: 'The deadline is too tight for us to complete the project properly.', fr: '"Too tight" + for + objet + to + infinitif.' },
+      { en: 'There are too many stakeholders and not enough time to consult them all.', fr: '"Too many" + dénombrable / "not enough" + indénombrable.' },
+      { en: 'Is the budget large enough to cover all the expenses?', fr: '"Enough" après l\'adjectif.' },
+      { en: 'We have too little data to draw any conclusion.', fr: '"Too little" + indénombrable.' }
+    ],
+    pitfalls: [
+      '❌ "enough big" → ✅ "big enough" — "enough" se place APRÈS l\'adjectif.',
+      '"Too" ≠ "very" : "too" implique un problème/excès ; "very" est neutre. "It\'s very hot" (constat) ≠ "It\'s too hot to work" (conséquence négative).',
+      '❌ "too much employees" → ✅ "too many employees" (dénombrable).'
+    ]
+  },
+
+  // ══════════════════════════════════════════════
+  //  PRÉPOSITIONS
+  // ══════════════════════════════════════════════
+  {
+    id: 'prepositions-time',
+    category: 'prepositions',
+    tier: 1,
+    label: 'Prépositions de temps',
+    summary: 'At / On / In + For / Since / By / Until / During pour le temps.',
+    rules: [
+      {
+        title: 'AT — moments précis',
+        content: 'AT + heure : at 9 am, at noon, at midnight, at 3:30 pm. AT + moments spéciaux : at the weekend (UK) / on the weekend (US), at night, at Christmas, at Easter, at lunchtime, at the moment, at the same time, at that point. Expressions fixes : at first, at last, at once, at the latest.'
+      },
+      {
+        title: 'ON — jours et dates',
+        content: 'ON + jour de la semaine : on Monday, on Fridays (habitude). ON + date précise : on July 4th, on 15 March. ON + fête avec date précise : on Christmas Day, on New Year\'s Eve. ON + anniversaire : on my birthday. ON + jour + partie du jour : on Monday morning, on Sunday afternoon.'
+      },
+      {
+        title: 'IN — périodes longues',
+        content: 'IN + mois : in January, in November. IN + année : in 2023, in the 1990s. IN + saison : in summer, in the winter. IN + siècle/époque : in the 21st century, in the Middle Ages. IN + partie du jour : in the morning, in the afternoon, in the evening (mais AT night). IN + délai futur : I\'ll be back in 10 minutes. The project will end in three months.'
+      },
+      {
+        title: 'FOR / SINCE / DURING',
+        content: 'FOR + durée (combien de temps) : for 3 years, for two weeks, for a long time. Utilisé avec present perfect, past simple, futur. SINCE + point de départ précis : since 2019, since Monday, since the meeting. Toujours avec le present perfect. DURING + période nommée : during the meeting, during my stay, during the 1970s. ≠ For : "during" ne peut pas être suivi d\'une durée chiffrée : ❌ during 3 hours → ✅ for 3 hours.'
+      },
+      {
+        title: 'BY / UNTIL (TILL) / FROM…TO',
+        content: 'BY = au plus tard (limite) : Please submit the report by Friday. BY + futur = avant : I will have finished by 5 pm. UNTIL/TILL = jusqu\'à (continuité jusqu\'à un point) : I worked until midnight. The shop is open till 8. BY ≠ UNTIL : "By 5 pm" (fini avant 5h) vs "Until 5 pm" (continue jusqu\'à 5h). FROM…TO/UNTIL : The conference runs from Monday to Wednesday. Open from 9 to 6.'
+      }
+    ],
+    examples: [
+      { en: 'The deadline is at noon on Friday — please submit by then.', fr: '"At" (heure) + "on" (jour) + "by" (limite).' },
+      { en: 'She has been working on this since January.', fr: '"Since" + point de départ → present perfect.' },
+      { en: 'The project ran from March to September.', fr: '"From...to" pour une période délimitée.' },
+      { en: 'We will have a decision by the end of the week.', fr: '"By" = au plus tard à ce moment.' }
+    ],
+    pitfalls: [
+      '"Since" exige le present perfect ou past perfect : ❌ "I work here since 2019" → ✅ "I have worked here since 2019".',
+      '"During 3 hours" est incorrect → ✅ "for 3 hours". "During" précède un événement/période nommée.',
+      '"By" (avant) ≠ "until" (jusqu\'à) : "Finish by Friday" (avant vendredi) ≠ "Work until Friday" (jusqu\'à vendredi inclus).'
+    ]
+  },
+
+  {
+    id: 'prepositions-place',
+    category: 'prepositions',
+    tier: 1,
+    label: 'Prépositions de lieu',
+    summary: 'In / On / At + prépositions de position, direction et expressions fixes.',
+    rules: [
+      {
+        title: 'IN — espace fermé, volume',
+        content: 'IN + espace délimité, volume, contenant : in the box, in the room, in my pocket, in a bottle. IN + lieux géographiques larges : in Paris, in France, in the north, in the mountains, in the street (UK). IN + groupes/organisations : She works in marketing. He is in the finance team. IN + médias/livres : I read it in the newspaper. It\'s in the report.'
+      },
+      {
+        title: 'ON — surface, alignement linéaire',
+        content: 'ON + surface (contact) : on the table, on the wall, on the floor, on a shelf. ON + étages : on the third floor, on the ground floor. ON + côtés : on the left, on the right. ON + transport (avec siège) : on the bus, on the train, on the plane, on the ship. ON + médias : on TV, on the radio, on the phone, on the internet. ON + rue (US) : on Fifth Avenue.'
+      },
+      {
+        title: 'AT — point précis, adresse',
+        content: 'AT + adresse complète : at 10 Downing Street, at this address. AT + lieux fonctionnels (fonction, pas bâtiment) : at school (pour étudier), at work, at home, at the office, at the station, at the airport. AT + événements : at a conference, at a party, at a concert. AT + position : at the top, at the bottom, at the end of the corridor.'
+      },
+      {
+        title: 'Prépositions de position',
+        content: 'Above/over = au-dessus de (over = contact possible ou traversée). Below/under = en dessous de (under = contact possible, below = plus général). Next to/beside = à côté de. Behind = derrière. In front of = devant. Between = entre (deux éléments). Among/amongst = parmi (trois ou plus). Opposite = en face de. Near/close to = près de.'
+      },
+      {
+        title: 'Prépositions de mouvement (direction)',
+        content: 'To = vers (destination) : go to work, travel to London. Into = vers l\'intérieur (mouvement entrant) : walk into the room. Out of = vers l\'extérieur : walk out of the building. Onto = sur (mouvement vers surface) : step onto the stage. From = depuis (point de départ) : fly from Paris. Through = à travers : drive through the tunnel. Along = le long de : walk along the river. Across = de l\'autre côté : walk across the bridge.'
+      }
+    ],
+    examples: [
+      { en: 'The files are in the drawer, on the left shelf in the archive room.', fr: 'IN (contenant) + ON (surface) + IN (espace).' },
+      { en: 'She\'s at the airport — she just landed and is at baggage claim.', fr: '"At" pour un lieu fonctionnel.' },
+      { en: 'The announcement was made on TV and published in the newspaper.', fr: '"On" pour médias audiovisuels / "in" pour print.' },
+      { en: 'He walked into the boardroom and sat opposite the chairman.', fr: 'Mouvement (into) + position (opposite).' }
+    ],
+    pitfalls: [
+      '"In the street" (UK) vs "on the street" (US) — les deux sont corrects selon le registre.',
+      '"AT school / AT work / AT home" = fonction (pas le bâtiment). "The school" = le bâtiment : ❌ "at the home" → ✅ "at home".',
+      '"On a bus/train" (transport en commun) vs "in a car/taxi" (véhicule privé). Get in/into a car ; get on/onto a bus.'
+    ]
+  },
+
+  // ══════════════════════════════════════════════
+  //  STRUCTURES VERBALES
+  // ══════════════════════════════════════════════
+  {
+    id: 'gerund-infinitive',
+    category: 'verbal',
+    tier: 2,
+    label: 'Gerund vs Infinitive',
+    summary: 'Quand utiliser -ing ou to + base verbale, y compris les verbes à double sens.',
+    rules: [
+      {
+        title: 'Verbes + gérondif (-ing) uniquement',
+        content: 'Enjoy, avoid, suggest, mind, risk, deny, consider, finish, keep, miss, practise, involve, delay, postpone, recommend, resent, resist, appreciate, can\'t help, can\'t stand, give up, look forward to, object to, be used to, succeed in, insist on, feel like, it\'s no use, it\'s worth. Ex : She denied stealing the documents. I look forward to hearing from you. They suggested postponing the meeting.'
+      },
+      {
+        title: 'Verbes + infinitif (to + base) uniquement',
+        content: 'Want, need, decide, hope, plan, refuse, manage, fail, agree, promise, offer, seem, appear, tend, expect, claim, afford, aim, arrange, choose, dare, deserve, determine, intend, learn, prepare, pretend, struggle, swear, threaten, wish, would like. Ex : He refused to sign the contract. She managed to finish on time. We can\'t afford to miss this opportunity.'
+      },
+      {
+        title: 'Verbes à double sens — sens DIFFÉRENTS',
+        content: 'REMEMBER : + ing = se souvenir d\'une action passée (I remember locking the door). + to = ne pas oublier de faire qqch (Remember to lock the door!). FORGET : + ing = se souvenir (avec regret) d\'une action passée (I\'ll never forget meeting her). + to = oublier de faire (I forgot to call him). STOP : + ing = cesser une activité (Stop talking!). + to = s\'arrêter pour faire qqch (He stopped to check his phone). TRY : + ing = expérimenter une méthode (Try adding more salt). + to = faire un effort (I tried to solve the problem). REGRET : + ing = regretter ce qu\'on a fait (I regret saying that). + to = regretter d\'annoncer (We regret to inform you...).'
+      },
+      {
+        title: 'Après les prépositions — toujours gérondif',
+        content: 'Après TOUTE préposition, utiliser le gérondif. after doing, before leaving, by calling, without asking, instead of working, in addition to presenting, look forward to meeting. ⚠️ "TO" peut être une préposition : used to doing (habitué à), look forward to hearing (attendre avec impatience), object to being (s\'opposer à). Ici "to" ≠ marqueur d\'infinitif → gérondif obligatoire.'
+      },
+      {
+        title: 'Make, let, have, get — structures causatives',
+        content: 'MAKE + objet + BASE (force) : He made me rewrite the report. MAKE au passif + to : I was made to rewrite the report. LET + objet + BASE (permission) : The manager let her leave early. HAVE + objet + V3 (service fait par qqn) : We had the office cleaned. We had the report translated. GET + objet + V3 (résultat) : Get the contract signed. I got my car fixed. GET + objet + to-inf (persuasion) : She got him to sign the agreement.'
+      }
+    ],
+    examples: [
+      { en: 'I remember sending the invoice, but I forgot to attach the receipt.', fr: 'Remember + ing (passé) vs forget + to (futur/intention).' },
+      { en: 'The company decided to outsource, thereby avoiding the cost of hiring.', fr: '"Decided to" + "avoiding" (après préposition).' },
+      { en: 'She had her presentation reviewed by a coach before the board meeting.', fr: 'Causatif "have sth done".' },
+      { en: 'It is worth taking the time to understand the market before launching.', fr: '"Worth" + gérondif.' }
+    ],
+    pitfalls: [
+      '"Look forward to meeting" (pas "to meet") — "to" est ici une préposition.',
+      '"Stop to smoke" (s\'arrêter pour fumer) ≠ "stop smoking" (arrêter de fumer). Erreur fréquente.',
+      'Au passif, "make" prend "to" : He made me do it → I was made to do it.'
+    ]
+  },
+
+  {
+    id: 'reported-speech',
+    category: 'verbal',
+    tier: 3,
+    label: 'Reported Speech',
+    summary: 'Discours indirect : backshift, transformations de pronoms, questions et impératifs.',
+    rules: [
+      {
+        title: 'Backshift — concordance des temps',
+        content: 'Quand le verbe introducteur est au passé (said, told, asked), les temps reculent dans le temps. Present simple → Past simple : "I work here" → He said he worked there. Present continuous → Past continuous : "I am working" → She said she was working. Past simple → Past perfect : "I left" → He said he had left. Present perfect → Past perfect : "I have finished" → She said she had finished. Will → Would. Can → Could. May → Might. Must → Had to / Must (obligation immuable). Shall → Would. "Would, could, might, should, ought to" restent inchangés.'
+      },
+      {
+        title: 'Pas de backshift — exceptions',
+        content: 'On ne fait PAS de backshift si : ① La situation est toujours vraie : He said the Earth orbits the Sun. ② Le verbe introducteur est au présent/futur : She says she is coming. ③ On cite en temps réel : He just told me he is arriving. ④ Avec "that" explicite et clarté contextuelle : The manager explained that the system works differently.'
+      },
+      {
+        title: 'Transformations de pronoms et expressions de temps',
+        content: 'Pronoms : I → he/she. We → they. My → his/her. Our → their. You → I/he/she (selon contexte). Expressions de temps/lieu : now → then. today → that day. yesterday → the day before / the previous day. tomorrow → the next day / the following day. last week → the previous week. next year → the following year. here → there. this → that. these → those. ago → before / previously.'
+      },
+      {
+        title: 'Questions indirectes',
+        content: 'ORDRE SUJET-VERBE (pas d\'inversion comme dans la question directe). WH- questions : He asked me where I worked. (pas : where did I work) She wondered what the project involved. YES/NO questions : introduce with "if" or "whether" : They asked if we had any questions. I wanted to know whether she had received the email. ⚠️ Pas d\'auxiliaire "do/does/did" dans les questions indirectes : ❌ He asked me where did I live → ✅ where I lived.'
+      },
+      {
+        title: 'Impératifs, verbes introducteurs variés',
+        content: 'IMPÉRATIFS rapportés → tell/ask/order + objet + to-infinitive : "Come here!" → He told me to come. "Don\'t touch it!" → She warned me not to touch it. AUTRES VERBES INTRODUCTEURS plus précis : suggest + -ing / that clause : She suggested (that) we postpone the meeting. advise/recommend + -ing ou + objet + to-inf : He advised postponing / advised us to postpone. offer + to-inf : She offered to help. promise + to-inf : He promised to call. admit + -ing : He admitted making an error. deny + -ing : She denied leaking the information.'
+      }
+    ],
+    examples: [
+      { en: '"We will launch next quarter." → The CEO announced that they would launch the following quarter.', fr: 'Will→would + today/next→following.' },
+      { en: '"Where did you go to university?" → She asked him where he had gone to university.', fr: 'Question indirecte : pas d\'inversion + backshift.' },
+      { en: '"Don\'t share this report." → He instructed us not to share the report.', fr: 'Impératif négatif rapporté.' },
+      { en: '"I have already signed the contract." → She said she had already signed the contract.', fr: 'Present perfect → Past perfect.' }
+    ],
+    pitfalls: [
+      'Questions indirectes : pas d\'inversion ni d\'auxiliaire do/did : ❌ "He asked what did I think" → ✅ "He asked what I thought".',
+      '"Say" vs "tell" : say (+ proposition sans objet) / tell (+ objet indirect) : He said he was tired. / He told me he was tired. ❌ "He said me".',
+      'Pas toujours de backshift pour les vérités permanentes : "She said water boils at 100°C" (pas de backshift).'
+    ]
+  },
+
+  {
+    id: 'question-tags',
+    category: 'verbal',
+    tier: 2,
+    label: 'Question Tags',
+    summary: 'Construire et utiliser les question tags, y compris les cas irréguliers.',
+    rules: [
+      {
+        title: 'Principe général',
+        content: 'Un question tag est une mini-question ajoutée en fin de phrase pour demander confirmation ou chercher l\'accord. RÈGLE : si la phrase principale est AFFIRMATIVE → tag NÉGATIF. Si la phrase est NÉGATIVE → tag AFFIRMATIF. Le tag reprend L\'AUXILIAIRE de la phrase principale. She is ready, isn\'t she? / He isn\'t coming, is he? They have finished, haven\'t they? You will attend, won\'t you?'
+      },
+      {
+        title: 'Présent et passé simples (do/does/did)',
+        content: 'Sans auxiliaire dans la phrase principale, on utilise do/does/did. She works here, doesn\'t she? They finished on time, didn\'t they? You speak French, don\'t you? He called you, didn\'t he? ⚠️ 3ème personne singulier présent → "doesn\'t" : She likes it, doesn\'t she? (pas "don\'t")'
+      },
+      {
+        title: 'Cas particuliers',
+        content: '"I am" → tag : aren\'t I? (irrégulier) : I am right, aren\'t I? "Let\'s" → shall we? : Let\'s start, shall we? Impératif positif → will you? ou would you? (invitation/ordre poli) : Open the window, will you? Impératif négatif → will you? : Don\'t be late, will you? "Have" (verbe plein, possession) → use do/does : You have a car, don\'t you? "Have" (auxiliaire) → use have : She has been promoted, hasn\'t she?'
+      },
+      {
+        title: 'Pronoms dans les tags',
+        content: 'Le pronom du tag doit correspondre au sujet. Nobody/No one → they : Nobody called, did they? Somebody/Someone → they : Someone left a message, didn\'t they? Everything → it : Everything is ready, isn\'t it? Nothing → it : Nothing is wrong, is it? "There is/are" → there : There is a problem, isn\'t there?'
+      },
+      {
+        title: 'Intonation et sens',
+        content: 'L\'intonation change le sens du tag : INTONATION DESCENDANTE (↘) : on est quasi-certain et on cherche confirmation : It\'s a great deal, isn\'t it ↘ (je suis sûr, demande d\'accord). INTONATION MONTANTE (↗) : on est incertain et on pose une vraie question : You\'ve seen the report, haven\'t you ↗ (je ne suis pas sûr).'
+      }
+    ],
+    examples: [
+      { en: 'The merger was announced yesterday, wasn\'t it?', fr: 'Was → wasn\'t + pronom it.' },
+      { en: 'Nobody has raised any objections, have they?', fr: '"Nobody" → pronom "they" au tag affirmatif.' },
+      { en: 'Let\'s review the figures, shall we?', fr: '"Let\'s" → tag "shall we".' },
+      { en: 'I am the only one who noticed, aren\'t I?', fr: '"I am" → tag irrégulier "aren\'t I".' }
+    ],
+    pitfalls: [
+      '"I am late, aren\'t I?" est correct (pas "amn\'t I" — forme non standard).',
+      '"She has a car, doesn\'t she?" ("have" verbe plein) vs "She has arrived, hasn\'t she?" ("have" auxiliaire).',
+      '"Needn\'t" → tag affirmatif "need they?" : He needn\'t attend, need he?'
+    ]
+  },
+
+  {
+    id: 'modals-deduction',
+    category: 'verbal',
+    tier: 3,
+    label: 'Modals — Déduction, Probabilité & Regret',
+    summary: 'Must / Can\'t / Might / Should + have + V3 pour analyser des situations passées et présentes.',
+    rules: [
+      {
+        title: 'Déduction présente — certitude et probabilité',
+        content: 'MUST BE : déduction logique forte (quasi-certitude positive) : He must be tired — he has been working for 12 hours. The light is on; she must be home. CAN\'T BE : impossibilité logique (quasi-certitude négative) : He can\'t be the thief — he was with me all evening. She can\'t be over 30; she looks so young. MIGHT/MAY/COULD BE : possibilité ou incertitude : He might be in a meeting. It could be a technical issue. There may be a delay.'
+      },
+      {
+        title: 'Déduction passée — modal + have + V3',
+        content: 'MUST HAVE + V3 : certitude positive sur le passé : She must have forgotten the meeting — she\'s never late otherwise. CAN\'T HAVE + V3 : impossibilité logique dans le passé : He can\'t have sent the email; he was travelling all day. MIGHT/MAY/COULD HAVE + V3 : possibilité passée : They might have taken the wrong file. She could have left already.'
+      },
+      {
+        title: 'Obligation passée non remplie — Should / Ought to',
+        content: 'SHOULD HAVE + V3 : regret, conseil rétroactif, reproche : You should have arrived earlier. I should have checked the data. She shouldn\'t have said that. OUGHT TO HAVE + V3 : même sens, légèrement plus formel : He ought to have informed us. NEEDN\'T HAVE + V3 : action effectuée mais inutile : I needn\'t have prepared so many slides — the meeting was cancelled. (J\'ai préparé, mais c\'était inutile.) ≠ DIDN\'T NEED TO : la personne ne savait pas que c\'était inutile et n\'a pas agi : I didn\'t need to prepare slides, so I didn\'t.'
+      },
+      {
+        title: 'Would rather / Had better',
+        content: 'WOULD RATHER + base verbale : préférence personnelle : I would rather work from home. I\'d rather not attend the launch party. WOULD RATHER + sujet + prétérit : préférence concernant les actions d\'autrui (présent/futur) : I\'d rather you didn\'t smoke in here. She\'d rather we postponed the meeting. HAD BETTER + base verbale : conseil pressant (conséquence négative implicite) : You had better submit this before 5 pm or you\'ll miss the deadline. We\'d better not tell him — he\'ll overreact.'
+      },
+      {
+        title: 'Used to / Be used to / Get used to',
+        content: 'USED TO + base verbale : habitude passée révolue (état ou action) : I used to work night shifts. She used to be very shy. (Plus le cas maintenant.) BE USED TO + gérondif : être habitué à (état actuel) : He is used to dealing with difficult clients. I\'m not used to working remotely. GET USED TO + gérondif : s\'habituer à (processus) : It takes time to get used to the new software. She\'s getting used to commuting.'
+      }
+    ],
+    examples: [
+      { en: 'She must have left already — her coat is gone.', fr: 'Déduction passée basée sur une preuve (certitude).' },
+      { en: 'He can\'t have written this report; he joined the team yesterday.', fr: 'Impossibilité logique passée.' },
+      { en: 'I should have prepared more questions for the interview.', fr: 'Regret — conseil rétroactif.' },
+      { en: 'You\'d better send the invoice today, or we\'ll lose the contract.', fr: '"Had better" — conseil pressant avec conséquence.' }
+    ],
+    pitfalls: [
+      'Après un modal : TOUJOURS base verbale sans "to" ni conjugaison : ❌ "He must has left" → ✅ "He must have left".',
+      '"Needn\'t have done" (fait mais inutile) ≠ "didn\'t need to do" (pas fait car inutile).',
+      '"Used to swim" (habitude passée) ≠ "be used to swimming" (habitué à) ≠ "get used to swimming" (s\'habituer à).'
+    ]
+  },
+
+  {
+    id: 'phrasal-verbs',
+    category: 'verbal',
+    tier: 2,
+    label: 'Phrasal Verbs (Business)',
+    summary: 'Les phrasal verbs essentiels en contexte professionnel — séparables et inséparables.',
+    rules: [
+      {
+        title: 'Séparables vs inséparables',
+        content: 'SÉPARABLES : l\'objet peut se placer entre le verbe et la particule, ou après. Si l\'objet est un pronom, il SE PLACE obligatoirement entre les deux : call off the meeting / call the meeting off ✅. call it off ✅ / ❌ call off it. INSÉPARABLES : le verbe et la particule ne peuvent jamais être séparés : look into the issue ✅ / ❌ look the issue into. deal with the problem ✅ / ❌ deal the problem with.'
+      },
+      {
+        title: 'Phrasal verbs — réunions & projets',
+        content: 'Bring up = soulever (un sujet) : She brought up the budget issue. Bring forward = avancer (une date) : Can we bring the meeting forward? Put off / Postpone = reporter : We had to put off the launch. Put back = reporter à plus tard : The deadline has been put back to next month. Call off / Cancel : The conference was called off. Set up = organiser, créer : We need to set up a meeting. Draw up = rédiger (un plan, contrat) : Draw up a proposal.'
+      },
+      {
+        title: 'Phrasal verbs — gestion & ressources humaines',
+        content: 'Take on = embaucher / prendre en charge : We are taking on new staff. / She took on extra responsibilities. Let go (of) = licencier / lâcher : Three employees were let go. Lay off = licencier (économique) : 50 workers were laid off. Hand in / Submit = remettre : Please hand in your report by Friday. Fill in / out = remplir (formulaire) : Fill in this form. Take over = reprendre le contrôle de / racheter : The company was taken over by a competitor. Step down = démissionner : The CEO stepped down.'
+      },
+      {
+        title: 'Phrasal verbs — communication & négociation',
+        content: 'Get through (to) = joindre au téléphone : I can\'t get through to the client. Follow up (on) = faire un suivi : I\'ll follow up on that email. Come up with = proposer, trouver : She came up with a great solution. Look into = examiner, enquêter : We are looking into the complaint. Back up = soutenir, sauvegarder : Do you have data to back up your claim? Run through = passer en revue : Let me run through the key points. Go over = revoir, examiner : We need to go over the figures again.'
+      },
+      {
+        title: 'Phrasal verbs — finance & croissance',
+        content: 'Cut back on = réduire : We need to cut back on expenses. Come in under budget = rester sous le budget : The project came in under budget. Write off = passer en pertes, amortir : The loss was written off. Add up = s\'additionner, s\'agencer : The figures don\'t add up. Pick up = se redresser, s\'améliorer : Sales are picking up. Fall through = échouer, tomber à l\'eau : The deal fell through. Break even = rentrer dans ses frais : We expect to break even by Q3.'
+      }
+    ],
+    examples: [
+      { en: 'She brought up the issue of overtime pay, and we decided to look into it.', fr: '"Bring up" (soulever) + "look into" (examiner) — séparable puis inséparable.' },
+      { en: 'The merger fell through because they couldn\'t come up with a fair offer.', fr: '"Fall through" (échouer) + "come up with" (proposer).' },
+      { en: 'We need to cut back on travel costs and hand in all receipts by Friday.', fr: '"Cut back on" (réduire) + "hand in" (remettre).' },
+      { en: 'Call it off — the venue has cancelled on us.', fr: 'Pronom obligatoirement entre les deux éléments.' }
+    ],
+    pitfalls: [
+      'Pronom entre verbe et particule : ❌ "call off it" → ✅ "call it off".',
+      '"Look forward to" + gérondif : "to" est une PRÉPOSITION ici : ❌ "look forward to meet" → ✅ "look forward to meeting".',
+      '"Make up" peut signifier inventer (make up a story), compenser (make up for lost time) ou se réconcilier (they made up) — le contexte est essentiel.'
+    ]
+  },
+
+  // ══════════════════════════════════════════════
+  //  CONNECTEURS & SYNTAXE
+  // ══════════════════════════════════════════════
+  {
+    id: 'linking-words',
+    category: 'connectors',
+    tier: 2,
+    label: 'Linking Words & Connectors',
+    summary: 'Connecteurs d\'addition, contraste, cause, conséquence, condition et but.',
+    rules: [
+      {
+        title: 'Addition',
+        content: 'COORDONNANTS : and, both…and, not only…but also. ADVERBIAUX (+ virgule ou point-virgule) : moreover, furthermore, in addition, besides, on top of that, what is more. PRÉPOSITIONS : in addition to + nom/gérondif. Registre formel (TOEIC/business) : moreover, furthermore, additionally. Ex : The project was completed on time; moreover, it came in under budget. In addition to the salary, benefits include health insurance.'
+      },
+      {
+        title: 'Contraste et concession',
+        content: 'COORDONNANTS : but, yet. SUBORDONNANTS (+ proposition) : although, even though, while, whereas, even if, much as. PRÉPOSITIONS (+ nom/gérondif) : despite, in spite of, notwithstanding. ADVERBIAUX : however, nevertheless, nonetheless, on the other hand, conversely, albeit. ⚠️ Structures : "Despite the cost, it was approved." / "Although it was costly, it was approved." ❌ "Despite it was costly" → "Despite the fact that it was costly".'
+      },
+      {
+        title: 'Cause et explication',
+        content: 'SUBORDONNANTS : because (cause directe), since/as (cause connue, moins emphatique), given that, seeing that. PRÉPOSITIONS : because of, due to, owing to, as a result of, on account of (+ nom). ADVERBIAUX : therefore, consequently, as a result, accordingly, hence, thus (conséquence). Ex : Due to the delay, we lost the contract. The project succeeded because the team was well-coordinated. The deadline was missed; consequently, a penalty was applied.'
+      },
+      {
+        title: 'Condition',
+        content: 'If, unless (= if not), provided (that), providing (that), as long as, on condition that, given that, should (inversion formelle), in case (précaution). "In case" ≠ "if" : "I\'ll bring an umbrella in case it rains" (précaution préventive) ≠ "If it rains, I\'ll stay home" (condition). "Unless" = if not : Unless we act now, we will miss the opportunity (= If we don\'t act now).'
+      },
+      {
+        title: 'But, résultat et autres connecteurs utiles',
+        content: 'BUT : "lest" (de peur que, formel), "so that / in order that" (but/intention). OPPOSITION PARALLÈLE : whereas, while (tandis que). SÉQUENCE : firstly, secondly, then, next, finally, subsequently, afterwards. ILLUSTRATION : for example, for instance, such as, namely, that is (i.e.). RÉSUMÉ : in conclusion, to sum up, in short, overall, all in all. Éviter les répétitions : "furthermore / additionally / what is more" plutôt que "also, also, also".'
+      }
+    ],
+    examples: [
+      { en: 'Despite the economic downturn, the company managed to increase its market share.', fr: '"Despite" + groupe nominal.' },
+      { en: 'The proposal was rejected; however, several elements were retained.', fr: '"However" = connecteur adverbial de contraste (virgule + point-virgule).' },
+      { en: 'Owing to unforeseen delays, the launch has been postponed until further notice.', fr: '"Owing to" (formel) + groupe nominal.' },
+      { en: 'Unless both parties agree to the terms, the contract will not be signed.', fr: '"Unless" = "if not".' }
+    ],
+    pitfalls: [
+      '❌ "Despite he was tired" → ✅ "Despite being tired" ou "Despite the fact that he was tired" — "despite" ne précède pas directement un sujet+verbe.',
+      '❌ "Although... but" — ne pas combiner les deux : "Although it was expensive, we bought it" (pas "but" en plus).',
+      '"However" est un adverbe, pas une conjonction : séparer les propositions par un point-virgule ou un point : "It failed; however, we learned a lot." ❌ "It failed, however we learned a lot."'
+    ]
+  },
+
+  {
+    id: 'word-order',
+    category: 'connectors',
+    tier: 3,
+    label: 'Word Order, Inversion & Subjunctive',
+    summary: 'Structure canonique, inversion emphatique, conditionnels inversés et subjonctif.',
+    rules: [
+      {
+        title: 'Structure de base SVOA',
+        content: 'L\'ordre canonique de l\'anglais est Sujet + Verbe + Objet + Adverbe/Circonstant. She (S) submitted (V) the report (O) on Monday (A). Les adverbes de fréquence (always, never, often, usually, sometimes) se placent : ① AVANT le verbe principal : She always arrives on time. ② APRÈS be : He is never late. ③ ENTRE l\'auxiliaire et le verbe principal : I have never seen this before. Les adverbes de manière, lieu, temps : ordre préféré = manière → lieu → temps : She worked efficiently at the office yesterday.'
+      },
+      {
+        title: 'Inversion après adverbes négatifs / restrictifs',
+        content: 'Quand ces adverbes ou expressions sont placés EN DÉBUT DE PHRASE pour l\'emphase, l\'ordre sujet-auxiliaire s\'inverse (comme dans une question). Never, rarely, seldom, hardly, scarcely, barely, little (dans le sens "guère"), no sooner, not only, not until, at no time, under no circumstances, in no way, on no account. Structure : adverbe + auxiliaire + sujet + verbe. Never have I seen such dedication. Rarely does he miss a deadline. Not until the results were confirmed did they celebrate. Under no circumstances should you share this information.'
+      },
+      {
+        title: 'Inversion dans les conditionnels formels',
+        content: 'En anglais formel et écrit, on peut omettre "if" et inverser le sujet et l\'auxiliaire. Conditionnel 1 : "If you should need help" → Should you need help, please contact us. Conditionnel 2 : "If it were not for his support" → Were it not for his support, we would have failed. Conditionnel 3 : "If I had known" → Had I known about the delay, I would have warned you. Ces structures sont très fréquentes dans les e-mails professionnels, rapports et le TOEIC.'
+      },
+      {
+        title: 'Structures corrélatives (No sooner… than / Hardly… when)',
+        content: 'No sooner had + sujet + V3 + than : No sooner had she arrived than the meeting started. Hardly/Scarcely/Barely had + sujet + V3 + when : Hardly had the project launched when the first problem arose. Scarcely had we signed the contract when the deal changed. ⚠️ Inversion obligatoire dans la 1ère proposition.'
+      },
+      {
+        title: 'Subjonctif (Subjunctive mood)',
+        content: 'Le subjonctif utilise la BASE VERBALE (forme infinitive sans "to") à toutes les personnes, y compris la 3ème singulier. AFTER VERBS of recommendation/necessity : suggest, recommend, propose, insist, demand, require, ask, order, command, urge. It is essential/important/vital/necessary/advisable + that... The committee recommended that the CEO resign. It is essential that every employee be aware of the rules. I suggest that she take a different approach. ⚠️ La forme négative : It is vital that he not share this (sans "doesn\'t").'
+      }
+    ],
+    examples: [
+      { en: 'Not only did he lose the contract, but he also damaged the company\'s reputation.', fr: '"Not only" en tête → inversion obligatoire.' },
+      { en: 'Had I received the brief earlier, I could have prepared a stronger proposal.', fr: 'Inversion du conditionnel 3 (= If I had received).' },
+      { en: 'The board insisted that the report be submitted before the shareholders\' meeting.', fr: 'Subjonctif après "insist that" — "be" à toutes les personnes.' },
+      { en: 'Scarcely had the quarterly results been published when the stock price dropped.', fr: '"Scarcely… when" avec inversion.' }
+    ],
+    pitfalls: [
+      '❌ "Not only he lost the contract" → ✅ "Not only did he lose" — inversion auxiliaire + sujet obligatoire.',
+      'Subjonctif : ❌ "It is essential that he is/was present" → ✅ "that he be present" (base verbale).',
+      'Inversion conditionnelle : ❌ "Would I have known" → ✅ "Had I known" (past perfect, pas would).'
+    ]
+  },
+
+  // ══════════════════════════════════════════════
+  //  NOMS & DÉTERMINANTS
+  // ══════════════════════════════════════════════
+  {
+    id: 'plural-nouns',
+    category: 'nouns',
+    tier: 1,
+    label: 'Plural Nouns',
+    summary: 'Pluriels réguliers, irréguliers, invariables et noms toujours pluriels ou singuliers.',
+    rules: [
+      {
+        title: 'Pluriels réguliers',
+        content: 'Règle générale : + s (books, reports, ideas). Mots en -ch, -sh, -x, -z, -s : + es (watches, dishes, boxes, buzzes, buses). Mots en consonne + y : y → ies (company→companies, strategy→strategies, factory→factories). Voyelle + y : + s uniquement (days, boys, keys, plays). Mots en -f/-fe : → ves (leaf→leaves, knife→knives, half→halves, shelf→shelves). Exceptions : beliefs, roofs, cliffs, chiefs (+ s seulement).'
+      },
+      {
+        title: 'Pluriels irréguliers à mémoriser',
+        content: 'Changement de voyelle : man→men, woman→women, foot→feet, tooth→teeth, goose→geese, mouse→mice, louse→lice. Terminaison -en : child→children, ox→oxen. Forme identique : sheep, fish, deer, species, series, means, aircraft, spacecraft. Mots d\'origine latine/grecque : criterion→criteria, phenomenon→phenomena, datum→data, medium→media, bacterium→bacteria, analysis→analyses, basis→bases, hypothesis→hypotheses, index→indices/indexes.'
+      },
+      {
+        title: 'Noms toujours pluriels (sans singulier)',
+        content: 'Vêtements/objets en deux parties : trousers, jeans, shorts, tights, scissors, glasses (lunettes), tweezers, pliers, headphones. Autres : belongings, surroundings, premises (locaux), earnings, savings, goods, stairs, remains, outskirts. Avec "a pair of" pour les quantifier : a pair of scissors / two pairs of trousers.'
+      },
+      {
+        title: 'Noms indénombrables (toujours singuliers)',
+        content: 'JAMAIS de pluriel, JAMAIS d\'article "a/an" : advice, information, news, knowledge, furniture, luggage, baggage, equipment, machinery, traffic, weather, research, evidence, data (souvent traité comme sing. en usage moderne), progress, work (travail général), damage, harm. Avec "a piece of / an item of / a bit of" pour singulariser : a piece of advice, an item of furniture. ⚠️ "The news is good" (singulier). "The staff are..." ou "The staff is..." (collectif, les deux possibles).'
+      },
+      {
+        title: 'Noms collectifs',
+        content: 'En anglais américain, toujours singulier. En anglais britannique, singulier ou pluriel selon qu\'on pense à l\'entité (sing.) ou aux personnes (plur.). Noms concernés : team, staff, committee, government, board, company, family, police, jury, audience, crowd. Ex (UK) : The team are working hard. / The team is well-organised. (US) : The team is working hard. ⚠️ "Police" en anglais est TOUJOURS pluriel : The police are investigating (jamais "polices").'
+      }
+    ],
+    examples: [
+      { en: 'The criteria for selection have been revised by the committee.', fr: '"Criteria" (pluriel de criterion) + verbe pluriel.' },
+      { en: 'Could you give me some advice? I need a piece of information.', fr: 'Indénombrables : "some advice" / "a piece of information" (pas de pluriel).' },
+      { en: 'She packed two pairs of trousers and some shorts for the trip.', fr: '"A pair of trousers" pour les pluralia tantum.' },
+      { en: 'The media are divided on the issue.', fr: '"Media" = pluriel de "medium" → verbe pluriel.' }
+    ],
+    pitfalls: [
+      '❌ "informations, advices, furnitures, researches" — ces formes n\'existent pas en anglais.',
+      '❌ "The police is investigating" → ✅ "The police are" (toujours pluriel).',
+      '"Data" est le pluriel de "datum" : en usage académique → "Data are" ; en usage courant → "Data is" est accepté.'
+    ]
+  },
+
+  {
+    id: 'possessive-s',
+    category: 'nouns',
+    tier: 1,
+    label: 'Possessive \'s & Of',
+    summary: 'Exprimer la possession : \'s, s\', of, et le double possessif.',
+    rules: [
+      {
+        title: 'Nom singulier + \'s',
+        content: 'Pour tout nom singulier, on ajoute \'s : Tom\'s report. The client\'s signature. The company\'s strategy. The CEO\'s decision. Même pour les noms se terminant en -s : James\'s office (ou James\' — les deux sont acceptés). Dickens\'s novels / Dickens\' novels. En pratique, les deux formes sont correctes pour les noms se terminant en -s.'
+      },
+      {
+        title: 'Nom pluriel régulier (finissant en -s) → apostrophe seule',
+        content: 'Pour les pluriels qui se terminent en -s, on ajoute uniquement l\'apostrophe après le s : The employees\' contracts were reviewed. The clients\' expectations are high. The managers\' offices are on the top floor. ⚠️ boys\' (plusieurs garçons) ≠ boy\'s (un garçon).'
+      },
+      {
+        title: 'Nom pluriel irrégulier (ne finissant pas en -s) → \'s',
+        content: 'Les pluriels irréguliers qui ne se terminent pas en -s reprennent \'s : The children\'s toys. The men\'s locker room. The women\'s conference. The people\'s choice. Ces formes fonctionnent exactement comme un singulier.'
+      },
+      {
+        title: 'Possessif avec "of" — pour les objets inanimés longs',
+        content: 'Pour les groupes nominaux longs ou les objets inanimés, on préfère "of" : the roof of the building (pas "the building\'s roof" — moins naturel). The results of the survey. The aim of the project. However, le \'s reste possible et courant pour les organisations : The company\'s results. The government\'s policy. The bank\'s interest rates.'
+      },
+      {
+        title: 'Double possessif (of + possessive pronoun)',
+        content: 'Structure : a/an/this/some + nom + of + possessif pronom ou nom + \'s. A colleague of mine. A friend of Tom\'s. That report of hers. This idea of John\'s. Sens : parmi plusieurs collègues, c\'est un collègue qui m\'appartient au sens relationnel. ≠ My colleague (implique une seule personne). Expressions : "a friend of the family\'s" (litt.), "a favourite of the manager\'s".'
+      }
+    ],
+    examples: [
+      { en: 'The board\'s decision was influenced by the shareholders\' concerns.', fr: '"Board\'s" (singulier) + "shareholders\'" (pluriel régulier).' },
+      { en: 'The children\'s education fund has been increased significantly.', fr: '"Children\'s" (pluriel irrégulier → \'s).' },
+      { en: 'A former colleague of mine recommended this approach.', fr: 'Double possessif : "of mine".' },
+      { en: 'The results of the annual survey have been published.', fr: '"Of" pour groupe nominal long/inanimé.' }
+    ],
+    pitfalls: [
+      '❌ "The childrens\' toys" → ✅ "The children\'s toys" (pluriel irrégulier → \'s, pas s\').',
+      '"It\'s" = it is/has. "Its" = possessif de "it". Ces deux formes sont très souvent confondues.',
+      '❌ "a friend of me" → ✅ "a friend of mine" (double possessif : pronom possessif, pas objet).'
+    ]
+  }
 ];
 
 const EXERCISES = [
   // ========== ARTICLES (20 Complex Exercises) ==========
   { id: 'gex-art-01', lessonId: 'articles-a-an-the', type: 'blank', tier: 2, prompt: 'She is studying _____ history of _____ United Kingdom.', answer: 'the / the', explanation: 'Spécifique ("histoire de") et pays composé ("UK").' },
   { id: 'gex-art-02', lessonId: 'articles-a-an-the', type: 'mcq', tier: 3, prompt: '_____ happiness is more important than _____ money.', options: ['The / the', 'A / —', '— / —', '— / the'], answer: '— / —', explanation: 'Concepts abstraits généraux : pas d\'article.' },
-  { id: 'gex-art-03', lessonId: 'articles-a-an-the', type: 'error', tier: 2, prompt: 'He is a university student.', errorWord: 'an', answer: 'a', explanation: 'University commence par le son consonne /j/.' },
+  { id: 'gex-art-03', lessonId: 'articles-a-an-the', type: 'error', tier: 2, prompt: 'She is an unique opportunity for the team.', errorWord: 'an', answer: 'a', explanation: '"Unique" commence par le son /j/ (consonne) — on dit "a unique", pas "an unique".' },
   { id: 'gex-art-04', lessonId: 'articles-a-an-the', type: 'reorder', tier: 2, prompt: 'Remets dans l\'ordre :', tokens: ['sun', 'The', 'is', 'shining'], answer: 'The sun is shining', explanation: 'Les astres uniques prennent "the".' },
 
   // ========== COMPARATIVES ==========
@@ -184,8 +1243,8 @@ const EXERCISES = [
   { id: 'gex-adv-016', lessonId: 'gerund-infinitive', type: 'error', tier: 2, prompt: 'I am looking forward to meet you.', errorWord: 'meet', answer: 'meeting', explanation: "Dans l'expression 'look forward to', 'to' est une préposition, elle doit être suivie d'un gérondif (-ing)." },
 
   // --- Modals (Deduction & Regret) ---
-  { id: 'gex-adv-017', lessonId: 'personal-pronouns', type: 'mcq', tier: 3, prompt: 'You _____ have seen him; he was in London at the time.', options: ["can't", "mustn't", "shouldn't", "wouldn't"], answer: "can't", explanation: "'Can't have + V3' exprime une impossibilité logique dans le passé." },
-  { id: 'gex-adv-018', lessonId: 'personal-pronouns', type: 'blank', tier: 3, prompt: 'I _____ have studied harder for the exam (regret).', answer: 'should', explanation: "'Should have + V3' exprime un regret ou un conseil passé non suivi." },
+  { id: 'gex-adv-017', lessonId: 'modals-deduction', type: 'mcq', tier: 3, prompt: 'You _____ have seen him; he was in London at the time.', options: ["can't", "mustn't", "shouldn't", "wouldn't"], answer: "can't", explanation: "'Can't have + V3' exprime une impossibilité logique dans le passé." },
+  { id: 'gex-adv-018', lessonId: 'modals-deduction', type: 'blank', tier: 3, prompt: 'I _____ have studied harder for the exam (regret).', answer: 'should', explanation: "'Should have + V3' exprime un regret ou un conseil passé non suivi." },
 
   // --- Articles (Nuances) ---
   { id: 'gex-adv-019', lessonId: 'articles-a-an-the', type: 'mcq', tier: 2, prompt: 'He is _____ honest man with _____ PhD in history.', options: ['an / a', 'a / a', 'an / an', 'a / an'], answer: 'an / a', explanation: "'Honest' commence par un h muet (son voyelle), 'PhD' (/pi-eitsh-di/) commence par un son consonne." },
@@ -311,8 +1370,8 @@ const EXERCISES = [
   { id: 'gex-adv-117', lessonId: 'gerund-infinitive', type: 'transform', tier: 3, prompt: 'Active: I convinced him to join. -> Passive: He was made _____.', answer: 'to join', explanation: "Au passif, 'make' est suivi de l'infinitif complet avec 'to'." },
 
   // --- Modals (Perfect forms) ---
-  { id: 'gex-adv-118', lessonId: 'personal-pronouns', type: 'mcq', tier: 3, prompt: 'The document is missing. Someone _____ have taken it by mistake.', options: ['must', 'can', 'should', 'would'], answer: 'must', explanation: "Déduction logique forte au passé : 'must have + V3'." },
-  { id: 'gex-adv-119', lessonId: 'personal-pronouns', type: 'mcq', tier: 3, prompt: 'You _____ have told me you were coming; I would have prepared dinner.', options: ['might', 'must', 'can', 'will'], answer: 'might', explanation: "'Might have + V3' exprime un reproche ou une possibilité passée non réalisée." },
+  { id: 'gex-adv-118', lessonId: 'modals-deduction', type: 'mcq', tier: 3, prompt: 'The document is missing. Someone _____ have taken it by mistake.', options: ['must', 'can', 'should', 'would'], answer: 'must', explanation: "Déduction logique forte au passé : 'must have + V3'." },
+  { id: 'gex-adv-119', lessonId: 'modals-deduction', type: 'mcq', tier: 3, prompt: 'You _____ have told me you were coming; I would have prepared dinner.', options: ['might', 'must', 'can', 'will'], answer: 'might', explanation: "'Might have + V3' exprime un reproche ou une possibilité passée non réalisée." },
 
   // --- Gerund vs Infinitive (TOEIC special) ---
   { id: 'gex-adv-120', lessonId: 'gerund-infinitive', type: 'mcq', tier: 3, prompt: 'The CEO suggested _____ a new marketing strategy.', options: ['adopting', 'to adopt', 'adopt', 'adoption'], answer: 'adopting', explanation: "'Suggest' est suivi du gérondif." },
@@ -367,7 +1426,7 @@ const EXERCISES = [
   { id: 'gex-adv-147', lessonId: 'reported-speech', type: 'transform', tier: 3, prompt: 'Direct: "I can help" -> Indirect: He said he _____ help.', answer: 'could', explanation: "Can devient could au discours indirect." },
   { id: 'gex-adv-148', lessonId: 'word-order', type: 'reorder', tier: 3, prompt: "Emphase :", tokens: ['did', 'he', 'say', 'What', 'exactly'], answer: 'What did he exactly say', explanation: "Structure interrogative." },
   { id: 'gex-adv-149', lessonId: 'question-tags', type: 'blank', tier: 3, prompt: 'You have a car, _____ you?', answer: "don't", explanation: "Tag pour 'have' (verbe plein) au présent." },
-  { id: 'gex-adv-150', lessonId: 'personal-pronouns', type: 'mcq', tier: 3, prompt: 'Between you and _____, I think he is lying.', options: ['me', 'I', 'my', 'mine'], answer: 'me', explanation: "Après une préposition, on utilise le pronom objet ('me')." },
+  { id: 'gex-adv-150', lessonId: 'personal-pronouns', type: 'mcq', tier: 3, prompt: 'Between you and _____, this deal is risky.', options: ['me', 'I', 'my', 'mine'], answer: 'me', explanation: "Après une préposition (between), on utilise le pronom objet 'me', jamais le sujet 'I'." },
   { id: 'gex-adv-151', lessonId: 'word-order', type: 'mcq', tier: 3, prompt: 'Should the meeting _____ postponed, we will notify you.', options: ['be', 'is', 'was', 'being'], answer: 'be', explanation: "Inversion du 'If' au futur (Should you...)."},
   { id: 'gex-adv-152', lessonId: 'linking-words', type: 'mcq', tier: 3, prompt: '_____ he studied hard, he failed the exam.', options: ['Although', 'Despite', 'In spite of', 'However'], answer: 'Although', explanation: "Concession avec proposition complète."},
   { id: 'gex-adv-153', lessonId: 'gerund-infinitive', type: 'mcq', tier: 3, prompt: 'I look forward to _____ from you.', options: ['hearing', 'hear', 'to hear', 'heard'], answer: 'hearing', explanation: "'To' est ici une préposition."},

@@ -41,15 +41,59 @@
 
 .rule-block h3 { margin-bottom: var(--s-2); color: var(--moss-deep); font-size: 1.1rem; }
 
+.examples-block {
+  background: rgba(200, 132, 44, 0.04);
+  border: 1px solid rgba(200, 132, 44, 0.15);
+  border-radius: var(--radius);
+  padding: var(--s-4);
+}
+
+.examples-block h4 {
+  color: var(--amber-deep);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .example-row {
-  padding: var(--s-3);
-  border-left: 2px solid var(--amber-light);
-  background: rgba(200, 132, 44, 0.03);
+  padding: var(--s-3) var(--s-3);
+  border-left: 3px solid var(--amber);
+  background: white;
   margin-bottom: var(--s-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.example-en {
+  font-family: var(--serif);
   font-size: 0.95rem;
+  color: var(--ink);
+  font-style: italic;
+}
+
+.example-fr {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
 }
 
 .example-row em { color: var(--ink-soft); display: block; margin-top: 2px; font-size: 0.85rem; }
+
+.pill-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: var(--amber);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin: 0 2px;
+  vertical-align: middle;
+}
 
 .pitfall-box {
   background: rgba(122, 46, 46, 0.05);

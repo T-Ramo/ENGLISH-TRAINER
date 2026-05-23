@@ -2,8 +2,10 @@
 .secrets.local
 *.local
 
-# Audio files (hosted on Cloudflare R2)
+# DownloadMP3 — scripts committés, données ignorées
 DownloadMP3/ello_b2/
+DownloadMP3/ello-pack/
+DownloadMP3/data/
 # Python generation checkpoints
 scripts/.reading_checkpoint.json
 scripts/.qcm_checkpoint.json
