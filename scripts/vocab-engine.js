@@ -207,6 +207,17 @@ const VocabEngine = {
     Storage.addPoints(this.session.points);
     Storage.registerActivity();
 
+    // Record history entry
+    if (!Storage.state.vocab.history) Storage.state.vocab.history = [];
+    Storage.state.vocab.history.push({
+      date: new Date().toISOString().slice(0, 10),
+      mode: this.session.mode.key,
+      correct: correctCount,
+      total: this.session.results.length,
+      points: this.session.points,
+    });
+    Storage.save();
+
     // Award badges
     this.checkBadges(correctCount);
 

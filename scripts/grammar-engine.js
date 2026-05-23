@@ -158,7 +158,7 @@ const GrammarEngine = {
   checkBadges() {
     const readCount = Storage.state.grammar.lessonsRead.length;
     if (readCount >= 10) Storage.awardBadge('grammar-lesson-10');
-    if (readCount >= 33) Storage.awardBadge('grammar-lesson-all');
+    if (readCount >= LESSONS.length) Storage.awardBadge('grammar-lesson-all');
   }
 };
 

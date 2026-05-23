@@ -62,11 +62,12 @@
 
     function renderLesson(id) {
       const l = LESSONS.find(x => x.id === id);
+      Storage.markLessonRead(id);
       stageRoot.innerHTML = `<div class="lesson-full">
         <button class="btn btn-ghost btn-sm" onclick="renderSelection()">← Retour</button>
         <h1 class="serif" style="margin:20px 0">${l.label}</h1>
-        ${l.rules.map((r, i) => `<div class="rule-block"><h3>${i+1}. ${r.title}</h3><p>${r.content}</p></div>`).join('')}
-        <div class="pitfall-box"><h4>⚠️ Pièges</h4><ul>${l.pitfalls.map(p => `<li>${p}</li>`).join('')}</ul></div>
+        ${(l.rules || []).map((r, i) => `<div class="rule-block"><h3>${i+1}. ${r.title}</h3><p>${r.content}</p></div>`).join('')}
+        ${(l.pitfalls || []).length ? `<div class="pitfall-box"><h4>⚠️ Pièges</h4><ul>${l.pitfalls.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
         <button class="btn btn-amber btn-lg" style="margin-top:30px" onclick="startSession('lesson', '${l.id}')">S'entraîner →</button>
       </div>`;
     }
@@ -82,7 +83,7 @@
       stageRoot.innerHTML = `<div class="quiz-stage">
         <div class="quiz-progress"><div class="progress-bar"><div class="progress-fill" style="width:${(s.index/s.queue.length)*100}%"></div></div></div>
         <div id="quiz-content"></div>
-        <div class="quiz-actions" id="submit-area"><button class="btn btn-primary btn-lg" onclick="handleGrammarSubmit()">Valider</button></div>
+        <div class="quiz-actions" id="submit-area">${ex && ex.type === 'mcq' ? '' : '<button class="btn btn-primary btn-lg" onclick="handleGrammarSubmit()">Valider</button>'}</div>
         <div id="feedback"></div>
       </div>`;
       GrammarUI.renderExercise(ex, document.getElementById('quiz-content'));
@@ -91,7 +92,18 @@
     window.handleGrammarSubmit = function(val) {
       const ex = GrammarEngine.current();
       const input = document.getElementById('g-input');
-      const finalVal = val || (ex.type === 'error' ? { word: GrammarEngine.session.errorSelected, correction: input.value } : input.value);
+      let finalVal;
+      if (val !== undefined) {
+        finalVal = val;
+      } else if (ex.type === 'reorder') {
+        finalVal = GrammarUI.getReorderValue();
+      } else if (ex.type === 'error') {
+        if (!GrammarEngine.session.errorSelected) return; // aucun mot sélectionné
+        finalVal = { word: GrammarEngine.session.errorSelected, correction: input ? input.value : '' };
+      } else {
+        if (!input) return;
+        finalVal = input.value;
+      }
       const res = GrammarEngine.submit(finalVal);
       
       document.getElementById('submit-area').style.display = 'none';
@@ -111,6 +123,7 @@
 
     function renderSummary() {
       const res = GrammarEngine.finish();
+      if (res.diag?.level?.startsWith('B2')) Storage.awardBadge('grammar-b2');
       let html = `<div class="session-summary anim-fade-up">
         <div class="eyebrow">Session terminée</div>
         <div class="summary-score">${res.score}<span style="font-size: 2rem; color: var(--ink-soft)">/${res.total}</span></div>
@@ -144,7 +157,7 @@
           <button class="lesson-modal-close" onclick="this.parentElement.parentElement.remove()">✕</button>
           <h2 class="serif">${l.label}</h2>
           <div style="margin-top:20px">
-            ${l.rules.map((r, i) => `
+            ${(l.rules || []).map((r, i) => `
               <div class="rule-block">
                 <h3 style="font-size:1rem">${i+1}. ${r.title}</h3>
                 <p style="font-size:0.9rem">${r.content}</p>

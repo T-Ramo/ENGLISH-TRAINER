@@ -20,6 +20,7 @@ const DEFAULT_STATE = {
   vocab: {
     // word_id -> { seen, correct, wrong, lastSeenAt, nextDueAt, ease, intervalDays }
     cards: {},
+    history: [], // { date, mode, correct, total, points }
   },
   badges: [],
   settings: {
@@ -86,6 +87,9 @@ const Storage = {
   },
 
   reset() {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('toeic_p_') || k.startsWith('toeic_r_'))
+      .forEach(k => localStorage.removeItem(k));
     localStorage.removeItem(STORAGE_KEY);
     this.load();
   },

@@ -4,12 +4,14 @@
 
 # Audio files (hosted on Cloudflare R2)
 DownloadMP3/ello_b2/
-# QCM generation checkpoint
+# Python generation checkpoints
+scripts/.reading_checkpoint.json
 scripts/.qcm_checkpoint.json
+scripts/.toeic_checkpoint.json
 
 # Python virtual environment
 .venv_vocab/
-# Local data source and generated vocab artifacts
+# Local data source and generated vocab artifacts (deleted, kept for safety)
 vocab-list.md
 tmp_bad_verbs.txt
 data/vocab.wn.js

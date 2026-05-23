@@ -99,7 +99,7 @@
             <a href="conjugation.html" class="module-card">
               <div class="module-num">03 — Verbes</div>
               <h3 class="module-title">Conjugaison</h3>
-              <p class="module-desc">160 verbes irréguliers, 14 temps, modaux et conditionnels. 5 modes d'exercice avec SRS.</p>
+              <p class="module-desc">200+ verbes irréguliers, 14 temps, modaux et conditionnels. 5 modes d'exercice avec SRS.</p>
               <div class="module-foot">
                 <span><span class="pill pill-amber">Disponible</span></span>
                 <span class="module-arrow">→</span>
@@ -167,7 +167,7 @@
               </div>
               <div class="pbar-item">
                 <span class="pbar-label">Leçons de grammaire lues</span>
-                <span class="pbar-num" id="pbar-grammar-num">0 / 33</span>
+                <span class="pbar-num" id="pbar-grammar-num">0 / 21</span>
                 <div class="pbar-track"><div class="pbar-fill" id="pbar-grammar" style="background:var(--moss)"></div></div>
               </div>
               <div class="pbar-item">
@@ -222,8 +222,9 @@
 
     // Barre grammaire
     const readCount = st.grammar.lessonsRead.length;
-    document.getElementById('pbar-grammar').style.width = Math.round((readCount / 33) * 100) + '%';
-    document.getElementById('pbar-grammar-num').textContent = readCount + ' / 33 lues';
+    const totalLessons = 21;
+    document.getElementById('pbar-grammar').style.width = Math.round((readCount / totalLessons) * 100) + '%';
+    document.getElementById('pbar-grammar-num').textContent = readCount + ' / ' + totalLessons + ' lues';
 
     // Barre verbes irréguliers
     if (typeof IRREGULAR_VERBS !== 'undefined' && typeof ConjEngine !== 'undefined') {
@@ -249,6 +250,9 @@
       { id: 'grammar-lesson-10', label: '📚 10 Leçons lues' },
       { id: 'grammar-lesson-all', label: '🎓 Expert Grammaire' },
       { id: 'grammar-b2', label: '🏆 Niveau B2 atteint' },
+      { id: 'comp-perfect', label: '✦ Compréhension parfaite' },
+      { id: 'comp-listener-10', label: '🎧 10 sessions écoute' },
+      { id: 'comp-listener-50', label: '🎧 50 sessions écoute' },
     ];
     const badgesRow = document.getElementById('badges-row');
     badgesRow.innerHTML = ALL_BADGES.map(b => {

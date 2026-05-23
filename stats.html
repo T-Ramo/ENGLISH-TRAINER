@@ -77,7 +77,7 @@
   function buildStats(state) {
     const vocabTotal = typeof VOCAB !== 'undefined' ? VOCAB.length : 0;
     return {
-      vocab:         { cards: analyzeCards(state.vocab?.cards),        hist: analyzeHistory([]) },
+      vocab:         { cards: analyzeCards(state.vocab?.cards),        hist: analyzeHistory(state.vocab?.history) },
       conj:          { cards: analyzeCards(state.conj?.cards),         hist: analyzeHistory(state.conj?.history) },
       grammar:       { cards: analyzeCards(state.grammar?.cards),      hist: analyzeHistory(state.grammar?.history) },
       comprehension: { cards: analyzeCards(state.comprehension?.cards),hist: analyzeHistory(state.comprehension?.history) },
