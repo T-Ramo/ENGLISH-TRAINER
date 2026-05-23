@@ -115,7 +115,12 @@ const VocabEngine = {
   submit(userInput, opts = { auto: false }) {
     const w = this.current();
     if (!w) return null;
-    const { ok, near } = Shared.matchAnswer(userInput, w.en);
+
+    // Build the full list of valid answers: primary + accept synonyms
+    const validAnswers = [w.en, ...(w.accept || [])];
+    const matchResults = validAnswers.map(ans => Shared.matchAnswer(userInput, ans));
+    const ok   = matchResults.some(r => r.ok);
+    const near = !ok && matchResults.some(r => r.near);
     const timeMs = Date.now() - this.session.currentStart;
 
     let pts = 0;

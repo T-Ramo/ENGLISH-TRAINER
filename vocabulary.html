@@ -164,18 +164,20 @@
 
       stageRoot.innerHTML = `
         <div class="quiz-stage">
-          <div class="quiz-progress">
-            <span class="progress-label mono">${idx + 1} / ${total}</span>
-            <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
-            <span class="progress-label mono">+${s.points} pts</span>
-          </div>
-          <div class="quiz-streak ${s.streak >= 5 ? 'big' : ''}">
-            ${s.streak >= 1 ? '🔥 ' + s.streak + " d'affilée" : '&nbsp;'}
+          <div class="quiz-header">
+            <div class="quiz-progress">
+              <span class="progress-label mono">${idx + 1} / ${total}</span>
+              <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
+              <span class="progress-label mono">+${s.points} pts</span>
+            </div>
+            <div class="quiz-streak ${s.streak >= 5 ? 'big' : ''}">
+              ${s.streak >= 1 ? '🔥 ' + s.streak + " d'affilée" : '&nbsp;'}
+            </div>
           </div>
 
           <div class="quiz-prompt">
             <div class="prompt-type">${POS_LABELS[w.pos] || w.pos}</div>
-            <div class="prompt-word">${w.fr}</div>
+            <div class="prompt-word">${w.fr}${w.hint ? `<span class="prompt-hint">${w.hint}</span>` : ''}</div>
             ${w.example ? `<div class="prompt-pos">Indice : utilisé dans une phrase comme "${maskExample(w.example, w.en)}"</div>` : ''}
           </div>
 

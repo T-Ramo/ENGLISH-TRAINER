@@ -113,15 +113,22 @@
   justify-content: center;
 }
 
-.quiz-progress {
+.quiz-header {
   position: absolute;
   top: var(--s-4);
   left: var(--s-5);
   right: var(--s-5);
   display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.quiz-progress {
+  display: flex;
   align-items: center;
   gap: var(--s-3);
 }
+
 .progress-bar {
   flex: 1;
   height: 4px;
@@ -142,15 +149,11 @@
 }
 
 .quiz-streak {
-  position: absolute;
-  top: var(--s-4);
-  right: var(--s-5);
   font-family: var(--mono);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--amber-deep);
-  display: flex;
-  align-items: center;
-  gap: var(--s-1);
+  text-align: right;
+  min-height: 1.2em;
 }
 .quiz-streak.big { animation: pop 0.4s ease; }
 
@@ -174,6 +177,16 @@
   line-height: 1.05;
   color: var(--ink);
 }
+.prompt-hint {
+  display: inline-block;
+  margin-left: 10px;
+  font-family: var(--mono);
+  font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+  font-weight: 400;
+  color: var(--ink-soft);
+  vertical-align: middle;
+}
+
 .prompt-pos {
   display: inline-block;
   margin-top: var(--s-3);
