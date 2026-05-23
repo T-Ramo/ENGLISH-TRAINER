@@ -9,8 +9,9 @@ scripts/.reading_checkpoint.json
 scripts/.qcm_checkpoint.json
 scripts/.toeic_checkpoint.json
 
-# Python virtual environment
+# Python virtual environments
 .venv_vocab/
+.venv_gen/
 # Local data source and generated vocab artifacts (deleted, kept for safety)
 vocab-list.md
 tmp_bad_verbs.txt
