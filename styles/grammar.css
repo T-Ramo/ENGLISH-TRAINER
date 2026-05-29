@@ -1,162 +1,373 @@
-/* ============================================================
-   GRAMMAR MODULE SPECIFIC STYLES
-   ============================================================ */
+/* ════════════════════════════════════════════════════════════
+   GRAMMAR MODULE — Styles
+   ════════════════════════════════════════════════════════════ */
 
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--s-5);
-  margin-top: var(--s-6);
+/* Tab system */
+.tab-content {
+  display: none;
 }
 
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Lesson cards */
 .lesson-card {
-  background: var(--paper-warm);
-  border: 1px solid rgba(26, 22, 18, 0.1);
-  border-radius: var(--radius-lg);
-  padding: var(--s-4);
-  cursor: pointer;
   transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-  text-align: left;
 }
 
-.lesson-card:hover { transform: translateY(-2px); border-color: var(--amber); box-shadow: var(--shadow); }
-.lesson-card.read { border-left: 4px solid var(--success); }
-
-.lesson-full {
-  max-width: 800px;
-  margin: 0 auto;
-  animation: fade-up 0.4s ease;
+.lesson-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--amber-deep);
 }
 
+.lesson-card.read {
+  opacity: 0.8;
+  border-color: var(--moss);
+}
+
+/* Category pills */
+.cat-pill-amber {
+  background: var(--amber);
+  color: white;
+}
+
+.cat-pill-moss {
+  background: var(--moss);
+  color: white;
+}
+
+.cat-pill-burgundy {
+  background: var(--burgundy);
+  color: white;
+}
+
+.cat-pill-amber-deep {
+  background: var(--amber-deep);
+  color: white;
+}
+
+.cat-pill-ink {
+  background: var(--ink);
+  color: white;
+}
+
+.cat-pill-moss-deep {
+  background: var(--moss-deep);
+  color: white;
+}
+
+.cat-pill-rose {
+  background: var(--rose);
+  color: white;
+}
+
+.cat-pill-burgundy-deep {
+  background: #5a1e1e;
+  color: white;
+}
+
+.cat-pill-ink-deep {
+  background: #0a0a0a;
+  color: white;
+}
+
+/* Level badges */
+.level-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: var(--s-1) var(--s-2);
+  border-radius: var(--s-1);
+}
+
+.level-badge-a1,
+.level-badge-a2 {
+  background: var(--moss);
+  color: white;
+}
+
+.level-badge-b1 {
+  background: var(--amber);
+  color: white;
+}
+
+.level-badge-b2 {
+  background: var(--amber-deep);
+  color: white;
+}
+
+/* Rule blocks */
 .rule-block {
+  background: var(--paper);
+  padding: var(--s-3);
+  border-left: 4px solid var(--amber);
+  margin-bottom: var(--s-2);
+  border-radius: var(--s-1);
+}
+
+.rule-block strong {
+  display: block;
+  color: var(--ink);
+  margin-bottom: var(--s-1);
+}
+
+.rule-block p {
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+/* Example rows */
+.example-row {
+  padding: var(--s-2);
+  background: var(--paper);
+  margin-bottom: var(--s-2);
+  border-radius: var(--s-1);
+  border-left: 3px solid var(--moss);
+}
+
+.example-row p {
+  margin: 0;
+}
+
+.example-row p:first-child {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.example-row p:last-child {
+  color: var(--ink-soft);
+  font-style: italic;
+  margin-top: var(--s-1);
+}
+
+/* Pitfall and tip boxes */
+.pitfall-box {
+  background: rgba(168, 56, 56, 0.1);
+  padding: var(--s-3);
+  border-left: 4px solid var(--burgundy);
+  border-radius: var(--s-1);
+  margin-top: var(--s-4);
+}
+
+.pitfall-box strong {
+  color: var(--burgundy);
+  display: block;
+  margin-bottom: var(--s-2);
+}
+
+.pitfall-box ul {
+  margin: 0;
+  padding-left: var(--s-4);
+}
+
+.pitfall-box li {
+  margin-bottom: var(--s-1);
+  color: var(--ink);
+}
+
+.tip-box {
+  background: rgba(200, 132, 44, 0.1);
+  padding: var(--s-3);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--s-1);
+  margin-top: var(--s-3);
+}
+
+.tip-box strong {
+  color: var(--amber);
+  display: block;
+  margin-bottom: var(--s-1);
+}
+
+.tip-box p {
+  margin: 0;
+  color: var(--ink);
+}
+
+/* Mode cards */
+.mode-card {
+  transition: all 0.2s ease;
+}
+
+.mode-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mode-card h3 {
+  font-family: Fraunces;
+  font-weight: 700;
+}
+
+.mode-card p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* MCQ options */
+.mcq-option {
+  padding: var(--s-2);
+  border: 2px solid var(--amber);
   background: white;
-  padding: var(--s-5);
-  border-radius: var(--radius);
-  border: 1px solid rgba(26, 22, 18, 0.05);
+  border-radius: var(--s-1);
+  cursor: pointer;
+  text-align: left;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  color: var(--ink);
+}
+
+.mcq-option:hover {
+  border-color: var(--amber-deep);
+  background: var(--paper);
+}
+
+/* Reorder tokens */
+.reorder-token {
+  display: inline-block;
+  padding: var(--s-1) var(--s-2);
+  background: var(--paper);
+  border: 2px solid var(--amber);
+  border-radius: var(--s-1);
+  cursor: move;
+  user-select: none;
+  margin: var(--s-1);
+  transition: all 0.2s ease;
+}
+
+.reorder-token:hover {
+  background: var(--amber);
+  color: white;
+}
+
+.reorder-zone {
+  border: 2px dashed var(--amber);
+  border-radius: var(--s-1);
+  padding: var(--s-3);
+  background: var(--paper);
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+/* Error clickable words */
+.error-clickable-word {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  color: var(--burgundy);
+  font-weight: 600;
+  border-bottom: 2px solid var(--burgundy);
+}
+
+.error-clickable-word:hover {
+  background: var(--burgundy);
+  color: white;
+}
+
+/* Lesson category section */
+.lesson-category-section {
   margin-bottom: var(--s-4);
 }
 
-.rule-block h3 { margin-bottom: var(--s-2); color: var(--moss-deep); font-size: 1.1rem; }
-
-.examples-block {
-  background: rgba(200, 132, 44, 0.04);
-  border: 1px solid rgba(200, 132, 44, 0.15);
-  border-radius: var(--radius);
-  padding: var(--s-4);
-}
-
-.examples-block h4 {
-  color: var(--amber-deep);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.example-row {
-  padding: var(--s-3) var(--s-3);
-  border-left: 3px solid var(--amber);
-  background: white;
-  margin-bottom: var(--s-2);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.example-en {
-  font-family: var(--serif);
-  font-size: 0.95rem;
-  color: var(--ink);
-  font-style: italic;
-}
-
-.example-fr {
-  font-size: 0.82rem;
-  color: var(--ink-soft);
-}
-
-.example-row em { color: var(--ink-soft); display: block; margin-top: 2px; font-size: 0.85rem; }
-
-.pill-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: var(--amber);
-  color: white;
-  border-radius: 50%;
-  font-size: 0.7rem;
-  font-weight: 700;
-  margin: 0 2px;
-  vertical-align: middle;
-}
-
-.pitfall-box {
-  background: rgba(122, 46, 46, 0.05);
-  border: 1px solid rgba(122, 46, 46, 0.1);
-  padding: var(--s-4);
-  border-radius: var(--radius);
-  margin-top: var(--s-6);
-}
-
-.pitfall-box h4 { color: var(--burgundy); margin-bottom: var(--s-2); display: flex; align-items: center; gap: 8px; }
-
-/* Exercice Types */
-
-/* Reorder */
-.reorder-zone {
-  min-height: 80px;
-  padding: var(--s-4);
+.lesson-category-section > div:first-child {
   background: var(--paper);
-  border: 2px dashed rgba(26, 22, 18, 0.1);
-  border-radius: var(--radius);
-  margin: var(--s-5) 0;
+  padding: var(--s-2);
+  border-radius: var(--s-1);
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2);
-  justify-content: center;
   align-items: center;
-}
-
-.token-pool {
-  display: flex;
-  flex-wrap: wrap;
   gap: var(--s-2);
-  justify-content: center;
-}
-
-.reorder-token {
-  background: white;
-  border: 1px solid rgba(26, 22, 18, 0.15);
-  padding: 6px 12px;
-  border-radius: var(--radius);
+  margin-bottom: var(--s-3);
   cursor: pointer;
-  font-family: var(--mono);
-  font-size: 0.9rem;
-  transition: all 0.1s ease;
+  transition: all 0.2s ease;
 }
 
-.reorder-token:hover { background: var(--paper-warm); }
-.reorder-token.used { opacity: 0.3; pointer-events: none; }
-
-/* Error Detection */
-.error-sentence {
-  font-family: var(--serif);
-  font-size: 1.5rem;
-  line-height: 1.8;
-  margin: var(--s-5) 0;
+.lesson-category-section > div:first-child:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.error-word {
-  cursor: pointer;
-  padding: 0 4px;
-  border-radius: 2px;
-  transition: background 0.2s;
+/* Quiz progress */
+.quiz-progress {
+  margin-bottom: var(--s-4);
 }
 
-.error-word:hover { background: rgba(200, 132, 44, 0.15); }
-.error-word.selected { background: var(--amber); color: white; }
+.quiz-progress .progress-bar {
+  background: var(--ink);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.quiz-progress .progress-bar-fill {
+  background: var(--amber);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Summary view */
+.summary-container {
+  text-align: center;
+  padding: var(--s-6);
+}
+
+.summary-score {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--amber);
+  margin-bottom: var(--s-2);
+}
+
+.summary-details {
+  background: var(--paper);
+  padding: var(--s-3);
+  border-radius: var(--s-1);
+  margin-bottom: var(--s-3);
+  text-align: left;
+}
+
+.summary-details div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--s-1);
+  padding-bottom: var(--s-1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.summary-details div:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mode-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  .lesson-card {
+    grid-column: span 1 !important;
+  }
+
+  .summary-container {
+    padding: var(--s-4);
+  }
+
+  .mcq-option {
+    font-size: 0.95rem;
+    padding: var(--s-1) var(--s-2);
+  }
+}

@@ -167,7 +167,7 @@
               </div>
               <div class="pbar-item">
                 <span class="pbar-label">Leçons de grammaire lues</span>
-                <span class="pbar-num" id="pbar-grammar-num">0 / 21</span>
+                <span class="pbar-num" id="pbar-grammar-num">0 / 48</span>
                 <div class="pbar-track"><div class="pbar-fill" id="pbar-grammar" style="background:var(--moss)"></div></div>
               </div>
               <div class="pbar-item">
@@ -190,6 +190,7 @@
   <!-- Scripts -->
   <script src="data/vocab.js"></script>
   <script src="data/conjugation.js"></script>
+  <script src="data/grammar.js"></script>
   <script src="scripts/storage.js"></script>
   <script src="scripts/shared.js"></script>
   <script src="scripts/conj-engine.js"></script>
@@ -222,7 +223,7 @@
 
     // Barre grammaire
     const readCount = st.grammar.lessonsRead.length;
-    const totalLessons = 21;
+    const totalLessons = 48;
     document.getElementById('pbar-grammar').style.width = Math.round((readCount / totalLessons) * 100) + '%';
     document.getElementById('pbar-grammar-num').textContent = readCount + ' / ' + totalLessons + ' lues';
 
@@ -249,6 +250,8 @@
       { id: 'modal-pro', label: '⊛ Modal Pro' },
       { id: 'grammar-lesson-10', label: '📚 10 Leçons lues' },
       { id: 'grammar-lesson-all', label: '🎓 Expert Grammaire' },
+      { id: 'grammar-category-master', label: '✦ Maître categorie' },
+      { id: 'grammar-perfect-diag', label: '🎯 Diagnostic parfait' },
       { id: 'grammar-b2', label: '🏆 Niveau B2 atteint' },
       { id: 'comp-perfect', label: '✦ Compréhension parfaite' },
       { id: 'comp-listener-10', label: '🎧 10 sessions écoute' },

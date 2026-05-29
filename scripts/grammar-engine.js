@@ -1,254 +1,292 @@
 /* ============================================================
-   GRAMMAR ENGINE — Logic & UI for 5 exercise types
+   GRAMMAR ENGINE — Moteur de quiz et session
    ============================================================ */
 
-const GrammarEngine = {
-  session: null,
+class GrammarEngine {
+  constructor() {
+    this.session = null;
+    this.current = null;
+    this.sessionIndex = 0;
+  }
 
-  MODES: {
-    lesson:    { key: 'lesson', label: 'Leçon + Pratique', icon: '📖', sessionSize: 12 },
-    mixed:     { key: 'mixed', label: 'Pratique Mixte', icon: '🔀', sessionSize: 20 },
-    diagnostic:{ key: 'diagnostic', label: 'Test Diagnostic', icon: '🩺', sessionSize: 25 },
-    srs:       { key: 'srs', label: 'Révision SRS', icon: '↻', sessionSize: 20 },
-  },
+  startSession(mode, filters = {}) {
+    let exercisePool = [...EXERCISES];
 
-  startSession({ mode, lessonId = null }) {
-    let pool = EXERCISES;
-    if (lessonId) pool = EXERCISES.filter(ex => ex.lessonId === lessonId);
+    // Filtre par niveau si fourni
+    if (filters.levels && filters.levels.length > 0) {
+      const exercisesInLessons = EXERCISES.filter(ex => {
+        const lesson = LESSONS.find(l => l.id === ex.lessonId);
+        return lesson && filters.levels.includes(lesson.level);
+      });
+      exercisePool = exercisesInLessons;
+    }
 
-    let queue;
-    if (mode === 'srs') {
-      queue = this.buildSRSQueue(pool, this.MODES[mode].sessionSize);
+    // Filtre par catégorie si fourni
+    if (filters.categories && filters.categories.length > 0) {
+      const exercisesInLessons = EXERCISES.filter(ex => {
+        const lesson = LESSONS.find(l => l.id === ex.lessonId);
+        return lesson && filters.categories.includes(lesson.category);
+      });
+      exercisePool = exercisesInLessons;
+    }
+
+    // Déterminer le nombre d'exercices selon le mode
+    let sessionSize = GrammarEngine.MODES[mode]?.sessionSize || 20;
+    if (mode === 'srs-review') {
+      const dueCards = Storage.getGrammarDueCards(10);
+      sessionSize = dueCards.length;
+      exercisePool = dueCards.map(cardId => EXERCISES.find(ex => ex.id === cardId)).filter(Boolean);
     } else {
-      queue = Shared.shuffle(pool).slice(0, this.MODES[mode].sessionSize);
+      Shared.shuffle(exercisePool);
+      exercisePool = exercisePool.slice(0, sessionSize);
     }
 
     this.session = {
-      mode: this.MODES[mode],
-      queue,
-      index: 0,
+      mode,
+      exercises: exercisePool,
       results: [],
-      streak: 0,
       points: 0,
-      startedAt: Date.now(),
-      currentStart: Date.now(),
-      errorSelected: null
+      startTime: Date.now(),
+      streak: 0,
+      categoryScores: mode === 'diagnostic-test' ? {} : null
     };
-    return this.session;
-  },
 
-  buildSRSQueue(pool, size) {
-    const now = Date.now();
-    const due = pool.filter(ex => {
-      const c = Storage.getGrammarCard(ex.id);
-      return c && c.nextDueAt && c.nextDueAt <= now;
-    });
-    const rest = pool.filter(ex => !due.includes(ex));
-    return [...Shared.shuffle(due), ...Shared.shuffle(rest)].slice(0, size);
-  },
+    this.sessionIndex = 0;
+    this.current = this.session.exercises[0];
+    return this.current;
+  }
 
-  current() { return this.session ? this.session.queue[this.session.index] : null; },
+  next() {
+    this.sessionIndex++;
+    if (this.sessionIndex < this.session.exercises.length) {
+      this.current = this.session.exercises[this.sessionIndex];
+      return this.current;
+    }
+    return null;
+  }
 
-  submit(userInput) {
-    const ex = this.current();
-    const timeMs = Date.now() - this.session.currentStart;
-    let ok = false, near = false, pts = 0;
+  isFinished() {
+    return this.sessionIndex >= this.session.exercises.length - 1;
+  }
 
-    if (ex.type === 'mcq') {
-      ok = userInput === ex.answer;
-      pts = ok ? 6 : 0;
-    } else if (ex.type === 'error') {
-      const wordOk = Shared.normalize(userInput.word) === Shared.normalize(ex.errorWord);
-      const resCorr = Shared.matchAnswer(userInput.correction, ex.answer);
-      ok = wordOk && resCorr.ok;
-      pts = ok ? 12 : (wordOk ? 4 : 0);
-      near = resCorr.near;
-    } else {
-      const res = Shared.matchAnswer(userInput, ex.answer);
-      ok = res.ok;
-      near = res.near;
-      if (ex.type === 'reorder') pts = ok ? 12 : 0;
-      else if (ex.type === 'transform') pts = ok ? 10 : 0;
-      else pts = ok ? 8 : 0; // type 'blank'
+  submitAnswer(userAnswer) {
+    if (!this.current) return { correct: false, message: 'No exercise loaded' };
+
+    const { type } = this.current;
+    let isCorrect = false;
+
+    switch (type) {
+      case 'blank':
+      case 'transform':
+        isCorrect = Shared.matchAnswer(userAnswer, this.current.answer);
+        break;
+      case 'mcq':
+        isCorrect = userAnswer === this.current.answer;
+        break;
+      case 'reorder':
+        isCorrect = JSON.stringify(Shared.shuffle(userAnswer)) === JSON.stringify(Shared.shuffle(this.current.answer));
+        break;
+      case 'error':
+        isCorrect = userAnswer === this.current.answer;
+        break;
     }
 
-    if (ok) {
+    // Calcul des points
+    let exercisePoints = GrammarEngine.EXERCISE_POINTS[type] || 6;
+    let earnedPoints = exercisePoints;
+
+    // Bonus streak (x1.5 après 5 correctes)
+    if (isCorrect) {
       this.session.streak++;
-      if (this.session.streak >= 5) pts = Math.round(pts * 1.5);
-      if (timeMs < 10000) pts += 3;
+      if (this.session.streak >= 5) {
+        earnedPoints = Math.floor(earnedPoints * 1.5);
+      }
     } else {
       this.session.streak = 0;
     }
 
-    this.session.points += pts;
-    this.session.results.push({ ex, ok, near, pointsEarned: pts, timeMs, lessonId: ex.lessonId });
-    this.updateSRS(ex.id, ok);
-
-    return { ok, near, pts, explanation: ex.explanation, answer: ex.answer };
-  },
-
-  updateSRS(id, ok) {
-    const c = Storage.getGrammarCard(id) || { seen:0, correct:0, wrong:0, ease:2.5, intervalDays:0 };
-    c.seen++;
-    if (ok) {
-      c.correct++;
-      c.ease = Math.min(3.0, c.ease + 0.1);
-      c.intervalDays = c.intervalDays === 0 ? 1 : Math.round(c.intervalDays * c.ease);
-    } else {
-      c.wrong++;
-      c.ease = Math.max(1.3, c.ease - 0.2);
-      c.intervalDays = 0;
+    // Bonus vitesse (< 10s)
+    const exerciseTime = this.getCurrentExerciseTime();
+    if (exerciseTime < 10000 && isCorrect) {
+      earnedPoints += 3;
     }
-    c.nextDueAt = Date.now() + (c.intervalDays * 86400000);
-    Storage.upsertGrammarCard(id, c);
-  },
 
-  next() {
-    this.session.index++;
-    this.session.currentStart = Date.now();
-    return this.current();
-  },
+    if (isCorrect) {
+      this.session.points += earnedPoints;
+    }
 
-  finish() {
-    Storage.addPoints(this.session.points);
-    Storage.registerActivity();
-    this.checkBadges();
-    const diag = this.session.mode.key === 'diagnostic' ? this.calculateDiagnostic() : null;
-    const correct = this.session.results.filter(r => r.ok).length;
-    const total = this.session.queue.length;
-
-    // Enregistrement dans l'historique
-    Storage.state.grammar.history.push({
-      date: new Date().toISOString().slice(0, 10),
-      mode: this.session.mode.key,
-      correct,
-      total,
-      points: this.session.points
-    });
-    Storage.save();
-
-    return { score: correct, total, points: this.session.points, diag, results: this.session.results };
-  },
-
-  calculateDiagnostic() {
-    const results = this.session.results;
-    const score = results.filter(r => r.ok).length;
-    const pct = (score / results.length) * 100;
-    
-    let level = 'A2 (Elementary)';
-    if (pct >= 85) level = 'B2 (Upper Intermediate / Advanced)';
-    else if (pct >= 55) level = 'B1 (Intermediate)';
-
-    const lessonMistakes = {};
-    results.forEach(r => {
-      if (!r.ok) {
-        lessonMistakes[r.lessonId] = (lessonMistakes[r.lessonId] || 0) + 1;
+    // Tracking diagnostic
+    if (this.session.mode === 'diagnostic-test') {
+      const lesson = LESSONS.find(l => l.id === this.current.lessonId);
+      if (lesson) {
+        const catKey = lesson.category;
+        if (!this.session.categoryScores[catKey]) {
+          this.session.categoryScores[catKey] = { correct: 0, total: 0 };
+        }
+        this.session.categoryScores[catKey].total++;
+        if (isCorrect) this.session.categoryScores[catKey].correct++;
       }
+    }
+
+    // Sauvegarde result et SRS
+    this.session.results.push({
+      exerciseId: this.current.id,
+      lessonId: this.current.lessonId,
+      correct: isCorrect,
+      points: earnedPoints,
+      time: exerciseTime
     });
 
-    const recommendations = Object.entries(lessonMistakes)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([id]) => LESSONS.find(l => l.id === id))
-      .filter(l => l);
+    // Mise à jour SRS
+    this.updateCardSRS(this.current.id, isCorrect);
 
-    return { level, score, total: results.length, recommendations };
-  },
+    return {
+      correct: isCorrect,
+      earnedPoints,
+      explanation: this.current.explanation,
+      message: isCorrect ? 'Correct!' : `Wrong. Answer: ${this.current.answer}`
+    };
+  }
+
+  updateCardSRS(exerciseId, correct) {
+    const card = Storage.getGrammarCard(exerciseId);
+    const now = new Date();
+
+    if (!card) {
+      const newCard = {
+        id: exerciseId,
+        seen: 1,
+        correct: correct ? 1 : 0,
+        ease: 2.5,
+        intervalDays: correct ? 1 : 0,
+        nextDueAt: correct ? new Date(now.getTime() + 86400000).toISOString() : now.toISOString()
+      };
+      Storage.upsertGrammarCard(newCard);
+      return;
+    }
+
+    // SM-2 simplified
+    card.seen++;
+    if (correct) {
+      card.correct++;
+      const factor = Math.max(1.3, card.ease - (5 - 4.5));
+      card.ease = factor;
+      const days = card.intervalDays === 0 ? 1 : Math.round(card.intervalDays * card.ease);
+      card.intervalDays = days;
+    } else {
+      card.ease = Math.max(1.3, card.ease - 0.2);
+      card.intervalDays = 0;
+    }
+
+    card.nextDueAt = new Date(now.getTime() + card.intervalDays * 86400000).toISOString();
+    Storage.upsertGrammarCard(card);
+  }
+
+  getCurrentExerciseTime() {
+    const exStart = this.session.results.length > 0 ? this.session.results[this.session.results.length - 1].startTime || Date.now() : Date.now();
+    return Date.now() - exStart;
+  }
+
+  finishSession() {
+    const duration = Math.round((Date.now() - this.session.startTime) / 1000);
+    const totalExercises = this.session.exercises.length;
+    const correctAnswers = this.session.results.filter(r => r.correct).length;
+    const accuracy = Math.round((correctAnswers / totalExercises) * 100);
+
+    // Marquer les leçons comme lues
+    const uniqueLessons = [...new Set(this.session.results.map(r => r.lessonId))];
+    uniqueLessons.forEach(lessonId => Storage.markLessonRead('grammar', lessonId));
+
+    // Ajouter les points
+    Storage.addPoints(this.session.points);
+    Storage.registerActivity('grammar', this.session.mode, correctAnswers, totalExercises);
+
+    // Vérifier les badges
+    const badges = this.checkBadges();
+
+    // Estimation du niveau (pour diagnostic)
+    let estimatedLevel = 'A2';
+    if (this.session.mode === 'diagnostic-test' && this.session.categoryScores) {
+      const avgScore = Object.values(this.session.categoryScores).reduce((sum, cat) => sum + (cat.correct / cat.total), 0) / Object.keys(this.session.categoryScores).length;
+      if (avgScore >= 0.8) estimatedLevel = 'B2';
+      else if (avgScore >= 0.6) estimatedLevel = 'B1';
+      else estimatedLevel = 'A2';
+    }
+
+    return {
+      mode: this.session.mode,
+      accuracy,
+      totalPoints: this.session.points,
+      duration,
+      correctAnswers,
+      totalExercises,
+      categoryScores: this.session.categoryScores,
+      estimatedLevel,
+      badges,
+      streak: this.session.streak
+    };
+  }
 
   checkBadges() {
-    const readCount = Storage.state.grammar.lessonsRead.length;
-    if (readCount >= 10) Storage.awardBadge('grammar-lesson-10');
-    if (readCount >= LESSONS.length) Storage.awardBadge('grammar-lesson-all');
-  }
-};
+    const newBadges = [];
 
-const GrammarUI = {
-  renderExercise(ex, container) {
-    container.innerHTML = '';
-    const promptEl = document.createElement('div');
-    promptEl.className = 'quiz-prompt';
-    promptEl.innerHTML = `<div class="prompt-type">${ex.type.toUpperCase()}</div><div class="prompt-word">${ex.prompt}</div>`;
-    container.appendChild(promptEl);
-
-    const interactionEl = document.createElement('div');
-    interactionEl.className = 'quiz-interaction';
-
-    if (ex.type === 'blank' || ex.type === 'transform') {
-      interactionEl.innerHTML = `<input type="text" id="g-input" class="quiz-input" placeholder="Ta réponse..." autocomplete="off">`;
-    } else if (ex.type === 'mcq') {
-      interactionEl.className = 'qcm-options';
-      ex.options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'qcm-option';
-        btn.textContent = opt;
-        btn.onclick = () => window.handleGrammarSubmit(opt);
-        interactionEl.appendChild(btn);
-      });
-    } else if (ex.type === 'reorder') {
-      interactionEl.innerHTML = `
-        <div id="reorder-zone" class="reorder-zone"></div>
-        <div class="token-pool">
-          ${Shared.shuffle(ex.tokens).map(t => `<button class="reorder-token" onclick="GrammarUI.toggleToken(this)">${t}</button>`).join('')}
-        </div>
-        <div style="margin-top:20px"><button class="btn btn-ghost btn-sm" onclick="GrammarUI.resetReorder()">Réinitialiser</button></div>
-      `;
-    } else if (ex.type === 'error') {
-      const sent = document.createElement('div');
-      sent.className = 'error-sentence';
-      ex.prompt.split(' ').forEach(w => {
-        const span = document.createElement('span');
-        span.className = 'error-word'; span.textContent = w + ' ';
-        span.onclick = () => {
-          document.querySelectorAll('.error-word').forEach(s => s.classList.remove('selected'));
-          span.classList.add('selected');
-          GrammarEngine.session.errorSelected = w.replace(/[.,!?;]$/, '');
-          document.getElementById('error-correction-zone').style.display = 'block';
-          document.getElementById('g-input').focus();
-        };
-        sent.appendChild(span);
-      });
-      interactionEl.appendChild(sent);
-      const corrZone = document.createElement('div');
-      corrZone.id = 'error-correction-zone'; corrZone.style.display = 'none';
-      corrZone.innerHTML = `<p class="muted">Quelle est la correction ?</p><input type="text" id="g-input" class="quiz-input" style="max-width:300px">`;
-      interactionEl.appendChild(corrZone);
+    // Badge: 10 leçons lues
+    const lessonsRead = Storage.getLessonsRead('grammar').length;
+    if (lessonsRead >= 10 && !Storage.hasBadge('grammar-lesson-10')) {
+      Storage.awardBadge('grammar-lesson-10');
+      newBadges.push('grammar-lesson-10');
     }
 
-    container.appendChild(interactionEl);
-    const focusInput = document.getElementById('g-input');
-    if (focusInput) focusInput.focus();
-  },
-
-  toggleToken(btn) {
-    const zone = document.getElementById('reorder-zone');
-    if (!zone) return;
-    if (btn.classList.contains('used')) {
-      btn.classList.remove('used');
-      const clones = Array.from(zone.children);
-      const target = clones.find(c => c.textContent === btn.textContent);
-      if (target) target.remove();
-    } else {
-      btn.classList.add('used');
-      const clone = document.createElement('span');
-      clone.className = 'pill pill-amber';
-      clone.textContent = btn.textContent;
-      clone.style.margin = '4px';
-      zone.appendChild(clone);
+    // Badge: 48 leçons lues
+    if (lessonsRead >= 48 && !Storage.hasBadge('grammar-lesson-all')) {
+      Storage.awardBadge('grammar-lesson-all');
+      newBadges.push('grammar-lesson-all');
     }
-  },
 
-  resetReorder() {
-    const zone = document.getElementById('reorder-zone');
-    if (zone) zone.innerHTML = '';
-    document.querySelectorAll('.reorder-token').forEach(t => t.classList.remove('used'));
-  },
+    // Badge: Perfect 100% sur catégorie
+    if (!Storage.hasBadge('grammar-category-master')) {
+      const categoryScores = Object.entries(this.session.categoryScores || {});
+      categoryScores.forEach(([cat, scores]) => {
+        if (scores.correct === scores.total && scores.total >= 5) {
+          Storage.awardBadge('grammar-category-master');
+          newBadges.push('grammar-category-master');
+        }
+      });
+    }
 
-  getReorderValue() {
-    const zone = document.getElementById('reorder-zone');
-    if (!zone) return '';
-    return Array.from(zone.children)
-                .map(c => c.textContent).join(' ');
+    // Badge: 100% diagnostic
+    if (this.session.mode === 'diagnostic-test' && this.session.results.every(r => r.correct) && !Storage.hasBadge('grammar-perfect-diag')) {
+      Storage.awardBadge('grammar-perfect-diag');
+      newBadges.push('grammar-perfect-diag');
+    }
+
+    // Badge: B2+ level
+    if (this.session.mode === 'diagnostic-test') {
+      const avgScore = Object.values(this.session.categoryScores || {}).reduce((sum, cat) => sum + (cat.correct / cat.total), 0) / Object.keys(this.session.categoryScores || {}).length;
+      if (avgScore >= 0.8 && !Storage.hasBadge('grammar-b2')) {
+        Storage.awardBadge('grammar-b2');
+        newBadges.push('grammar-b2');
+      }
+    }
+
+    return newBadges;
   }
-};
 
-window.GrammarEngine = GrammarEngine;
+  static MODES = {
+    'lesson-practice': { label: 'Leçon', sessionSize: 15, basePoints: 8 },
+    'mixed-practice': { label: 'Entraînement', sessionSize: 20, basePoints: 7 },
+    'diagnostic-test': { label: 'Test diagnostic', sessionSize: 25, basePoints: 10 },
+    'srs-review': { label: 'Révision SRS', sessionSize: 10, basePoints: 6 }
+  };
+
+  static EXERCISE_POINTS = {
+    'blank': 8,
+    'mcq': 6,
+    'transform': 10,
+    'reorder': 12,
+    'error': 12
+  };
+}
+
+// Instance globale
+const grammarEngine = new GrammarEngine();

@@ -167,8 +167,10 @@ const Storage = {
     return this.state.grammar.cards[id] || null;
   },
 
-  upsertGrammarCard(id, partial) {
+  upsertGrammarCard(partial) {
+    const id = partial.id;
     const cur = this.state.grammar.cards[id] || {
+      id,
       seen: 0, correct: 0, wrong: 0,
       lastSeenAt: null, nextDueAt: null,
       ease: 2.5, intervalDays: 0,
@@ -177,11 +179,61 @@ const Storage = {
     this.save();
   },
 
-  markLessonRead(lessonId) {
-    if (!this.state.grammar.lessonsRead.includes(lessonId)) {
-      this.state.grammar.lessonsRead.push(lessonId);
+  markLessonRead(module, lessonId) {
+    if (!this.state[module]) this.state[module] = { cards: {}, lessonsRead: [], history: [] };
+    if (!this.state[module].lessonsRead) this.state[module].lessonsRead = [];
+    if (!this.state[module].lessonsRead.includes(lessonId)) {
+      this.state[module].lessonsRead.push(lessonId);
       this.save();
     }
+  },
+
+  isLessonRead(module, lessonId) {
+    if (!this.state[module] || !this.state[module].lessonsRead) return false;
+    return this.state[module].lessonsRead.includes(lessonId);
+  },
+
+  getLessonsRead(module) {
+    if (!this.state[module] || !this.state[module].lessonsRead) return [];
+    return this.state[module].lessonsRead;
+  },
+
+  getGrammarDueCards(maxCards = 10) {
+    const now = new Date();
+    const dueIds = [];
+    for (const [id, card] of Object.entries(this.state.grammar.cards || {})) {
+      if (!card.nextDueAt || new Date(card.nextDueAt) <= now) {
+        dueIds.push(id);
+        if (dueIds.length >= maxCards) break;
+      }
+    }
+    return dueIds;
+  },
+
+  registerActivity(module, mode, correct, total) {
+    if (!this.state[module]) this.state[module] = { cards: {}, lessonsRead: [], history: [] };
+    if (!this.state[module].history) this.state[module].history = [];
+    
+    const today = new Date().toISOString().slice(0, 10);
+    const last = this.state.streak.lastDay;
+    if (last !== today) {
+      if (!last || Math.round((new Date(today) - new Date(last)) / 86400000) === 1) {
+        this.state.streak.current += 1;
+      } else {
+        this.state.streak.current = 1;
+      }
+      this.state.streak.best = Math.max(this.state.streak.best, this.state.streak.current);
+      this.state.streak.lastDay = today;
+    }
+
+    this.state[module].history.push({
+      date: today,
+      mode,
+      correct,
+      total,
+      accuracy: Math.round((correct / total) * 100),
+    });
+    this.save();
   },
 
   getGrammarMasteryStats(exerciseIds) {
