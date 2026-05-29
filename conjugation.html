@@ -546,7 +546,7 @@
               ${tense ? `<span class="${tensePillClass(tense.category)}">${tense.label}</span>` : item.tense}
             </div>
             <div class="conj-prompt-sentence">${info.withBlank.replace('_____', '<strong>_____</strong>')}</div>
-            <div class="conj-prompt-verb-fr">→ "${item.verb.fr}"</div>
+            <div class="conj-prompt-verb-fr">→ <strong>to ${item.verb.base}</strong> <span style="color:var(--ink-soft)">(${item.verb.fr})</span></div>
           </div>
 
           <div class="quiz-input-row">

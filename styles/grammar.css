@@ -3,6 +3,39 @@
    ════════════════════════════════════════════════════════════ */
 
 /* Tab system */
+.tabs-container {
+  display: flex;
+  gap: var(--s-2);
+  margin-bottom: var(--s-6);
+  border-bottom: 2px solid var(--paper);
+  padding-bottom: var(--s-3);
+  overflow-x: auto;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: var(--s-2) var(--s-3);
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-weight: 600;
+  white-space: nowrap;
+  position: relative;
+  bottom: -1px;
+  transition: color 0.2s;
+}
+
+.tab-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--amber);
+}
+
+.tab-btn:hover:not(.active) {
+  color: var(--ink);
+}
+
 .tab-content {
   display: none;
 }

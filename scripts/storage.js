@@ -114,22 +114,6 @@ const Storage = {
     }
   },
 
-  // Called when the user completes a meaningful activity (e.g. a session)
-  registerActivity() {
-    const today = new Date().toISOString().slice(0, 10);
-    const last = this.state.streak.lastDay;
-    if (last !== today) {
-      if (!last || Math.round((new Date(today) - new Date(last)) / 86400000) === 1) {
-        this.state.streak.current += 1;
-      } else {
-        this.state.streak.current = 1;
-      }
-      this.state.streak.best = Math.max(this.state.streak.best, this.state.streak.current);
-      this.state.streak.lastDay = today;
-    }
-    this.save();
-  },
-
   addPoints(n) {
     this.state.points = Math.max(0, this.state.points + n);
     this.save();

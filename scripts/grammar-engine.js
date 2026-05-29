@@ -7,28 +7,35 @@ class GrammarEngine {
     this.session = null;
     this.current = null;
     this.sessionIndex = 0;
+    this.exerciseStartTime = null;
   }
 
   startSession(mode, filters = {}) {
     let exercisePool = [...EXERCISES];
 
-    // Filtre par niveau si fourni
+    // Filtre par leçon précise (leçon ciblée)
+    if (filters.lessonId) {
+      exercisePool = exercisePool.filter(ex => ex.lessonId === filters.lessonId);
+    }
+
+    // Filtre par niveau (AND avec les autres filtres)
     if (filters.levels && filters.levels.length > 0) {
-      const exercisesInLessons = EXERCISES.filter(ex => {
+      exercisePool = exercisePool.filter(ex => {
         const lesson = LESSONS.find(l => l.id === ex.lessonId);
         return lesson && filters.levels.includes(lesson.level);
       });
-      exercisePool = exercisesInLessons;
     }
 
-    // Filtre par catégorie si fourni
+    // Filtre par catégorie (AND avec les autres filtres)
     if (filters.categories && filters.categories.length > 0) {
-      const exercisesInLessons = EXERCISES.filter(ex => {
+      exercisePool = exercisePool.filter(ex => {
         const lesson = LESSONS.find(l => l.id === ex.lessonId);
         return lesson && filters.categories.includes(lesson.category);
       });
-      exercisePool = exercisesInLessons;
     }
+
+    // Pool vide : renvoyer null pour que l'appelant puisse gérer
+    if (exercisePool.length === 0) return null;
 
     // Déterminer le nombre d'exercices selon le mode
     let sessionSize = GrammarEngine.MODES[mode]?.sessionSize || 20;
@@ -53,11 +60,13 @@ class GrammarEngine {
 
     this.sessionIndex = 0;
     this.current = this.session.exercises[0];
+    this.exerciseStartTime = Date.now();
     return this.current;
   }
 
   next() {
     this.sessionIndex++;
+    this.exerciseStartTime = Date.now();
     if (this.sessionIndex < this.session.exercises.length) {
       this.current = this.session.exercises[this.sessionIndex];
       return this.current;
@@ -78,16 +87,19 @@ class GrammarEngine {
     switch (type) {
       case 'blank':
       case 'transform':
-        isCorrect = Shared.matchAnswer(userAnswer, this.current.answer);
+        isCorrect = Shared.matchAnswer(userAnswer, this.current.answer).ok;
         break;
       case 'mcq':
         isCorrect = userAnswer === this.current.answer;
         break;
-      case 'reorder':
-        isCorrect = JSON.stringify(Shared.shuffle(userAnswer)) === JSON.stringify(Shared.shuffle(this.current.answer));
+      case 'reorder': {
+        const sortedUser = [...userAnswer].sort();
+        const sortedAnswer = [...this.current.answer].sort();
+        isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedAnswer);
         break;
+      }
       case 'error':
-        isCorrect = userAnswer === this.current.answer;
+        isCorrect = Shared.matchAnswer(userAnswer, this.current.answer).ok;
         break;
     }
 
@@ -142,9 +154,9 @@ class GrammarEngine {
 
     return {
       correct: isCorrect,
-      earnedPoints,
+      earnedPoints: isCorrect ? earnedPoints : 0,
+      correctAnswer: this.current.answer,
       explanation: this.current.explanation,
-      message: isCorrect ? 'Correct!' : `Wrong. Answer: ${this.current.answer}`
     };
   }
 
@@ -183,8 +195,7 @@ class GrammarEngine {
   }
 
   getCurrentExerciseTime() {
-    const exStart = this.session.results.length > 0 ? this.session.results[this.session.results.length - 1].startTime || Date.now() : Date.now();
-    return Date.now() - exStart;
+    return Date.now() - (this.exerciseStartTime || Date.now());
   }
 
   finishSession() {
@@ -207,7 +218,9 @@ class GrammarEngine {
     // Estimation du niveau (pour diagnostic)
     let estimatedLevel = 'A2';
     if (this.session.mode === 'diagnostic-test' && this.session.categoryScores) {
-      const avgScore = Object.values(this.session.categoryScores).reduce((sum, cat) => sum + (cat.correct / cat.total), 0) / Object.keys(this.session.categoryScores).length;
+      const totalCorrect = Object.values(this.session.categoryScores).reduce((s, c) => s + c.correct, 0);
+      const totalTotal = Object.values(this.session.categoryScores).reduce((s, c) => s + c.total, 0);
+      const avgScore = totalCorrect / totalTotal;
       if (avgScore >= 0.8) estimatedLevel = 'B2';
       else if (avgScore >= 0.6) estimatedLevel = 'B1';
       else estimatedLevel = 'A2';

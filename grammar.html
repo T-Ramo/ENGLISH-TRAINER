@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="styles/grammar.css">
 </head>
 <body>
-  <div id="topbar" class="topbar"></div>
+  <div id="topbar-slot"></div>
   
   <main class="container" style="max-width: 1000px; margin: 0 auto; padding: var(--s-4) var(--s-2);">
     
@@ -20,11 +20,11 @@
     </section>
 
     <!-- TABS -->
-    <div class="tabs-container" style="display: flex; gap: var(--s-2); margin-bottom: var(--s-6); border-bottom: 2px solid var(--paper); padding-bottom: var(--s-3); overflow-x: auto;">
-      <button class="tab-btn active" data-tab="lessons" style="background: none; border: none; padding: var(--s-2) var(--s-3); font-size: 1rem; cursor: pointer; color: var(--ink); font-weight: 600; border-bottom: 3px solid var(--amber); position: relative; bottom: -1px; white-space: nowrap;">📚 Leçons</button>
-      <button class="tab-btn" data-tab="exercises" style="background: none; border: none; padding: var(--s-2) var(--s-3); font-size: 1rem; cursor: pointer; color: var(--ink-soft); font-weight: 600; white-space: nowrap;">✏️ Exercices</button>
-      <button class="tab-btn" data-tab="diagnostic" style="background: none; border: none; padding: var(--s-2) var(--s-3); font-size: 1rem; cursor: pointer; color: var(--ink-soft); font-weight: 600; white-space: nowrap;">🎯 Test Diagnostic</button>
-      <button class="tab-btn" data-tab="srs" style="background: none; border: none; padding: var(--s-2) var(--s-3); font-size: 1rem; cursor: pointer; color: var(--ink-soft); font-weight: 600; white-space: nowrap;">🔄 Révisions</button>
+    <div class="tabs-container">
+      <button class="tab-btn active" data-tab="lessons">📚 Leçons</button>
+      <button class="tab-btn" data-tab="exercises">✏️ Exercices</button>
+      <button class="tab-btn" data-tab="diagnostic">🎯 Test Diagnostic</button>
+      <button class="tab-btn" data-tab="srs">🔄 Révisions</button>
     </div>
 
     <!-- TAB CONTENT: LESSONS -->
@@ -69,6 +69,7 @@
             <div id="category-filters" style="display: flex; gap: var(--s-1); flex-wrap: wrap;"></div>
           </div>
         </div>
+        <button id="start-exercises-btn" class="btn btn-primary" style="width: 100%; margin-top: var(--s-3);">▶ Commencer</button>
       </div>
     </div>
 
@@ -96,7 +97,7 @@
   <div id="stage-root"></div>
 
   <!-- Footer -->
-  <footer id="footer"></footer>
+  <footer id="footer-slot"></footer>
 
   <!-- Scripts -->
   <script src="scripts/shared.js"></script>
@@ -108,11 +109,14 @@
     // INITILISATION
     // ═══════════════════════════════════════════════════════
     
+    Storage.load();
     Shared.renderTopbar('grammar');
     Shared.renderFooter();
 
     let selectedMode = null;
     let selectedFilters = { levels: [], categories: [] };
+    let exercisesViewInit = false;
+    let selectedMcqOption = null;
 
     // ═══════════════════════════════════════════════════════
     // TAB NAVIGATION
@@ -124,9 +128,8 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
         e.target.classList.add('active');
-        e.target.style.borderBottomColor = 'var(--amber)';
         document.getElementById(`tab-${tabName}`).classList.add('active');
-        
+
         if (tabName === 'lessons') initLessonsView();
         if (tabName === 'exercises') initExercisesView();
       });
@@ -165,7 +168,7 @@
         header.style.background = 'var(--paper)';
         header.innerHTML = `
           <span class="pill ${cat.pillClass}" style="padding: var(--s-1) var(--s-2); border-radius: var(--s-1); font-size: 0.75rem; font-weight: 600;">${cat.label}</span>
-          <span style="flex: 1; font-weight: 600;">${cat.label}</span>
+          <span style="flex: 1;"></span>
           <span>▼</span>
         `;
 
@@ -222,20 +225,22 @@
             
             <h2 style="font-family: Fraunces; margin-bottom: var(--s-2);">${lesson.label}</h2>
             
-            ${lesson.rules.map((rule, i) => `
+            ${(lesson.rules || []).map((rule, i) => `
               <div class="rule-block" style="background: var(--paper); padding: var(--s-3); border-left: 4px solid var(--amber); margin-bottom: var(--s-2); border-radius: var(--s-1);">
                 <strong>${i + 1}. ${rule.title}</strong>
                 <p style="margin-top: var(--s-1); font-size: 0.95rem;">${rule.content}</p>
               </div>
             `).join('')}
 
-            <h3 style="margin-top: var(--s-4); margin-bottom: var(--s-2);">Exemples</h3>
-            ${lesson.examples.map(ex => `
-              <div class="example-row" style="padding: var(--s-2); background: var(--paper); margin-bottom: var(--s-2); border-radius: var(--s-1);">
-                <p><strong>${ex.en}</strong></p>
-                <p style="color: var(--ink-soft); font-style: italic; margin-top: var(--s-1);">${ex.fr}</p>
-              </div>
-            `).join('')}
+            ${lesson.examples && lesson.examples.length > 0 ? `
+              <h3 style="margin-top: var(--s-4); margin-bottom: var(--s-2);">Exemples</h3>
+              ${lesson.examples.map(ex => `
+                <div class="example-row" style="padding: var(--s-2); background: var(--paper); margin-bottom: var(--s-2); border-radius: var(--s-1);">
+                  <p><strong>${ex.en}</strong></p>
+                  <p style="color: var(--ink-soft); font-style: italic; margin-top: var(--s-1);">${ex.fr}</p>
+                </div>
+              `).join('')}
+            ` : ''}
 
             ${lesson.pitfalls ? `
               <div class="pitfall-box" style="background: rgba(168, 56, 56, 0.1); padding: var(--s-3); border-left: 4px solid var(--burgundy); border-radius: var(--s-1); margin-top: var(--s-4);">
@@ -273,7 +278,7 @@
 
       document.getElementById('start-lesson-btn').addEventListener('click', () => {
         selectedMode = 'lesson-practice';
-        selectedFilters = { levels: [], categories: [lesson.category] };
+        selectedFilters = { levels: [], categories: [], lessonId: lesson.id };
         startQuiz();
         stageRoot.innerHTML = '';
       });
@@ -284,16 +289,16 @@
     // ═══════════════════════════════════════════════════════
     
     function initExercisesView() {
-      const levelsDiv = document.getElementById('level-filters');
-      const categoriesDiv = document.getElementById('category-filters');
-      
-      levelsDiv.innerHTML = Object.entries(LEVELS).map(([key, val]) => `
+      if (exercisesViewInit) return;
+      exercisesViewInit = true;
+
+      document.getElementById('level-filters').innerHTML = Object.entries(LEVELS).map(([key, val]) => `
         <label style="display: flex; align-items: center; gap: var(--s-1); cursor: pointer;">
           <input type="checkbox" value="${key}" class="level-filter"> ${val.label}
         </label>
       `).join('');
 
-      categoriesDiv.innerHTML = Object.entries(GRAMMAR_CATEGORIES).map(([key, val]) => `
+      document.getElementById('category-filters').innerHTML = Object.entries(GRAMMAR_CATEGORIES).map(([key, val]) => `
         <label style="display: flex; align-items: center; gap: var(--s-1); cursor: pointer;">
           <input type="checkbox" value="${key}" class="category-filter"> ${val.label}
         </label>
@@ -303,7 +308,9 @@
         card.addEventListener('click', () => {
           document.querySelectorAll('.mode-card').forEach(c => {
             c.style.background = 'var(--paper)';
+            c.style.color = '';
             c.style.transform = 'none';
+            c.querySelectorAll('*').forEach(el => el.style.color = '');
           });
           selectedMode = card.dataset.mode;
           card.style.background = 'var(--amber)';
@@ -333,23 +340,14 @@
         });
       });
 
-      // Bouton de démarrage
-      let startBtn = document.querySelector('[data-mode="lesson-practice"]').parentElement.querySelector('.btn-primary');
-      if (!startBtn) {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-primary';
-        btn.textContent = '▶ Commencer';
-        btn.style.width = '100%';
-        btn.style.marginTop = 'var(--s-3)';
-        btn.addEventListener('click', () => {
-          if (!selectedMode) {
-            alert('Sélectionnez un mode de jeu!');
-            return;
-          }
-          startQuiz();
-        });
-        document.getElementById('filters-section').appendChild(btn);
-      }
+      document.getElementById('start-exercises-btn').addEventListener('click', () => {
+        if (!selectedMode) {
+          alert('Sélectionnez un mode de jeu!');
+          return;
+        }
+        selectedFilters.lessonId = null;
+        startQuiz();
+      });
     }
 
     // ═══════════════════════════════════════════════════════
@@ -360,11 +358,17 @@
       const stageRoot = document.getElementById('stage-root');
       stageRoot.style.display = 'block';
 
-      grammarEngine.startSession(selectedMode, selectedFilters);
+      const session = grammarEngine.startSession(selectedMode, selectedFilters);
+      if (!session) {
+        stageRoot.innerHTML = '';
+        alert('Aucun exercice disponible pour ces filtres. Essaie d\'autres critères.');
+        return;
+      }
       renderQuizStage();
     }
 
     function renderQuizStage() {
+      selectedMcqOption = null;
       const stageRoot = document.getElementById('stage-root');
       const ex = grammarEngine.current;
       const progress = `${grammarEngine.sessionIndex + 1}/${grammarEngine.session.exercises.length}`;
@@ -372,12 +376,15 @@
       stageRoot.innerHTML = `
         <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--paper); z-index: 1000; overflow-y: auto;">
           <div style="max-width: 800px; margin: 0 auto; padding: var(--s-4);">
-            
+
             <!-- Progress bar -->
             <div style="margin-bottom: var(--s-4);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s-2);">
                 <span style="font-weight: 600;">${progress}</span>
-                <span style="font-weight: 600;">🔥 ${grammarEngine.session.streak} correct</span>
+                <div style="display: flex; align-items: center; gap: var(--s-3);">
+                  <span style="font-weight: 600;">🔥 ${grammarEngine.session.streak} correct</span>
+                  <button id="quit-btn" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--ink-soft);" title="Quitter">✕</button>
+                </div>
               </div>
               <div style="background: var(--ink); height: 8px; border-radius: 4px; overflow: hidden;">
                 <div style="background: var(--amber); height: 100%; width: ${(grammarEngine.sessionIndex + 1) / grammarEngine.session.exercises.length * 100}%;"></div>
@@ -393,9 +400,13 @@
         </div>
       `;
 
+      document.getElementById('quit-btn').addEventListener('click', () => {
+        stageRoot.innerHTML = '';
+      });
+
       renderExerciseByType(ex);
 
-      document.getElementById('submit-btn').addEventListener('click', () => {
+      document.getElementById('submit-btn').onclick = () => {
         const userAnswer = getUserAnswer(ex);
         if (!userAnswer) {
           alert('Veuillez répondre!');
@@ -404,7 +415,7 @@
 
         const feedback = grammarEngine.submitAnswer(userAnswer);
         showFeedback(feedback, ex);
-      });
+      };
     }
 
     function renderExerciseByType(ex) {
@@ -432,8 +443,10 @@
             btn.addEventListener('click', (e) => {
               document.querySelectorAll('.mcq-option').forEach(b => {
                 b.style.background = 'white';
+                b.style.color = '';
                 b.style.borderColor = 'var(--amber)';
               });
+              selectedMcqOption = e.target.dataset.option;
               e.target.style.background = 'var(--amber)';
               e.target.style.color = 'white';
             });
@@ -460,22 +473,23 @@
     }
 
     function getUserAnswer(ex) {
-      if (ex.type === 'mcq') {
-        const selected = document.querySelector('.mcq-option[style*="background: var(--amber)"]');
-        return selected ? selected.dataset.option : null;
-      }
+      if (ex.type === 'mcq') return selectedMcqOption;
       return document.getElementById('answer-input')?.value?.trim() || null;
     }
 
     function showFeedback(feedback, ex) {
       const content = document.getElementById('exercise-content');
+      const color = feedback.correct ? 'var(--moss)' : 'var(--burgundy)';
       content.innerHTML = `
-        <div style="padding: var(--s-3); border-radius: var(--s-1); background: ${feedback.correct ? 'var(--moss)' : 'var(--burgundy)'}20; border-left: 4px solid ${feedback.correct ? 'var(--moss)' : 'var(--burgundy)'};">
-          <p style="font-weight: 600; color: ${feedback.correct ? 'var(--moss)' : 'var(--burgundy)'}; margin-bottom: var(--s-2);">
-            ${feedback.correct ? '✓ Correct!' : '✗ Incorrect'}
+        <div style="padding: var(--s-3); border-radius: var(--s-1); background: ${color}20; border-left: 4px solid ${color};">
+          <p style="font-weight: 600; color: ${color}; margin-bottom: var(--s-2);">
+            ${feedback.correct ? '✓ Correct !' : '✗ Incorrect'}
           </p>
-          <p style="margin-bottom: var(--s-2);">+${feedback.earnedPoints} pts</p>
-          <p style="font-size: 0.95rem; color: var(--ink); margin-bottom: var(--s-2);">Explication: ${feedback.explanation}</p>
+          ${feedback.correct
+            ? `<p style="margin-bottom: var(--s-2); color: var(--ink-soft);">+${feedback.earnedPoints} pts</p>`
+            : `<p style="margin-bottom: var(--s-2);">Bonne réponse : <strong>${feedback.correctAnswer}</strong></p>`
+          }
+          <p style="font-size: 0.95rem; color: var(--ink);">💡 ${feedback.explanation}</p>
         </div>
       `;
 
